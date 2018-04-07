@@ -40,9 +40,9 @@ Connect to the Elk panel:
     elk.run()
 
 The above will connect to the Elk panel at IP address 192.168.1.100. the ``elk://``
-prefix specifies the the connect is plaintext. Alternatively, ``elks://`` will 
-connect over TLS. In this case a userid and password must be specified.
-In that case the call to ``Elk`` would be:
+prefix specifies that the connect is plaintext. Alternatively, ``elks://`` will 
+connect over TLS. In this case a userid and password must be specified
+and the call to ``Elk`` would be:
 
 .. code-block:: python
 

@@ -44,6 +44,9 @@ class Element:
         """Return a default name for based on class and index of element"""
         return self.__class__.__name__ + '-{:03d}'.format(self._index)
 
+    def is_default_name(self):
+        return self.name == self.default_name()
+
     def __str__(self):
         varlist = {k:v for (k, v) in vars(self).items() \
            if not k.startswith('_') and k != 'name'}.items()

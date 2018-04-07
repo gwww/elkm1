@@ -1,0 +1,67 @@
+#!/usr/bin/env python
+
+from elkm1 import Elk
+from elkm1.message import add_message_handler, MessageEncode
+from elkm1.const import Max
+
+import cmdr
+
+import asyncio
+import io
+import logging
+import sys
+import traceback
+from pprint import pprint
+
+LOG = logging.getLogger(__name__)
+
+class StdOutWrapper:
+    def __init__(self, cmdr):
+        sys.stdout = self
+        sys.stderr = self
+        self.cmdr = cmdr
+
+    def write(self,txt):
+        txt = txt.rstrip()
+        if len(txt) > 0:
+            self.cmdr.output(txt)
+
+    def flush(self):
+        pass
+
+def _unknown_handler(msg_code, data):
+    LOG.debug("No decoder for message type: %s Contents: %s", msg_code, data)
+
+def _timeout_handler(msg_code):
+    LOG.debug("Timeout waiting for '%s'", msg_code)
+
+def main():
+    interactive = False
+    if len(sys.argv) > 1:
+        interactive = sys.argv[1] == '-i'
+
+    if interactive:
+        c=cmdr.Commander('Elk console', cmd_cb=cmdr.ElkCommands())
+        mystdout = StdOutWrapper(c)
+        logging.basicConfig(stream=mystdout,
+                            level=logging.DEBUG, format='%(message)s')
+    else:
+        logging.basicConfig(level=logging.DEBUG, format='%(message)s')
+
+    try:
+        elk = Elk({'url': 'elk://192.168.1.142', 
+                   # 'element_list': ['panel'],
+                   'userid': 'testuser', 'password': 'testing'})
+        add_message_handler('unknown', _unknown_handler)
+        add_message_handler('timeout', _timeout_handler)
+        elk.loop.run_until_complete(elk.connect())
+        if interactive:
+            c._cmd.set_elk(elk)
+            c.loop()
+        else:
+            elk.run()
+    except KeyboardInterrupt:
+        exit(0)
+
+if __name__ == '__main__':
+    main()

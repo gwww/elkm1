@@ -3,7 +3,7 @@ Python ElkM1 library
 
 Library for interacting with ElkM1 alarm/automation panel.
 
-https://github.com/gwww/python-elkm1
+https://github.com/gwww/elkm1
 
 Requirements
 ------------

@@ -14,7 +14,7 @@ from setuptools import find_packages, setup, Command
 # Package meta-data.
 NAME = 'elkm1'
 DESCRIPTION = 'Library for interacting with ElkM1 alarm/automation panel.'
-URL = 'https://github.com/gwww/python-elkm1'
+URL = 'https://github.com/gwww/elkm1'
 EMAIL = 'gwwaters+elkm1@gmail.com'
 AUTHOR = 'Glenn Waters'
 

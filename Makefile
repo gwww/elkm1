@@ -9,6 +9,15 @@ clean:
 install:
 	pip install -e .
 
+build:
+	python setup.py sdist
+
+upload.test: build
+	twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+
+upload.prod: build
+	twine upload dist/*
+
 isort:
 	sh -c "isort --skip-glob=.tox --recursive . "
 

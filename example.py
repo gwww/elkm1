@@ -8,19 +8,19 @@ from elkm1.const import ZoneType, ZoneLogicalStatus
 from elkm1.proto import Connection
 from homeassistant.core import callback
 
-REQUIREMENTS = ['elkm1==0.0.1']
+REQUIREMENTS = ['elkm1==0.1.1']
 
 _LOGGER = logging.getLogger(__name__)
 
 @asyncio.coroutine
 def async_setup_platform(hass, config, add_devices, discovery_info=None):
     """Setup the sensor platform."""
-    elk = elkm1.Elk({}, loop=hass.loop)
+    elk = elkm1.Elk({'url': 'elk://192.168.1.142'}, loop=hass.loop)
 
     @asyncio.coroutine
     def connect():
         _LOGGER.debug("Elk connect")
-        yield from elk.connect(url='elk://192.168.1.142')
+        yield from elk.connect()
 
     hass.async_add_job(connect)
 
@@ -61,7 +61,7 @@ class Zone(Entity):
         return self._state
 
     @callback
-    def trigger_update(self):
+    def trigger_update(self, attribute, value):
         """Target of TestHomeAutomation callback."""
         self.async_schedule_update_ha_state(True)
 

@@ -9,7 +9,7 @@ import elkm1.message
 def main():
     """Create markdown doc with messages that have encoders/decoders"""
     no_plans_to_implement = {'ar', 'AR', 'at', 'AT', 
-        'ca', 'CA', 'cd', 'CD', 'RE', 'rr', 'RR',
+        'ca', 'CA', 'cd', 'CD', 'NS', 'NZ', 'RE', 'rr', 'RR',
         'rs', 'ua', 'UA', 'XB', 'xk'}
 
     # There is one "magic" encoder 'al' which is used to encode

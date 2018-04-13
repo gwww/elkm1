@@ -8,13 +8,14 @@ import elkm1.message
 
 def main():
     """Create markdown doc with messages that have encoders/decoders"""
-    no_plans_to_implement = {'ar', 'AR', 'at', 'AT', 
-        'ca', 'CA', 'cd', 'CD', 'DK', 'NS', 'NZ', 'RE', 'rr', 'RR',
-        'rs', 'ua', 'UA', 'XB', 'xk'}
+    no_plans_to_implement = {'ar', 'AR', 'at', 'AT',
+        'ca', 'CA', 'cd', 'CD', 'ds', 'DS', 'DK', 'NS', 'NZ',
+        'RE', 'rr', 'RR', 'rs', 'ua', 'UA', 'XB', 'xk'}
 
     # There is one "magic" encoder 'al' which is used to encode
     # messages a0-a8
     encoders = {'a0','a1','a2','a3','a4','a5','a6','a7','a8','a9','a:'}
+
     for fn_name, fn in inspect.getmembers(elkm1.message, inspect.isfunction):
         if not fn_name.endswith('_encode'):
             continue

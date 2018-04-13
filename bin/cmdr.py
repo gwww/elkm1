@@ -134,6 +134,8 @@ class ElkCommands(Command):
         self.display_objects(self.elk.settings, *args)
     def do_counter(self, *args):
         self.display_objects(self.elk.counters, *args)
+    def do_thermostat(self, *args):
+        self.display_objects(self.elk.thermostats, *args)
     def do_panel(self, *args):
         print(self.elk.panel)
     def encoder(self, fn, *args):

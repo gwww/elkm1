@@ -85,7 +85,7 @@ class TextDescriptions(Enum):
     ALARM_DURATION = 8
     SETTING = (9, Max.SETTINGS.value)
     COUNTER = (10, Max.COUNTERS.value)
-    THERMOSTAT = 11
+    THERMOSTAT = (11, Max.THERMOSTATS.value)
     FUNCTION_KEY_1 = 12
     FUNCTION_KEY_2 = 13
     FUNCTION_KEY_3 = 14

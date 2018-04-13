@@ -25,7 +25,7 @@ class Elk:
             element_list = config['element_list']
         else:
             element_list = ['panel', 'zones', 'lights', 'areas', 'tasks', 'keypads',
-                            'outputs', 'counters', 'settings']
+                            'outputs', 'thermostats', 'counters', 'settings']
         for element in element_list:
             self._create_element(element)
 

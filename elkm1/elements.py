@@ -45,6 +45,7 @@ class Element:
         return self.__class__.__name__ + '-{:03d}'.format(self._index)
 
     def is_default_name(self):
+        """Check if the name assigned is the default_name"""
         return self.name == self.default_name()
 
     def __str__(self):
@@ -75,11 +76,11 @@ class Elements:
             if descriptions[element.index] is not None:
                 element.setattr('name', descriptions[element.index])
 
+    def get_descriptions(self, description_type):
+        """Get the list of descriptions for the element."""
+        get_descriptions(self.elk, description_type, self._got_desc)
+
     @abstractmethod
     def sync(self):
         """Synchronize elements"""
         pass
-
-    def get_descriptions(self, description_type):
-        """Get the list of descriptions for the element."""
-        get_descriptions(self.elk, description_type, self._got_desc)

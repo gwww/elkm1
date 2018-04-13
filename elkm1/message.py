@@ -173,6 +173,14 @@ def _tc_decode(msg):
     """TC: Task change."""
     return {'task': int(msg[4:7])-1}
 
+@call_handlers('TR')
+def _tr_decode(msg):
+    """TR: Thermostat data response."""
+    return {'thermostat_index': int(msg[4:6])-1, 'mode': int(msg[6]),
+            'hold': msg[7]=='1', 'fan': int(msg[8]),
+            'current_temp': int(msg[9:11]), 'heat_setpoint': int(msg[11:13]),
+            'cool_setpoint': int(msg[13:15]), 'humidity': int(msg[15:17])}
+
 @call_handlers('VN')
 def _vn_decode(msg):
     """VN: Version information."""
@@ -262,8 +270,8 @@ def message_decode(msg):
 def al_encode(arm_mode, area, user_code):
     """al: Arm system. Note in 'al' the 'l' can vary"""
     # TODO: AS message not always returned; IC msg could be returned
-    return MessageEncode('0Da{level}{area:1d}{code:06d}00'.format(
-        level=arm_mode, area=area+1, code=user_code), 'AS')
+    return MessageEncode('0Da{}{:1d}{:06d}00'.format(arm_mode, area+1,
+                                                     user_code), 'AS')
 
 def as_encode():
     """as: Get area status."""
@@ -271,16 +279,15 @@ def as_encode():
 
 def cf_encode(output):
     """cf: Turn off output."""
-    return MessageEncode('09cf{output:03d}00'.format(output=output+1), None)
+    return MessageEncode('09cf{:03d}00'.format(output+1), None)
 
 def ct_encode(output):
     """ct: Toggle output."""
-    return MessageEncode('09ct{output:03d}00'.format(output=output+1), None)
+    return MessageEncode('09ct{:03d}00'.format(output+1), None)
 
 def cn_encode(output, time):
     """cn: Turn on output."""
-    return MessageEncode('0Ecn{output:03d}{time:05d}00'.
-                         format(output=output+1, time=time), None)
+    return MessageEncode('0Ecn{:03d}{:05d}00'.format(output+1, time), None)
 
 def cs_encode():
     """cs: Get all output status."""
@@ -298,8 +305,7 @@ def cw_encode(index, value, value_format):
     """cw: Write a custom value."""
     if value_format == 2:
         value = value[0] << 8 + value[1]
-    return MessageEncode('0Dcw{index:02d}{value:05d}00'.
-                         format(index=index+1, value=value), None)
+    return MessageEncode('0Dcw{:02d}{:05d}00'.format(index+1, value), None)
 
 def cv_encode(counter):
     """cv: Get counter."""
@@ -307,8 +313,7 @@ def cv_encode(counter):
 
 def cx_encode(counter, value):
     """cx: Change counter value."""
-    return MessageEncode('0Dcx{c:02d}{v:05d}00'.format(
-        c=counter+1, v=value), 'CV')
+    return MessageEncode('0Dcx{:02d}{:05d}00'.format(counter+1, value), 'CV')
 
 def ka_encode():
     """ka: Get keypad areas."""
@@ -327,15 +332,15 @@ def pc_encode(index, function_code, extended_code, time):
 
 def pf_encode(index):
     """pf: Turn off light."""
-    return MessageEncode('09pf{hc}00'.format(hc=index_to_housecode(index)), None)
+    return MessageEncode('09pf{}00'.format(index_to_housecode(index)), None)
 
 def pn_encode(index):
     """pn: Turn on light."""
-    return MessageEncode('09pn{hc}00'.format(hc=index_to_housecode(index)), None)
+    return MessageEncode('09pn{}00'.format(index_to_housecode(index)), None)
 
 def ps_encode(bank):
     """ps: Get lighting status."""
-    return MessageEncode('07ps{bank:1d}00'.format(bank=bank), 'PS')
+    return MessageEncode('07ps{:1d}00'.format(bank), 'PS')
 
 def pt_encode(index):
     """pt: Toggle light."""
@@ -343,20 +348,28 @@ def pt_encode(index):
 
 def sd_encode(desc_type, unit):
     """sd: Get description."""
-    return MessageEncode('0Bsd{_type:02d}{unit:03d}00'.format(
-        _type=desc_type, unit=unit+1), 'SD')
+    return MessageEncode('0Bsd{:02d}{:03d}00'.format(desc_type, unit+1), 'SD')
 
 def sp_encode(phrase):
     """sp: Speak phrase."""
-    return MessageEncode('09sp{phrase:03d}00'.format(phrase=phrase+1), None)
+    return MessageEncode('09sp{:03d}00'.format(phrase+1), None)
 
 def sw_encode(word):
     """sp: Speak word."""
-    return MessageEncode('09sp{word:03d}00'.format(word=word+1), None)
+    return MessageEncode('09sp{:03d}00'.format(word+1), None)
 
 def tn_encode(task):
     """tn: Activate task."""
-    return MessageEncode('09tn{task:03d}00'.format(task=task+1), None)
+    return MessageEncode('09tn{:03d}00'.format(task+1), None)
+
+def tr_encode(thermostat):
+    """tr: Request thermostat data."""
+    return MessageEncode('08tr{:02d}00'.format(thermostat+1), None)
+
+def ts_encode(thermostat, value, element):
+    """ts: Set thermostat data."""
+    return MessageEncode('0Bts{:02d}{:02d}{:1d}00'.format(
+        thermostat+1, value, element), None)
 
 def vn_encode():
     """zd: Get panel software version information."""

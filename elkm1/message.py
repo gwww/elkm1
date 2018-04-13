@@ -315,6 +315,11 @@ def cx_encode(counter, value):
     """cx: Change counter value."""
     return MessageEncode('0Dcx{:02d}{:05d}00'.format(counter+1, value), 'CV')
 
+def dm_encode(keypad_area, clear, beep, timeout, line1, line2):
+    """dm: Display message on keypad."""
+    return MessageEncode('2Edm{:1d}{:1d}{:1d}{:05d}{:^<16.16}{:^<16.16}00'.format(
+        keypad_area+1, clear, beep, timeout, line1, line2), None)
+
 def ka_encode():
     """ka: Get keypad areas."""
     return MessageEncode('06ka00', 'KA')

@@ -3,6 +3,7 @@ All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
+- Add NS, NZ to no plans to implement list
 
 ## [0.2.1] - 2018-04-13
 - Add display message encoder

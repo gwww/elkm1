@@ -4,6 +4,9 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.2.1] - 2018-04-13
+- Add display message encoder
+
 ## [0.2.0] - 2018-04-13
 - Add thermostats (not Omnistat)
 

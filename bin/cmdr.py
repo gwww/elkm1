@@ -110,7 +110,7 @@ class ElkCommands(Command):
 
     def do_raw(self, *args):
         """raw - send bytes typed to Elk"""
-        self.elk.send(MessageEncode(args[0], None))
+        self.elk.send(elkm1.message.MessageEncode(args[0], None))
 
     def display_objects(self, object_list, *args):
         for i in parse_range(" ".join(args), object_list.max_elements):

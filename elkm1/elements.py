@@ -42,7 +42,7 @@ class Element:
 
     def default_name(self):
         """Return a default name for based on class and index of element"""
-        return self.__class__.__name__ + '-{:03d}'.format(self._index)
+        return self.__class__.__name__ + '-{:03d}'.format(self._index+1)
 
     def is_default_name(self):
         """Check if the name assigned is the default_name"""

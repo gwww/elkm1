@@ -55,11 +55,12 @@ class Command(object):
         if cmd in self._quit_cmd:
             return Commander.Exit
 
+        print("#blue#{:s} {:s}".format(cmd, ' '.join(args)))
+
         if cmd in self._help_cmd:
             return self.help(args[0] if args else None)
 
         if hasattr(self, 'do_'+cmd):
-            print("#blue#{:s} {:s}".format(cmd, ' '.join(args)))
             return getattr(self, 'do_'+cmd)(*args)
 
         if cmd in self.encoders:
@@ -70,7 +71,6 @@ class Command(object):
                     converted.append(i)
                 except ValueError:
                     converted.append(arg)
-            print("#blue#{:s} {:s}".format(cmd, ' '.join(args)))
             self.encoder(self.encoders[cmd], *converted)
         else:
             raise UnknownCommand(cmd)
@@ -80,7 +80,7 @@ class Command(object):
             qc='|'.join(self._quit_cmd)
             hc ='|'.join(self._help_cmd)
 
-            res='#green#Type [%s] to get more help about particular command\n' % hc
+            res='#green#Type [%s] <command> to get more help about particular command\n' % hc
             res+='Type [%s] to quit program\n' % qc
 
             cl = [name[3:] for name in dir(self) if name.startswith('do_')]

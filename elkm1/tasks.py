@@ -1,6 +1,7 @@
 """Definition of an ElkM1 Task"""
 from .const import Max, TextDescriptions
 from .elements import Element, Elements
+from .message import tn_encode
 
 
 class Task(Element):
@@ -8,6 +9,10 @@ class Task(Element):
 
     def __init__(self, index): # pylint: disable=useless-super-delegation
         super().__init__(index)
+
+    def activate(self):
+        """(Helper) Activate task"""
+        self.elk.send(tn_encode(self._index))
 
 class Tasks(Elements):
     """Handling for multiple tasks"""

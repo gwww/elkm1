@@ -2,7 +2,7 @@
 
 from .const import Max, TextDescriptions
 from .elements import Element, Elements
-from .message import add_message_handler, ps_encode, pc_encode, pf_encode,
+from .message import add_message_handler, ps_encode, pc_encode, pf_encode, \
                      pn_encode, pt_encode
 
 
@@ -16,7 +16,7 @@ class Light(Element):
         """(Helper) Turn off light"""
         self.elk.send(pf_encode(self._index))
 
-    def turn_on(self, brightness=100, time=0)
+    def turn_on(self, brightness=100, time=0):
         """(Helper) Turn on light"""
         if brightness == 100:
             self.elk.send.pn_encode(self._index)

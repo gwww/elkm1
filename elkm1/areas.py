@@ -1,7 +1,7 @@
 """Definition of an ElkM1 Area"""
 from .const import Max, TextDescriptions
 from .elements import Element, Elements
-from .message import add_message_handler, as_encode
+from .message import add_message_handler, as_encode, al_encode
 
 
 class Area(Element):
@@ -11,6 +11,14 @@ class Area(Element):
         self.armed_status = None
         self.arm_up_state = None
         self.alarm_state = None
+
+    def arm(self, level, code):
+        """(Helper) Arm system at specified level (away, vacation, etc)"""
+        self.elk.send(al_encode(level, self._index, code))
+
+    def disarm(self, code):
+        """(Helper) Disarm system."""
+        self.arm(0, code)
 
 class Areas(Elements):
     """Handling for multiple areas"""

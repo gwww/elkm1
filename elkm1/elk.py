@@ -22,11 +22,12 @@ class Elk:
 
         # Setup for all the types of elements tracked
         if 'element_list' in config:
-            element_list = config['element_list']
+            self.element_list = config['element_list']
         else:
-            element_list = ['panel', 'zones', 'lights', 'areas', 'tasks', 'keypads',
-                            'outputs', 'thermostats', 'counters', 'settings']
-        for element in element_list:
+            self.element_list = ['panel', 'zones', 'lights', 'areas',
+                'tasks', 'keypads', 'outputs', 'thermostats',
+                'counters', 'settings']
+        for element in self.element_list:
             self._create_element(element)
 
     def _create_element(self, element):

@@ -3,7 +3,7 @@ from time import time
 
 from .const import Max, TextDescriptions
 from .elements import Element, Elements
-from .message import tn_encode
+from .message import add_message_handler, tn_encode
 
 
 class Task(Element):

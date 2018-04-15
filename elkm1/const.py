@@ -233,14 +233,20 @@ class ThermostatSetting(Enum):
     ELEMENT_COOL_SETPOINT = 4
     ELEMENT_HEAT_SETPOINT = 5
 
+class ThermostatMode(Enum):
+    """Thermostat modes"""
     MODE_OFF = 0
     MODE_HEAT = 1
     MODE_COOL = 2
     MODE_AUTO = 3
     MODE_EMERGENCY_HEAT = 4
 
+class ThermostatFan(Enum):
+    """Thermostat fan"""
     FAN_AUTO = 0
     FAN_ON = 1
 
+class ThermostatHold(Enum):
+    """Thermostat hold"""
     HOLD_OFF = 0
     HOLD_ON = 1

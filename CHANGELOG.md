@@ -10,6 +10,7 @@ This project follows [Semantic Versioning](https://semver.org/).
 - Add helper to Counter
 - Add helper to Task
 - Add helpers to Area
+- Add handler for task change (TC) message
 
 ## [0.2.1] - 2018-04-13
 - Add display message encoder

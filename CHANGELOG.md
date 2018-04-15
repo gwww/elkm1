@@ -5,7 +5,8 @@ This project follows [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 - Add NS, NZ to no plans to implement list
 - Make default name 1-based
-- Add helpers to Output
+- Add helpers to Outputs
+- Add helpers to Lights
 
 ## [0.2.1] - 2018-04-13
 - Add display message encoder

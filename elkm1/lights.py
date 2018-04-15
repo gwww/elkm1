@@ -11,6 +11,21 @@ class Light(Element):
         super().__init__(index)
         self.status = 0
 
+    def turn_off(self):
+        """(Helper) Turn off light"""
+        self.elk.send(pf_encode(self._index))
+
+    def turn_on(self, brightness=100, time=0)
+        """(Helper) Turn on light"""
+        if brightness == 100:
+            self.elk.send.pn_encode(self._index)
+        else:
+            self.elk.send(pc_encode(self._index, 9, brightness, time))
+
+    def toggle(self):
+        """(Helper) Toggle light"""
+        self.elk.send(pt_encode(self._index))
+
 class Lights(Elements):
     """Handling for multiple lights"""
     def __init__(self, elk):

@@ -10,6 +10,18 @@ class Output(Element):
         super().__init__(index)
         self.output_on = False
 
+    def turn_off(self):
+        """(Helper) Turn of an output"""
+        self.elk.send(cf_encode(self._index))
+
+    def turn_on(self, time):
+        """(Helper) Turn on an output"""
+        self.elk.send(cn_encode(self._index, time))
+
+    def toggle(self):
+        """(Helper) Toggle an output"""
+        self.elk.send(ct_encode(self._index))
+
 class Outputs(Elements):
     """Handling for multiple areas"""
     def __init__(self, elk):
@@ -28,15 +40,3 @@ class Outputs(Elements):
     def _cs_handler(self, output_status):
         for output in self.elements:
             output.setattr('output_on', output_status[output.index])
-
-    def turn_off(self):
-        """(Helper) Turn of an output"""
-        self.elk.send(cf_encode(self._index))
-
-    def turn_on(self, time):
-        """(Helper) Turn on an output"""
-        self.elk.send(cn_encode(self._index, time))
-
-    def toggle(self):
-        """(Helper) Toggle an output"""
-        self.elk.send(ct_encode(self._index))

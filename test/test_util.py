@@ -3,7 +3,7 @@ from unittest.mock import Mock
 
 from elkm1.const import TextDescriptions
 from elkm1.message import message_decode, MessageEncode
-from elkm1.util import parse_url, get_descriptions, sd_handler
+from elkm1.util import parse_url, get_descriptions, sd_handler, pretty_const
 
 def test_get_descriptions_sets_up_correctly():
     mock_elk = Mock()
@@ -62,3 +62,16 @@ def test_parse_url_serial_non_implemented():
 
 def test_parse_url_unknown_scheme():
     with pytest.raises(ValueError): parse_url('bad_scheme://rest')
+
+def test_pretty_const_with_single_word():
+    with pytest.raises(IndexError): pretty_const("TESTING")
+
+def test_pretty_const_with_two_words():
+    (type_, pretty) = pretty_const("MODE_HEAT")
+    assert type_ == 'Mode'
+    assert pretty == 'Heat'
+
+def test_pretty_const_with_more_than_two_words():
+    (type_, pretty) = pretty_const("MODE_EMERGENCY_HEAT")
+    assert type_ == 'Mode'
+    assert pretty == 'Emergency heat'

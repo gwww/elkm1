@@ -75,3 +75,12 @@ def parse_url(url):
     else:
         raise ValueError("Invalid scheme '%s'" % scheme)
     return (scheme, host, int(port), ssl_context)
+
+def pretty_const(value):
+    """Make a constant pretty for printing in GUI"""
+    words = value.split('_')
+    type_ = words[0].capitalize()
+    pretty = words[1].capitalize()
+    for word in words[2:]:
+        pretty += ' ' + word.lower()
+    return (type_, pretty)

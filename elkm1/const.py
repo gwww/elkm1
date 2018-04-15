@@ -223,3 +223,24 @@ MESSAGE_MAP = {
     'zs': "Zone status request",
     'zv': "Request Zone analog voltage",
 }
+
+class ThermostatSetting(Enum):
+    """Thermostat consts when setting"""
+    ELEMENT_MODE = 0
+    ELEMENT_HOLD = 1
+    ELEMENT_FAN = 2
+    ELEMENT_GET_TEMPERATURE = 3
+    ELEMENT_COOL_SETPOINT = 4
+    ELEMENT_HEAT_SETPOINT = 5
+
+    MODE_OFF = 0
+    MODE_HEAT = 1
+    MODE_COOL = 2
+    MODE_AUTO = 3
+    MODE_EMERGENCY_HEAT = 4
+
+    FAN_AUTO = 0
+    FAN_ON = 1
+
+    HOLD_OFF = 0
+    HOLD_ON = 1

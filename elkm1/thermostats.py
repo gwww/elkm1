@@ -1,7 +1,7 @@
 """Definition of an ElkM1 Thermostat"""
 from .const import Max, TextDescriptions
 from .elements import Element, Elements
-from .message import add_message_handler, tr_encode
+from .message import add_message_handler, tr_encode, ts_encode
 
 
 class Thermostat(Element):
@@ -43,3 +43,7 @@ class Thermostats(Elements):
         thermostat.setattr('heat_setpoint', heat_setpoint)
         thermostat.setattr('cool_setpoint', cool_setpoint)
         thermostat.setattr('humidity', humidity)
+
+    def set(self, element_to_set, value):
+        """(Helper) Set thermostat"""
+        self.elk.send(ts_encode(self._index, value, element_to_set))

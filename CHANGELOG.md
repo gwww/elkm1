@@ -12,6 +12,7 @@ This project follows [Semantic Versioning](https://semver.org/).
 - Add helpers to Area
 - Add handler for task change (TC) message
 - Add thermostat setting
+- Add helper for Setting (custom value)
 - Added const for thermostat setting
 - Added pretty_const (see test_util.py for API)
 

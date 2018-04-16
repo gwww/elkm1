@@ -1,7 +1,7 @@
 """Definition of an ElkM1 Custom Value"""
 from .const import Max, TextDescriptions
 from .elements import Element, Elements
-from .message import add_message_handler, cp_encode
+from .message import add_message_handler, cp_encode, cw_encode
 
 
 class Setting(Element):

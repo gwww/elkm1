@@ -119,6 +119,16 @@ def _cv_decode(msg):
     """CV: Counter value."""
     return {'counter': int(msg[4:6])-1, 'value': int(msg[6:11])}
 
+@call_handlers('IC')
+def _ic_decode(msg):
+    """IC: Send Valid Or Invalid User Code Format."""
+    code = 0
+    start = 4
+    for i in range(6):
+        code = code * 10 + int(msg[start:start+2])
+        start += 2
+    return {'code': code, 'user': int(msg[16:19])-1, 'keypad': int(msg[19:21])-1}
+
 @call_handlers('IE')
 def _ie_decode(_msg):
     """IE: Installer mode exited."""

@@ -10,11 +10,13 @@ class Keypad(Element):
         super().__init__(index)
         self.area = None
         self.temperature = None
+        self.last_user = None
 
 class Keypads(Elements):
     """Handling for multiple areas"""
     def __init__(self, elk):
         super().__init__(elk, Keypad, Max.KEYPADS.value)
+        add_message_handler('IC', self._ic_handler)
         add_message_handler('KA', self._ka_handler)
         add_message_handler('LW', self._lw_handler)
 
@@ -22,6 +24,10 @@ class Keypads(Elements):
         """Retrieve areas from ElkM1"""
         self.elk.send(ka_encode())
         self.get_descriptions(TextDescriptions.KEYPAD.value)
+
+    def _ic_handler(self, code, user, keypad):
+        # If user is negative then invalid code entered
+        self.elements[keypad].setattr('last_user', user)
 
     def _ka_handler(self, keypad_areas):
         for keypad in self.elements:

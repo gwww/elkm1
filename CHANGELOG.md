@@ -2,7 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [0.3.1]
+- Add elk attribute to Element
+
+## [0.3.0]
 - Add NS, NZ to no plans to implement list
 - Make default name 1-based
 - Add helpers to Output

@@ -20,11 +20,15 @@ class StdOutWrapper:
         sys.stdout = self
         sys.stderr = self
         self.cmdr = cmdr
+        self.log = None
+        #self.log = open('elk.log','w')
 
     def write(self,txt):
         txt = txt.rstrip()
         if len(txt) > 0:
             self.cmdr.output(txt)
+            if self.log:
+                print(txt, file=self.log)
 
     def flush(self):
         pass
@@ -40,8 +44,11 @@ def main():
     if len(sys.argv) > 1:
         interactive = sys.argv[1] == '-i'
 
+    elk = Elk({'url': 'elk://192.168.1.142',
+               # 'element_list': ['panel'],
+               'userid': 'testuser', 'password': 'testing'})
     if interactive:
-        c=cmdr.Commander('Elk console', cmd_cb=cmdr.ElkCommands())
+        c=cmdr.Commander('Elk console', cmd_cb=cmdr.Commands(elk))
         mystdout = StdOutWrapper(c)
         logging.basicConfig(stream=mystdout,
                             level=logging.DEBUG, format='%(message)s')
@@ -49,14 +56,10 @@ def main():
         logging.basicConfig(level=logging.DEBUG, format='%(message)s')
 
     try:
-        elk = Elk({'url': 'elk://192.168.1.142',
-                   # 'element_list': ['panel'],
-                   'userid': 'testuser', 'password': 'testing'})
         add_message_handler('unknown', _unknown_handler)
         add_message_handler('timeout', _timeout_handler)
         elk.loop.run_until_complete(elk.connect())
         if interactive:
-            c._cmd.set_elk(elk)
             c.loop()
         else:
             elk.run()

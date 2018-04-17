@@ -11,9 +11,9 @@ class Setting(Element):
         self.value_format = None
         self.value = None
 
-    def set(self, value_format, value):
+    def set(self, value):
         """(Helper) Set custom value."""
-        self.elk.send(cw_encode(self._index, value, value_format))
+        self.elk.send(cw_encode(self._index, value, self.value_format))
 
 class Settings(Elements):
     """Handling for multiple custom values"""

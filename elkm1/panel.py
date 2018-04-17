@@ -7,8 +7,7 @@ from .util import add_sync_handler, call_sync_handlers
 class Panel(Element):
     """Class representing an Area"""
     def __init__(self, elk):
-        super().__init__(0)
-        self._elk = elk
+        super().__init__(0, elk)
         self.real_time_clock = None
         self.elkm1_version = None
         self.xep_version = None
@@ -22,7 +21,7 @@ class Panel(Element):
         add_message_handler('XK', self._xk_handler)
         add_message_handler('RP', self._rp_handler)
         add_message_handler('IE', call_sync_handlers)
-        self._elk.send(vn_encode())
+        self.elk.send(vn_encode())
 
     def _vn_handler(self, elkm1_version, xep_version):
         self.setattr('elkm1_version', elkm1_version)

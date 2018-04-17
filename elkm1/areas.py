@@ -6,8 +6,8 @@ from .message import add_message_handler, as_encode, al_encode
 
 class Area(Element):
     """Class representing an Area"""
-    def __init__(self, index):
-        super().__init__(index)
+    def __init__(self, index, elk):
+        super().__init__(index, elk)
         self.armed_status = None
         self.arm_up_state = None
         self.alarm_state = None

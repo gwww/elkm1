@@ -8,8 +8,8 @@ from .message import add_message_handler, ps_encode, pc_encode, pf_encode, \
 
 class Light(Element):
     """Class representing a Light"""
-    def __init__(self, index):
-        super().__init__(index)
+    def __init__(self, index, elk):
+        super().__init__(index, elk)
         self.status = 0
 
     def turn_off(self):

@@ -6,8 +6,8 @@ from .message import add_message_handler, tr_encode, ts_encode
 
 class Thermostat(Element):
     """Class representing an Thermostat"""
-    def __init__(self, index): # pylint: disable=useless-super-delegation
-        super().__init__(index)
+    def __init__(self, index, elk): # pylint: disable=useless-super-delegation
+        super().__init__(index, elk)
         self.mode = 0
         self.hold = False
         self.fan = 0

@@ -9,8 +9,8 @@ from .message import add_message_handler, tn_encode
 class Task(Element):
     """Class representing an Task"""
 
-    def __init__(self, index): # pylint: disable=useless-super-delegation
-        super().__init__(index)
+    def __init__(self, index, elk): # pylint: disable=useless-super-delegation
+        super().__init__(index, elk)
         self.last_change = None
 
     def activate(self):

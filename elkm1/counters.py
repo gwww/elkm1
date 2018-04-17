@@ -6,8 +6,8 @@ from .message import add_message_handler, cx_encode
 
 class Counter(Element):
     """Class representing an Counter"""
-    def __init__(self, index):
-        super().__init__(index)
+    def __init__(self, index, elk):
+        super().__init__(index, elk)
         self.value = None
 
     def set(self, value):

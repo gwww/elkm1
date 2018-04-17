@@ -7,8 +7,8 @@ from .message import add_message_handler, zd_encode, zp_encode, zs_encode
 
 class Zone(Element):
     """Class representing a Zone"""
-    def __init__(self, index):
-        super().__init__(index)
+    def __init__(self, index, elk):
+        super().__init__(index, elk)
         self.definition = 0
         self.area = 0
         self.bypassed = False

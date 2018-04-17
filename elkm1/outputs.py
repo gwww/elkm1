@@ -7,8 +7,8 @@ from .message import add_message_handler, cs_encode, cf_encode, \
 
 class Output(Element):
     """Class representing an Output"""
-    def __init__(self, index):
-        super().__init__(index)
+    def __init__(self, index, elk):
+        super().__init__(index, elk)
         self.output_on = False
 
     def turn_off(self):

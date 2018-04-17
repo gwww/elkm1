@@ -6,8 +6,8 @@ from .message import add_message_handler, cp_encode, cw_encode
 
 class Setting(Element):
     """Class representing an Custom Value"""
-    def __init__(self, index):
-        super().__init__(index)
+    def __init__(self, index, elk):
+        super().__init__(index, elk)
         self.value_format = None
         self.value = None
 

@@ -8,8 +8,9 @@ from .util import add_sync_handler, get_descriptions
 
 class Element:
     """Element class"""
-    def __init__(self, index):
+    def __init__(self, index, elk):
         self._index = index
+        self.elk = elk
         self._callbacks = []
         self.name = self.default_name()
 
@@ -59,7 +60,7 @@ class Elements:
     def __init__(self, elk, class_, max_elements):
         self.elk = elk
         self.max_elements = max_elements
-        self.elements = [class_(i) for i in range(max_elements)]
+        self.elements = [class_(i, elk) for i in range(max_elements)]
         add_sync_handler(self.sync)
 
     def __iter__(self):

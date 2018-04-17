@@ -6,8 +6,8 @@ from .message import add_message_handler, ka_encode
 
 class Keypad(Element):
     """Class representing an Keypad"""
-    def __init__(self, index):
-        super().__init__(index)
+    def __init__(self, index, elk):
+        super().__init__(index, elk)
         self.area = None
         self.temperature = None
         self.last_user = None

@@ -19,7 +19,7 @@ class Light(Element):
     def turn_on(self, brightness=100, time=0):
         """(Helper) Turn on light"""
         if brightness == 100:
-            self._elk.send.pn_encode(self._index)
+            self._elk.send(pn_encode(self._index))
         else:
             self._elk.send(pc_encode(self._index, 9, brightness, time))
 

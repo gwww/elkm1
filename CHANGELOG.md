@@ -2,6 +2,9 @@
 All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## [Uncommitted]
+- Make elk attribute in Element private
+
 ## [0.3.1]
 - Add elk attribute to Element
 

@@ -13,7 +13,7 @@ class Setting(Element):
 
     def set(self, value):
         """(Helper) Set custom value."""
-        self.elk.send(cw_encode(self._index, value, self.value_format))
+        self._elk.send(cw_encode(self._index, value, self.value_format))
 
 class Settings(Elements):
     """Handling for multiple custom values"""

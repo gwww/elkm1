@@ -13,15 +13,15 @@ class Output(Element):
 
     def turn_off(self):
         """(Helper) Turn of an output"""
-        self.elk.send(cf_encode(self._index))
+        self._elk.send(cf_encode(self._index))
 
     def turn_on(self, time):
         """(Helper) Turn on an output"""
-        self.elk.send(cn_encode(self._index, time))
+        self._elk.send(cn_encode(self._index, time))
 
     def toggle(self):
         """(Helper) Toggle an output"""
-        self.elk.send(ct_encode(self._index))
+        self._elk.send(ct_encode(self._index))
 
 class Outputs(Elements):
     """Handling for multiple areas"""

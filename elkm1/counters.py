@@ -12,7 +12,7 @@ class Counter(Element):
 
     def set(self, value):
         """(Helper) Set counter to value"""
-        self.elk.send(cx_encode(self._index, value))
+        self._elk.send(cx_encode(self._index, value))
 
 # pylint: disable=R0903
 class Counters(Elements):

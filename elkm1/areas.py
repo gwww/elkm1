@@ -14,7 +14,7 @@ class Area(Element):
 
     def arm(self, level, code):
         """(Helper) Arm system at specified level (away, vacation, etc)"""
-        self.elk.send(al_encode(level, self._index, code))
+        self._elk.send(al_encode(level, self._index, code))
 
     def disarm(self, code):
         """(Helper) Disarm system."""

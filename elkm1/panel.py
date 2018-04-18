@@ -21,7 +21,7 @@ class Panel(Element):
         add_message_handler('XK', self._xk_handler)
         add_message_handler('RP', self._rp_handler)
         add_message_handler('IE', call_sync_handlers)
-        self.elk.send(vn_encode())
+        self._elk.send(vn_encode())
 
     def _vn_handler(self, elkm1_version, xep_version):
         self.setattr('elkm1_version', elkm1_version)

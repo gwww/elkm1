@@ -16,6 +16,10 @@ class Thermostat(Element):
         self.cool_setpoint = 0
         self.humidity = 0
 
+    def set(self, element_to_set, value):
+        """(Helper) Set thermostat"""
+        self._elk.send(ts_encode(self._index, value, element_to_set))
+
 class Thermostats(Elements):
     """Handling for multiple areas"""
     def __init__(self, elk):
@@ -43,7 +47,3 @@ class Thermostats(Elements):
         thermostat.setattr('heat_setpoint', heat_setpoint)
         thermostat.setattr('cool_setpoint', cool_setpoint)
         thermostat.setattr('humidity', humidity)
-
-    def set(self, element_to_set, value):
-        """(Helper) Set thermostat"""
-        self.elk.send(ts_encode(self._index, value, element_to_set))

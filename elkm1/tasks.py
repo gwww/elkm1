@@ -15,7 +15,7 @@ class Task(Element):
 
     def activate(self):
         """(Helper) Activate task"""
-        self.elk.send(tn_encode(self._index))
+        self._elk.send(tn_encode(self._index))
 
 class Tasks(Elements):
     """Handling for multiple tasks"""

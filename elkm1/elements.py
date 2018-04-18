@@ -10,7 +10,7 @@ class Element:
     """Element class"""
     def __init__(self, index, elk):
         self._index = index
-        self.elk = elk
+        self._elk = elk
         self._callbacks = []
         self.name = self.default_name()
 

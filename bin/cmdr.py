@@ -8,13 +8,20 @@ from collections import deque
 import inspect
 import re
 import threading
+import traceback
 import urwid
 from importlib import import_module
 
 import elkm1.message
 
 
-def parse_subcommand(self, line):
+def parse_subcommand(line):
+    tokens = line.split()
+    if len(tokens) == 0:
+        return (None, None)
+    cmd = tokens[0].lower()
+    args = tokens[1:]
+
     converted = []
     for arg in args:
         try:
@@ -22,7 +29,7 @@ def parse_subcommand(self, line):
             converted.append(i)
         except ValueError:
             converted.append(arg)
-    return converted
+    return (cmd, converted)
 
 def parse_range(rng, max):
     # e.g. rng = "<3, 45, 46, 48-51, 77"
@@ -41,9 +48,11 @@ def parse_range(rng, max):
             raise ValueError('Unknown range type: "%s"'%x)
     return ids
 
-def parse_element_command(line, max):
+def parse_element_command(cmd, line, max):
     match = re.match( '([\d,\- <*]+)(\w*.*)', line)
-    ids = parse_range(match.groups[0])
+    ids = parse_range(match.groups()[0], max)
+    subcommand = parse_subcommand(match.groups()[1])
+    return (ids, subcommand[0], subcommand[1])
 
 def find_class(module, class_name):
     for class_ in inspect.getmembers(module, inspect.isclass):
@@ -94,7 +103,7 @@ class Commands():
             self.element_cmds[cmd] = (fn,
                              '{} <range list> [subcommand]'.format(cmd),
                              'Displays internal state of {}'.format(element),
-                              get_helpers(element,cmd.capitalize()))
+                              get_helpers(element, cmd.capitalize()))
 
     def __call__(self, line):
         tokens = line.split()
@@ -142,10 +151,18 @@ class Commands():
 
     def print_elements(self, cmd, args):
         element_list = getattr(self.elk, cmd+'s', None)
-        if not element_list:
-            element_list = getattr(self.elk, cmd)
-        for i in parse_range(" ".join(args), element_list.max_elements):
-            print(element_list[i])
+        args = parse_element_command(cmd, " ".join(args), element_list.max_elements)
+        if args[1]:
+            if args[1] in self.element_cmds[cmd][3]:
+                fn = self.element_cmds[cmd][3][args[1]][0]
+            else:
+                raise NotImplemented
+            for i in args[0]:
+                print(fn)
+                fn(element_list[i], *args[2])
+        else:
+            for i in args[0]:
+                print(element_list[i])
 
     def panel_print(self, cmd, args):
         print(self.elk.panel)
@@ -270,6 +287,7 @@ class Commander(urwid.Frame):
             try:
                 res = self._cmd(line)
             except Exception as e:
+                traceback.print_exc()
                 self.output('Error: %s'%e, 'error')
                 return
             if res==Commander.Exit:

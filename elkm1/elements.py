@@ -41,9 +41,9 @@ class Element:
         setattr(self, attr, new_value)
         self._call_callbacks(attr, new_value)
 
-    def default_name(self):
+    def default_name(self, separator='-'):
         """Return a default name for based on class and index of element"""
-        return self.__class__.__name__ + '-{:03d}'.format(self._index+1)
+        return self.__class__.__name__ + '{}{:03d}'.format(separator, self._index+1)
 
     def is_default_name(self):
         """Check if the name assigned is the default_name"""

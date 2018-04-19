@@ -72,6 +72,62 @@ class ZoneLogicalStatus(Enum):
     Violated = 2
     Bypassed = 3
 
+class ArmedStatus(Enum):
+    """Area armed status"""
+    Disarmed = 0
+    Armed Away = 1
+    Armed Stay = 2
+    Armed Stay Instant = 3
+    Armed to Night = 4
+    Armed to Night Instant  = 5
+    Armed to Vacation = 6
+
+class ArmUpState(Enum):
+    """Ability to arm"""
+    NotReadyToArm = 0
+    ReadyToArm = 1
+    CanBeForceArmed = 2
+    ArmedAndExitTimerRunning = 3
+    FullyArmed = 4
+    ForceArmed = 5
+    ArmedWithBypass = 6
+
+class AlarmState(Enum):
+    """Current alarm state"""
+    NoAlarmActive = 0
+    EntranceDelayActive = 1
+    AlarmAbortDelayActive = 2
+    FireAlarm = 3
+    MedicalAlarm = 4
+    PoliceAlarm = 5
+    BurlarAlarm = 6
+    Aux1Alarm = 7
+    Aux2Alarm = 8
+    Aux3Alarm = 9
+    Aux4Alarm = ':'
+    CarbonMonoxideAlarm = ';'
+    EmergencyAlarm = '<'
+    FreezeAlarm= '='
+    GasAlarm = '>'
+    HeatAlarm = '?'
+    WaterAlarm = '@'
+    FireSupervisory = 'A'
+    VerifyFire = 'B'
+
+class ArmLevel(Enum):
+    """Arm/Disarm levels"""
+    Disarm = 0
+    ArmedAway = 1
+    ArmedStay = 2
+    ArmedStayInstant = 3
+    ArmedNight = 4
+    ArmedNightInstant = 5
+    ArmedVacation = 6
+    ArmToNextAwayMode  = 7
+    ArmToNextStayMode = 8
+    ForceArmToAwayMode  = 9
+    ForceArmToStayMode = ':'
+
 class TextDescriptions(Enum):
     """Types of description strings that can be retrieved from the panel"""
     ZONE = (0, Max.ZONES.value)

@@ -4,6 +4,8 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ## [Uncommitted]
 - Make elk attribute in Element private
+- Allow separator in default_name() to be specified
+- Add constants for arming, alarms
 
 ## [0.3.1]
 - Add elk attribute to Element

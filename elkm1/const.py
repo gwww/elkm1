@@ -151,20 +151,6 @@ class TextDescriptions(Enum):
     AUDIO_ZONE = 18
     AUDIO_SOURCE = 19
 
-class ArmLevel(Enum):
-    """Arming levels."""
-    Disarm = '0'
-    ArmAway = '1'
-    ArmStay = '2'
-    ArmStayInstant = '3'
-    ArmNight = '4'
-    ArmNightInstant = '5'
-    ArmVacation = '6'
-    ArmStepToNextAwayMode = '7'
-    ArmStepToNextStayMode = '8'
-    ForceArmAway = '9'
-    ForceArmStay = ':'
-
 # Map to convert message code to descriptive string
 MESSAGE_MAP = {
     'AP': "Send ASCII String",

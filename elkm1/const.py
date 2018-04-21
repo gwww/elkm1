@@ -73,17 +73,17 @@ class ZoneLogicalStatus(Enum):
     Bypassed = 3
 
 class ArmedStatus(Enum):
-    """Area armed status"""
+    """Area arming status: armed status"""
     Disarmed = 0
-    Armed Away = 1
-    Armed Stay = 2
-    Armed Stay Instant = 3
-    Armed to Night = 4
-    Armed to Night Instant  = 5
-    Armed to Vacation = 6
+    ArmedAway = 1
+    ArmedStay = 2
+    ArmedStayInstant = 3
+    ArmedToNight = 4
+    ArmedToNightInstant  = 5
+    ArmedToVacation = 6
 
 class ArmUpState(Enum):
-    """Ability to arm"""
+    """Area arming status: Ability to arm"""
     NotReadyToArm = 0
     ReadyToArm = 1
     CanBeForceArmed = 2
@@ -93,7 +93,7 @@ class ArmUpState(Enum):
     ArmedWithBypass = 6
 
 class AlarmState(Enum):
-    """Current alarm state"""
+    """Area arming status: Current alarm state"""
     NoAlarmActive = 0
     EntranceDelayActive = 1
     AlarmAbortDelayActive = 2
@@ -115,7 +115,7 @@ class AlarmState(Enum):
     VerifyFire = 'B'
 
 class ArmLevel(Enum):
-    """Arm/Disarm levels"""
+    """Levels for Arm/Disarm al_encode messages"""
     Disarm = 0
     ArmedAway = 1
     ArmedStay = 2

@@ -74,36 +74,36 @@ class ZoneLogicalStatus(Enum):
 
 class ArmedStatus(Enum):
     """Area arming status: armed status"""
-    Disarmed = 0
-    ArmedAway = 1
-    ArmedStay = 2
-    ArmedStayInstant = 3
-    ArmedToNight = 4
-    ArmedToNightInstant  = 5
-    ArmedToVacation = 6
+    Disarmed = '0'
+    ArmedAway = '1'
+    ArmedStay = '2'
+    ArmedStayInstant = '3'
+    ArmedToNight = '4'
+    ArmedToNightInstant  = '5'
+    ArmedToVacation = '6'
 
 class ArmUpState(Enum):
     """Area arming status: Ability to arm"""
-    NotReadyToArm = 0
-    ReadyToArm = 1
-    CanBeForceArmed = 2
-    ArmedAndExitTimerRunning = 3
-    FullyArmed = 4
-    ForceArmed = 5
-    ArmedWithBypass = 6
+    NotReadyToArm = '0'
+    ReadyToArm = '1'
+    CanBeForceArmed = '2'
+    ArmedAndExitTimerRunning = '3'
+    FullyArmed = '4'
+    ForceArmed = '5'
+    ArmedWithBypass = '6'
 
 class AlarmState(Enum):
     """Area arming status: Current alarm state"""
-    NoAlarmActive = 0
-    EntranceDelayActive = 1
-    AlarmAbortDelayActive = 2
-    FireAlarm = 3
-    MedicalAlarm = 4
-    PoliceAlarm = 5
-    BurlarAlarm = 6
-    Aux1Alarm = 7
-    Aux2Alarm = 8
-    Aux3Alarm = 9
+    NoAlarmActive = '0'
+    EntranceDelayActive = '1'
+    AlarmAbortDelayActive = '2'
+    FireAlarm = '3'
+    MedicalAlarm = '4'
+    PoliceAlarm = '5'
+    BurlarAlarm = '6'
+    Aux1Alarm = '7'
+    Aux2Alarm = '8'
+    Aux3Alarm = '9'
     Aux4Alarm = ':'
     CarbonMonoxideAlarm = ';'
     EmergencyAlarm = '<'
@@ -116,16 +116,16 @@ class AlarmState(Enum):
 
 class ArmLevel(Enum):
     """Levels for Arm/Disarm al_encode messages"""
-    Disarm = 0
-    ArmedAway = 1
-    ArmedStay = 2
-    ArmedStayInstant = 3
-    ArmedNight = 4
-    ArmedNightInstant = 5
-    ArmedVacation = 6
-    ArmToNextAwayMode  = 7
-    ArmToNextStayMode = 8
-    ForceArmToAwayMode  = 9
+    Disarm = '0'
+    ArmedAway = '1'
+    ArmedStay = '2'
+    ArmedStayInstant = '3'
+    ArmedNight = '4'
+    ArmedNightInstant = '5'
+    ArmedVacation = '6'
+    ArmToNextAwayMode  = '7'
+    ArmToNextStayMode = '8'
+    ForceArmToAwayMode  = '9'
     ForceArmToStayMode = ':'
 
 class TextDescriptions(Enum):

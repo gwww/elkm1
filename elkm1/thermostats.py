@@ -37,6 +37,7 @@ class Thermostats(Elements):
             if not thermostat.is_default_name():
                 self.elk.send(tr_encode(thermostat._index))
 
+    # pylint: disable=too-many-arguments
     def _tr_handler(self, thermostat_index, mode, hold, fan, current_temp,
                     heat_setpoint, cool_setpoint, humidity):
         thermostat = self.elements[thermostat_index]

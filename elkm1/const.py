@@ -20,113 +20,142 @@ class Max(Enum):
 
 class ZoneType(Enum):
     """Types of Elk zones"""
-    Disabled = 0
-    BurlarEntryExit1 = 1
-    BurlarEntryExit2 = 2
-    BurglarPerimeterInstant = 3
-    BurglarInterior = 4
-    BurglarInteriorFollower = 5
-    BurglarInteriorNight = 6
-    BurglarInteriorNightDelay = 7
-    Burglar24Hour = 8
-    BurglarBoxTamper = 9
-    FireAlarm = 10
-    FireVerified = 11
-    FireSupervisory = 12
-    AuxAlarm1 = 13
-    AuxAlarm2 = 14
-    KeyFob = 15
-    NonAlarm = 16
-    CarbonMonoxide = 17
-    EmergencyAlarm = 18
-    FreezeAlarm = 19
-    GasAlarm = 20
-    HeatAlarm = 21
-    MedicalAlarm = 22
-    PoliceAlarm = 23
-    PoliceNoIndication = 24
-    WaterAlarm = 25
-    KeyMomentaryArmDisarm = 26
-    KeyMomentaryArmAway = 27
-    KeyMomentaryArmStay = 28
-    KeyMomentaryDisarm = 29
-    KeyOnOff = 30
-    MuteAudibles = 31
-    PowerSupervisory = 32
-    Temperature = 33
-    AnalogZone = 34
-    PhoneKey = 35
-    IntercomKey = 36
+    DISABLED = 0
+    BURLAR_ENTRY_EXIT_1 = 1
+    BURLAR_ENTRY_EXIT_2 = 2
+    BURGLAR_PERIMETER_INSTANT = 3
+    BURGLAR_INTERIOR = 4
+    BURGLAR_INTERIOR_FOLLOWER = 5
+    BURGLAR_INTERIOR_NIGHT = 6
+    BURGLAR_INTERIOR_NIGHT_DELAY = 7
+    BURGLAR24_HOUR = 8
+    BURGLAR_BOX_TAMPER = 9
+    FIRE_ALARM = 10
+    FIRE_VERIFIED = 11
+    FIRE_SUPERVISORY = 12
+    AUX_ALARM_1 = 13
+    AUX_ALARM_2 = 14
+    KEYFOB = 15
+    NON_ALARM = 16
+    CARBON_MONOXIDE = 17
+    EMERGENCY_ALARM = 18
+    FREEZE_ALARM = 19
+    GAS_ALARM = 20
+    HEAT_ALARM = 21
+    MEDICAL_ALARM = 22
+    POLICE_ALARM = 23
+    POLICE_NO_INDICATION = 24
+    WATER_ALARM = 25
+    KEY_MOMENTARY_ARM_DISARM = 26
+    KEY_MOMENTARY_ARM_AWAY = 27
+    KEY_MOMENTARY_ARM_STAY = 28
+    KEY_MOMENTARY_DISARM = 29
+    KEY_ON_OFF = 30
+    MUTE_AUDIBLES = 31
+    POWER_SUPERVISORY = 32
+    TEMPERATURE = 33
+    ANALOG_ZONE = 34
+    PHONE_KEY = 35
+    INTERCOM_KEY = 36
 
 class ZonePhysicalStatus(Enum):
     """Zone physical status; name capitalized so can be used in displays"""
-    Unconfigured = 0
-    Open = 1
+    UNCONFIGURED = 0
+    OPEN = 1
     EOL = 2
-    Short = 3
+    SHORT = 3
 
 class ZoneLogicalStatus(Enum):
     """Zone logical status; name capitalized so can be used in displays"""
-    Normal = 0
-    Troubled = 1
-    Violated = 2
-    Bypassed = 3
+    NORMAL = 0
+    TROUBLED = 1
+    VIOLATED = 2
+    BYPASSED = 3
 
 class ArmedStatus(Enum):
     """Area arming status: armed status"""
-    Disarmed = '0'
-    ArmedAway = '1'
-    ArmedStay = '2'
-    ArmedStayInstant = '3'
-    ArmedToNight = '4'
-    ArmedToNightInstant  = '5'
-    ArmedToVacation = '6'
+    DISARMED = '0'
+    ARMED_AWAY = '1'
+    ARMED_STAY = '2'
+    ARMED_STAY_INSTANT = '3'
+    ARMED_TO_NIGHT = '4'
+    ARMED_TO_NIGHT_INSTANT = '5'
+    ARMED_TO_VACATION = '6'
 
 class ArmUpState(Enum):
     """Area arming status: Ability to arm"""
-    NotReadyToArm = '0'
-    ReadyToArm = '1'
-    CanBeForceArmed = '2'
-    ArmedAndExitTimerRunning = '3'
-    FullyArmed = '4'
-    ForceArmed = '5'
-    ArmedWithBypass = '6'
+    NOT_READY_TO_ARM = '0'
+    READY_TO_ARM = '1'
+    CAN_BE_FORCE_ARMED = '2'
+    ARMED_AND_EXIT_TIMER_RUNNING = '3'
+    FULLY_ARMED = '4'
+    FORCE_ARMED = '5'
+    ARMED_WITH_BYPASS = '6'
 
 class AlarmState(Enum):
     """Area arming status: Current alarm state"""
-    NoAlarmActive = '0'
-    EntranceDelayActive = '1'
-    AlarmAbortDelayActive = '2'
-    FireAlarm = '3'
-    MedicalAlarm = '4'
-    PoliceAlarm = '5'
-    BurlarAlarm = '6'
-    Aux1Alarm = '7'
-    Aux2Alarm = '8'
-    Aux3Alarm = '9'
-    Aux4Alarm = ':'
-    CarbonMonoxideAlarm = ';'
-    EmergencyAlarm = '<'
-    FreezeAlarm= '='
-    GasAlarm = '>'
-    HeatAlarm = '?'
-    WaterAlarm = '@'
-    FireSupervisory = 'A'
-    VerifyFire = 'B'
+    NO_ALARM_ACTIVE = '0'
+    ENTRANCE_DELAY_ACTIVE = '1'
+    ALARM_ABORT_DELAY_ACTIVE = '2'
+    FIRE_ALARM = '3'
+    MEDICAL_ALARM = '4'
+    POLICE_ALARM = '5'
+    BURLAR_ALARM = '6'
+    AUX_1_ALARM = '7'
+    AUX_2_ALARM = '8'
+    AUX_3_ALARM = '9'
+    AUX_4_ALARM = ':'
+    CARBON_MONOXIDE_ALARM = ';'
+    EMERGENCY_ALARM = '<'
+    FREEZE_ALARM = '='
+    GAS_ALARM = '>'
+    HEAT_ALARM = '?'
+    WATER_ALARM = '@'
+    FIRE_SUPERVISORY = 'A'
+    VERIFY_FIRE = 'B'
 
 class ArmLevel(Enum):
     """Levels for Arm/Disarm al_encode messages"""
-    Disarm = '0'
-    ArmedAway = '1'
-    ArmedStay = '2'
-    ArmedStayInstant = '3'
-    ArmedNight = '4'
-    ArmedNightInstant = '5'
-    ArmedVacation = '6'
-    ArmToNextAwayMode  = '7'
-    ArmToNextStayMode = '8'
-    ForceArmToAwayMode  = '9'
-    ForceArmToStayMode = ':'
+    DISARM = '0'
+    ARMED_AWAY = '1'
+    ARMED_STAY = '2'
+    ARMED_STAY_INSTANT = '3'
+    ARMED_NIGHT = '4'
+    ARMED_NIGHT_INSTANT = '5'
+    ARMED_VACATION = '6'
+    ARM_TO_NEXT_AWAY_MODE = '7'
+    ARM_TO_NEXT_STAY_MODE = '8'
+    FORCE_ARM_TO_AWAY_MODE = '9'
+    FORCE_ARM_TO_STAY_MODE = ':'
+
+class ZoneAlarmState(Enum):
+    """Alarm state for a zone"""
+    NO_ALARM = '0'
+    BURGLAR_ENTRY_EXIT_1 = '1'
+    BURGLAR_ENTRY_EXIT_2 = '2'
+    BURGLAR_PERIMETER_INSTANT = '3'
+    BURGLAR_INTERIOR = '4'
+    BURGLAR_INTERIOR_FOLLOWER = '5'
+    BURGLAR_INTERIOR_NIGHT = '6'
+    BURGLAR_INTERIOR_NIGHT_DELAY = '7'
+    BURGLAR_24_HOUR = '8'
+    BURGLAR_BOX_TAMPER = '9'
+    FIRE_ALARM = ':'
+    FIRE_VERIFIED = ';'
+    FIRE_SUPERVISORY = '<'
+    AUX_ALARM_1 = '='
+    AUX_ALARM_2 = '>'
+    KEYFOB = '?'  # not used
+    NON_ALARM = '@' # not used
+    CARBON_MONOXIDE = 'A'
+    EMERGENCY_ALARM = 'B'
+    FREEZE_ALARM = 'C'
+    GAS_ALARM = 'D'
+    HEAT_ALARM = 'E'
+    MEDICAL_ALARM = 'F'
+    POLICE_ALARM = 'G'
+    POLICE_NO_INDICATION = 'H'
+    WATER_ALARM = 'I'
 
 class TextDescriptions(Enum):
     """Types of description strings that can be retrieved from the panel"""

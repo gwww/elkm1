@@ -83,6 +83,11 @@ def _as_decode(msg):
             'arm_up_states': [ord(x)-0x30 for x in msg[12:20]],
             'alarm_states': [ord(x)-0x30 for x in msg[20:28]]}
 
+@call_handlers('AZ')
+def _az_decode(msg):
+    """AZ: Alarm by zone report."""
+    return {'alarm_status': [x for x in msg[4:4+Max.ZONES.value]]}
+
 @call_handlers('CR')
 def _cr_one_custom_value_decode(msg):
     index = int(msg[4:6])-1
@@ -124,7 +129,7 @@ def _ic_decode(msg):
     """IC: Send Valid Or Invalid User Code Format."""
     code = 0
     start = 4
-    for i in range(6):
+    for _ in range(6):
         code = code * 10 + int(msg[start:start+2])
         start += 2
     return {'code': code, 'user': int(msg[16:19])-1, 'keypad': int(msg[19:21])-1}
@@ -187,7 +192,7 @@ def _tc_decode(msg):
 def _tr_decode(msg):
     """TR: Thermostat data response."""
     return {'thermostat_index': int(msg[4:6])-1, 'mode': int(msg[6]),
-            'hold': msg[7]=='1', 'fan': int(msg[8]),
+            'hold': msg[7] == '1', 'fan': int(msg[8]),
             'current_temp': int(msg[9:11]), 'heat_setpoint': int(msg[11:13]),
             'cool_setpoint': int(msg[13:15]), 'humidity': int(msg[15:17])}
 
@@ -287,6 +292,10 @@ def as_encode():
     """as: Get area status."""
     return MessageEncode('06as00', 'AS')
 
+def az_encode():
+    """az: Get alarm by zone."""
+    return MessageEncode('06az00', 'AZ')
+
 def cf_encode(output):
     """cf: Turn off output."""
     return MessageEncode('09cf{:03d}00'.format(output+1), None)
@@ -325,6 +334,7 @@ def cx_encode(counter, value):
     """cx: Change counter value."""
     return MessageEncode('0Dcx{:02d}{:05d}00'.format(counter+1, value), 'CV')
 
+# pylint: disable=too-many-arguments
 def dm_encode(keypad_area, clear, beep, timeout, line1, line2):
     """dm: Display message on keypad."""
     return MessageEncode('2Edm{:1d}{:1d}{:1d}{:05d}{:^<16.16}{:^<16.16}00'.format(

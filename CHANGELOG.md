@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## [0.3.5]
+- Lint cleanup
+- Constants now all uppercase with underscores (can use pretty_const to print)
+- Added encode for az, decode for AZ (no handler yet)
+
 ## [0.3.4]
 Fix syntax; more descriptive docstrings
 

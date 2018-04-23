@@ -13,12 +13,14 @@ class Connection(asyncio.Protocol):
     """asyncio Protocol with line parsing and queuing writes"""
 
     # pylint: disable=too-many-instance-attributes
-    def __init__(self, connection_made=None, gotdata_callbk=None, loop=None):
+    def __init__(self, connection_made=None, connection_lost=None,
+                 gotdata_callbk=None, loop=None):
         self._transport = None
         self._waiting_for_response = None
         self._timeout_task = None
         self._queued_writes = []
-        self._connection_made = connection_made
+        self._connection_made_callbk = connection_made
+        self._connection_lost_callbk = connection_lost
         self._gotdata_callbk = gotdata_callbk
         self._buffer = ''
         self.loop = loop if loop else asyncio.get_event_loop()
@@ -26,13 +28,18 @@ class Connection(asyncio.Protocol):
     def connection_made(self, transport):
         LOG.debug("connected callback")
         self._transport = transport
-        if self._connection_made is not None:
-            self._connection_made(transport, self)
+        if self._connection_made_callbk is not None:
+            self._connection_made_callbk(transport, self)
 
     def connection_lost(self, exc):
         LOG.debug("disconnected callback")
         self._transport = None
-        # TODO: add reconnect logic
+        self._cancel_timer()
+        self._waiting_for_response = None
+        self._queued_writes = []
+        self._buffer = ''
+        if self._connection_lost_callbk is not None:
+            self._connection_lost_callbk()
 
     def _response_required_timeout(self):
         timeout_decode(self._waiting_for_response)
@@ -40,15 +47,18 @@ class Connection(asyncio.Protocol):
         self._waiting_for_response = None
         self._process_write_queue()
 
+    def _cancel_timer(self):
+        if self._timeout_task:
+            self._timeout_task.cancel()
+            self._timeout_task = None
+
     def data_received(self, data):
         self._buffer += data.decode('ISO-8859-1')
         while "\r\n" in self._buffer:
             line, self._buffer = self._buffer.split("\r\n", 1)
             if get_elk_command(line) == self._waiting_for_response:
                 self._waiting_for_response = None
-                if self._timeout_task:
-                    self._timeout_task.cancel()
-                    self._timeout_task = None
+                self._cancel_timer()
             self._gotdata_callbk(line)
         self._process_write_queue()
 

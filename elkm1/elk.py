@@ -19,6 +19,7 @@ class Elk:
         self.loop = loop if loop else asyncio.get_event_loop()
         self._config = config
         self._conn = None
+        self.connection_lost_callbk = None
 
         # Setup for all the types of elements tracked
         if 'element_list' in config:
@@ -35,8 +36,9 @@ class Elk:
         class_ = getattr(module, element.capitalize())
         setattr(self, element, class_(self))
 
-    async def connect(self):
+    async def connect(self, connection_lost_callbk=None):
         """Asyncio connection to Elk."""
+        self.connection_lost_callbk = connection_lost_callbk
         url = self._config['url']
         LOG.debug("Elk connect to %s", url)
         _scheme, host, port, ssl_context = parse_url(url)
@@ -44,6 +46,7 @@ class Elk:
         _coro = await self.loop.create_connection(
             lambda: Connection(loop=self.loop,
                 connection_made=self._connection_made,
+                connection_lost=self._connection_lost,
                 gotdata_callbk=self._got_data),
                 host=host, port=port, ssl=ssl_context)
 
@@ -69,3 +72,7 @@ class Elk:
             self._conn.write_data(self._config['userid'], raw=True)
             self._conn.write_data(self._config['password'], raw=True)
         call_sync_handlers()
+
+    def _connection_lost(self):
+        # TODO: callbk out of library
+        self._conn = None

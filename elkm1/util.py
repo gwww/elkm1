@@ -79,8 +79,7 @@ def parse_url(url):
 def pretty_const(value):
     """Make a constant pretty for printing in GUI"""
     words = value.split('_')
-    type_ = words[0].capitalize()
-    pretty = words[1].capitalize()
-    for word in words[2:]:
+    pretty = words[0].capitalize()
+    for word in words[1:]:
         pretty += ' ' + word.lower()
-    return (type_, pretty)
+    return pretty

@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## [0.3.6] Unreleased
+- Start of cleanup of cmdr.py; using attrs lib
+- Change return on pretty_const to string (was tuple)
+- First cut of adding disconnect handling
+  - Reconnect to be handler by client; will get a callback on disconnect
+
 ## [0.3.5]
 - Lint cleanup
 - Constants now all uppercase with underscores (can use pretty_const to print)

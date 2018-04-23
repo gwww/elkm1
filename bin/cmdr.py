@@ -11,9 +11,15 @@ import threading
 import traceback
 import urwid
 from importlib import import_module
+import attr
 
 import elkm1.message
 
+@attr.s
+class Command:
+    function = attr.ib()
+    help= attr.ib()
+    docs = attr.ib()
 
 def parse_subcommand(line):
     tokens = line.split()
@@ -82,14 +88,15 @@ class Commands():
         self._quit_cmd = ['q', 'quit', 'exit']
         self._help_cmd = ['?', 'help', 'h']
 
-        self.msg_cmds = {}
+        self.encode_cmds = {}
         for fn_name, fn in inspect.getmembers(elkm1.message, inspect.isfunction):
             if not fn_name.endswith('_encode'):
                 continue
             cmd = fn_name[0:2]
             params = [p for p in inspect.signature(fn).parameters]
             params = ' '.join(['<'+p+'>' for p in params])
-            self.msg_cmds[cmd] = (fn, '{} {}'.format(cmd, params), fn.__doc__)
+            self.encode_cmds[cmd] = Command(fn, '{} {}'.format(cmd, params), 
+                                         fn.__doc__)
 
         self.element_cmds = {}
         self.subcommands = {}
@@ -118,7 +125,7 @@ class Commands():
         if cmd in self._help_cmd:
             return self.help(cmd, args)
 
-        if cmd in self.msg_cmds:
+        if cmd in self.encode_cmds:
             return self.encoder(cmd, args)
 
         if cmd in self.element_cmds:
@@ -132,14 +139,15 @@ class Commands():
             res += 'Type "[q|quit|exit]" to quit program\n'
             res += 'Element display commands:\n  {}\n\n'.format(
                 ' '.join(list(self.element_cmds.keys())))
-            cl = [fnname for fnname in self.msg_cmds]
+            cl = [fnname for fnname in self.encode_cmds]
             res += 'Send message commands:\n  {}\n'.format(
                 ' '.join(sorted(cl)))
         else:
             help_for = args[0]
-            if help_for in self.msg_cmds:
-                res = "#green#{}\n{}".format(self.msg_cmds[help_for][1], 
-                                        self.msg_cmds[help_for][2])
+            if help_for in self.encode_cmds:
+                command = self.encode_cmds[help_for]
+                res = "#green#{}\n{}".format(command.help, command.docs)
+
             elif help_for in self.element_cmds:
                 res = "#green#{}\n{}".format(self.element_cmds[help_for][1], 
                                         self.element_cmds[help_for][2])
@@ -175,7 +183,7 @@ class Commands():
                 converted.append(i)
             except ValueError:
                 converted.append(arg)
-        self.elk.send(self.msg_cmds[cmd][0](*converted))
+        self.elk.send(self.encode_cmds[cmd].function(*converted))
 
 class FocusMixin(object):
     def mouse_event(self, size, event, button, x, y, focus):

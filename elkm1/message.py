@@ -79,9 +79,9 @@ class call_handlers(): # pylint: disable=invalid-name,too-few-public-methods
 @call_handlers('AS')
 def _as_decode(msg):
     """AS: Arming status report."""
-    return {'armed_statuses': [ord(x)-0x30 for x in msg[4:12]],
-            'arm_up_states': [ord(x)-0x30 for x in msg[12:20]],
-            'alarm_states': [ord(x)-0x30 for x in msg[20:28]]}
+    return {'armed_statuses': [x for x in msg[4:12]],
+            'arm_up_states': [x for x in msg[12:20]],
+            'alarm_states': [x for x in msg[20:28]]}
 
 @call_handlers('AZ')
 def _az_decode(msg):

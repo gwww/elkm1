@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](https://semver.org/).
 
 ## [0.3.7] Unreleased
+- Add asyncio serial support
+  - Add test program to test serial support (bin/test-serial); requires data
+    file that can be grokked from debug output of bin/elk
+- Add proper command line parsing for bin/elk including URL as param
+  - URL can also be read from environment variable ELKM1_URL
 
 ## [0.3.6]
 - Start of cleanup of cmdr.py; using attrs lib

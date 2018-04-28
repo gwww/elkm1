@@ -3,6 +3,7 @@
 import asyncio
 import logging
 from importlib import import_module
+import serial_asyncio
 
 from .message import message_decode
 from .proto import Connection
@@ -41,14 +42,15 @@ class Elk:
         self.connection_lost_callbk = connection_lost_callbk
         url = self._config['url']
         LOG.debug("Elk connect to %s", url)
-        _scheme, host, port, ssl_context = parse_url(url)
-        # pylint: disable=C0330
-        _coro = await self.loop.create_connection(
-            lambda: Connection(loop=self.loop,
-                connection_made=self._connection_made,
-                connection_lost=self._connection_lost,
-                gotdata_callbk=self._got_data),
-                host=host, port=port, ssl=ssl_context)
+        scheme, dest, param, ssl_context = parse_url(url)
+        if scheme == 'serial':
+            _coro = await serial_asyncio.create_serial_connection(self.loop,
+                        lambda: Connection(elk=self), dest, baudrate=param)
+        else:
+            # pylint: disable=C0330
+            _coro = await self.loop.create_connection(
+                    lambda: Connection(elk=self, loop=self.loop),
+                    host=dest, port=param, ssl=ssl_context)
 
     def run(self):
         """Enter the asyncio loop."""

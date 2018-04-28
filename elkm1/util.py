@@ -60,10 +60,6 @@ def url_scheme_is_secure(url):
 def parse_url(url):
     """Parse a Elk connection string """
     scheme, dest = url.split('://')
-    if scheme == 'serial':
-        # No easy way to test, so not implemented; should use serial.async
-        raise NotImplementedError("Elk serial connection not implemented")
-
     host = None
     ssl_context = None
     if scheme == 'elk':
@@ -72,6 +68,8 @@ def parse_url(url):
         host, port = dest.split(':') if ':' in dest else (dest, 2601)
         ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
         ssl_context.verify_mode = ssl.CERT_NONE
+    elif scheme == 'serial':
+        host, port = dest.split(':') if ':' in dest else (dest, 115200)
     else:
         raise ValueError("Invalid scheme '%s'" % scheme)
     return (scheme, host, int(port), ssl_context)

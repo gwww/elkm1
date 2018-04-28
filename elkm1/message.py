@@ -273,7 +273,11 @@ def message_decode(msg):
     """Decode an Elk message by passing to appropriate decoder"""
     _check_message_valid(msg)
 
-    decoder_name = '_' + msg[2:4].lower() + '_decode'
+    cmd = msg[2:4]
+    if not cmd.isupper():
+        raise ValueError("Invalid message code")
+
+    decoder_name = '_' + cmd.lower() + '_decode'
     try:
         if not callable(globals()[decoder_name]):
             raise ValueError

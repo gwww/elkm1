@@ -1,0 +1,40 @@
+#!/usr/bin/env python
+
+import os
+import termios
+import tty
+
+
+responses = {}
+with open('test-serial.data') as fp:
+    line1 = fp.readline()
+    while line1:
+        line2 = fp.readline()
+        if not line2:
+            break
+
+        (cmd1, data1) = line1.split(None, 1)
+        (cmd2, data2) = line2.split(None, 1)
+
+        if cmd1 == 'write_data' and cmd2 == 'got_data':
+            responses[data1.strip().strip("'")] = data2.strip().strip("'")
+
+        line1 = fp.readline()
+
+master, slave = os.openpty()
+# tty.setraw(master, termios.TCSANOW)
+print("Connect to:", os.ttyname(slave))
+
+while True:
+    try:
+        data = os.read(master, 10000)
+    except OSError:
+        break
+    if not data:
+        break
+
+    data = data.strip().decode('ISO-8859-1')
+    print("got_data: '{}'".format(data))
+    if data in responses:
+        os.write(master, (responses[data] + '\r\n').encode('ISO-8859-1'))
+        print("write_data: '{}'".format(responses[data]))

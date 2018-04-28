@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "6521c94b11683995b00188ac2a0f510fd807c1c2dc4bfdef3648011d7f641276"
+            "sha256": "9b5f0f53831d8e490454d11c3d87db08658cc8b03644715f95bcc326b0f72272"
         },
         "pipfile-spec": 6,
         "requires": {},
@@ -13,7 +13,23 @@
             }
         ]
     },
-    "default": {},
+    "default": {
+        "pyserial": {
+            "hashes": [
+                "sha256:6e2d401fdee0eab996cf734e67773a0143b932772ca8b42451440cfed942c627",
+                "sha256:e0770fadba80c31013896c7e6ef703f72e7834965954a78e71a3049488d4d7d8"
+            ],
+            "version": "==3.4"
+        },
+        "pyserial-asyncio": {
+            "hashes": [
+                "sha256:861d975029498e777a67c6d6d392e20b84a79c01608f3778c978d0106467c8f8",
+                "sha256:c40677a8874d8c24d4423a97498746de776f6dbcd0efbb8fa43dcf011a589aee"
+            ],
+            "index": "pypi",
+            "version": "==0.4"
+        }
+    },
     "develop": {
         "attrs": {
             "hashes": [
@@ -63,11 +79,11 @@
         },
         "pytest": {
             "hashes": [
-                "sha256:6266f87ab64692112e5477eba395cfedda53b1933ccd29478e671e73b420c19c",
-                "sha256:fae491d1874f199537fd5872b5e1f0e74a009b979df9d53d1553fd03da1703e1"
+                "sha256:54713b26c97538db6ff0703a12b19aeaeb60b5e599de542e7fca0ec83b9038e8",
+                "sha256:829230122facf05a5f81a6d4dfe6454a04978ea3746853b2b84567ecf8e5c526"
             ],
             "index": "pypi",
-            "version": "==3.5.0"
+            "version": "==3.5.1"
         },
         "pytest-mock": {
             "hashes": [

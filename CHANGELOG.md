@@ -2,7 +2,7 @@
 All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](https://semver.org/).
 
-## [0.3.7] Unreleased
+## [0.3.7]
 - Add asyncio serial support
   - Add test program to test serial support (bin/test-serial); requires data
     file that can be grokked from debug output of bin/elk

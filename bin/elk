@@ -6,6 +6,7 @@ import io
 import os
 import logging
 import sys
+import textwrap
 import traceback
 
 from elkm1 import Elk
@@ -40,18 +41,27 @@ def _unknown_handler(msg_code, data):
 def _timeout_handler(msg_code):
     LOG.debug("Timeout waiting for '%s'", msg_code)
 
+class SmartFormatter(argparse.HelpFormatter):
+    def _split_lines(self, text, width):
+        if text.startswith('R|'):
+            return text[2:].splitlines()
+        return argparse.HelpFormatter._split_lines(self, text, width)
+
 def parse_args():
-    parser = argparse.ArgumentParser("ElkM1 test program")
+    parser = argparse.ArgumentParser("elk", formatter_class=SmartFormatter)
 
     parser.add_argument('-i', '--interactive', action='store_true', default=False,
                         dest='interactive',
                         help='Run in interactive mode (type help for more info)')
     parser.add_argument('-u', '--url', action='store', dest='url',
-                        help='elk[s]://host[:port] or serial://port[:baud]')
+            help=("R|URL to connect to in one of the following formats:\n"
+                 "  elk://host[:port] -- connect to Elk over Ethernet\n"
+                 "  elks://host[:port] -- securely connect to Elk over Ethernet\n"
+                 "  serial://port[:baud] -- connect to Elk over serial port\n"))
     parser.add_argument('--userid', action='store', dest='userid',
-                        help='User name when for elks://')
+                        help='Userid when using secure connection (elks://)')
     parser.add_argument('--password', action='store', dest='password',
-                        help='Password for elks://')
+                        help='Password when using secure connection (elks://)')
 
     results = parser.parse_args()
     return results

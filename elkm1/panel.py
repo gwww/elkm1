@@ -1,4 +1,5 @@
 """Definition of an ElkM1 Area"""
+from .const import ElkRPStatus
 from .elements import Element
 from .message import add_message_handler, vn_encode
 from .util import add_sync_handler, call_sync_handlers
@@ -31,4 +32,8 @@ class Panel(Element):
         self.setattr('real_time_clock', real_time_clock)
 
     def _rp_handler(self, remote_programming_status):
+        if remote_programming_status == ElkRPStatus.DISCONNECTED.value:
+            self._elk.resume()
+        else:
+            self._elk.pause()
         self.setattr('remote_programming_status', remote_programming_status)

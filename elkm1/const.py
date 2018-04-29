@@ -321,3 +321,13 @@ class ThermostatHold(Enum):
     """Thermostat hold"""
     HOLD_OFF = 0
     HOLD_ON = 1
+
+class SettingFormat(Enum):
+    NUMBER = 0
+    TIMER = 1
+    TIME_OF_DAY = 2
+
+class ElkRPStatus(Enum):
+    DISCONNECTED = 0
+    CONNECTED = 1
+    INITIALIZING = 2

@@ -20,6 +20,7 @@ class Connection(asyncio.Protocol):
         self._queued_writes = []
         self.elk = elk
         self._buffer = ''
+        self._paused = False
         self.loop = loop if loop else asyncio.get_event_loop()
 
     def connection_made(self, transport):
@@ -30,12 +31,21 @@ class Connection(asyncio.Protocol):
     def connection_lost(self, exc):
         LOG.debug("disconnected callback")
         self._transport = None
+        self._cleanup()
+        self.elk._connection_lost()
+
+    def cleanup(self):
         self._cancel_timer()
         self._waiting_for_response = None
         self._queued_writes = []
         self._buffer = ''
-        self.elk._connection_lost()
-        self.loop.stop()
+
+    def pause(self):
+        self.cleanup()
+        self._paused = True
+
+    def resume(self):
+        self._paused = False
 
     def _response_required_timeout(self):
         timeout_decode(self._waiting_for_response)
@@ -66,6 +76,9 @@ class Connection(asyncio.Protocol):
     def write_data(self, data, response_required=None, timeout=5.0, raw=False):
         """Write data on the asyncio Protocol"""
         if self._transport is None:
+            return
+
+        if self._paused:
             return
 
         if self._waiting_for_response:

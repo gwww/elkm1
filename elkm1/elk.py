@@ -21,6 +21,7 @@ class Elk:
         self._config = config
         self._conn = None
         self.connection_lost_callbk = None
+        self._connection_retry_timer = 1
 
         # Setup for all the types of elements tracked
         if 'element_list' in config:
@@ -43,14 +44,21 @@ class Elk:
         url = self._config['url']
         LOG.debug("Elk connect to %s", url)
         scheme, dest, param, ssl_context = parse_url(url)
-        if scheme == 'serial':
-            _coro = await serial_asyncio.create_serial_connection(self.loop,
-                        lambda: Connection(elk=self), dest, baudrate=param)
-        else:
-            # pylint: disable=C0330
-            _coro = await self.loop.create_connection(
-                    lambda: Connection(elk=self, loop=self.loop),
-                    host=dest, port=param, ssl=ssl_context)
+        try:
+            if scheme == 'serial':
+                _coro = await serial_asyncio.create_serial_connection(self.loop,
+                            lambda: Connection(elk=self), dest, baudrate=param)
+            else:
+                # pylint: disable=C0330
+                _coro = await self.loop.create_connection(
+                        lambda: Connection(elk=self, loop=self.loop),
+                        host=dest, port=param, ssl=ssl_context)
+        except:
+            LOG.debug("Connection failed. Retrying in {} seconds".format(
+                self._connection_retry_timer))
+            self.loop.call_later(self._connection_retry_timer, self._reconnect)
+            self._connection_retry_timer = 2 * self._connection_retry_timer \
+                if self._connection_retry_timer < 256 else 300
 
     def run(self):
         """Enter the asyncio loop."""
@@ -67,9 +75,16 @@ class Elk:
         """Send a message to Elk panel."""
         self._conn.write_data(msg.message, msg.response_command)
 
+    def pause(self):
+        self._conn.pause()
+
+    def resume(self):
+        self._conn.resume()
+
     def _connection_made(self, _transport, conn):
         """Login and sync the ElkM1 panel to memory."""
         self._conn = conn
+        self._connection_retry_timer = 1
         if url_scheme_is_secure(self._config['url']):
             self._conn.write_data(self._config['userid'], raw=True)
             self._conn.write_data(self._config['password'], raw=True)
@@ -77,4 +92,10 @@ class Elk:
 
     def _connection_lost(self):
         # TODO: callbk out of library
+        LOG.debug("elk disconnected callback")
         self._conn = None
+        self.loop.call_later(self._connection_retry_timer, self._reconnect)
+
+    def _reconnect(self):
+        coro = self.connect()
+        asyncio.ensure_future(coro)

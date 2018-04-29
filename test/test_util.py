@@ -58,20 +58,19 @@ def test_parse_url_default_ssl_port():
     assert ssl is not None
 
 def test_parse_url_serial_non_implemented():
-    with pytest.raises(NotImplementedError): parse_url('serial://rest')
+    (scheme, host, port, ssl) = parse_url('serial:///dev/tty:4800')
+    assert scheme == 'serial'
+    assert host == '/dev/tty'
+    assert port == 4800
+    assert ssl is None
 
 def test_parse_url_unknown_scheme():
     with pytest.raises(ValueError): parse_url('bad_scheme://rest')
 
 def test_pretty_const_with_single_word():
-    with pytest.raises(IndexError): pretty_const("TESTING")
+    rsp = pretty_const("TESTING")
+    assert rsp == 'Testing'
 
 def test_pretty_const_with_two_words():
-    (type_, pretty) = pretty_const("MODE_HEAT")
-    assert type_ == 'Mode'
-    assert pretty == 'Heat'
-
-def test_pretty_const_with_more_than_two_words():
-    (type_, pretty) = pretty_const("MODE_EMERGENCY_HEAT")
-    assert type_ == 'Mode'
-    assert pretty == 'Emergency heat'
+    rsp = pretty_const("FIRE_ALARM")
+    assert rsp == 'Fire alarm'

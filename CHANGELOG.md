@@ -8,6 +8,13 @@ This project follows [Semantic Versioning](https://semver.org/).
     file that can be grokked from debug output of bin/elk
 - Add proper command line parsing for bin/elk including URL as param
   - URL can also be read from environment variable ELKM1_URL
+- Add reconnect logic with exponetial backoff
+- Add pause writing to Elk when in remote programming mode
+- Add const for format of setting
+- Add const for RP mode
+- Change thermostat const to match semantics of other const (e.g.: FAN_ON
+  changed to ON, MODE_AUTO to AUTO, etc). Makes for better formatting when
+  using pretty_const
 
 ## [0.3.6]
 - Start of cleanup of cmdr.py; using attrs lib

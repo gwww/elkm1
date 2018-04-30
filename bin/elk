@@ -92,7 +92,7 @@ def main():
     try:
         add_message_handler('unknown', _unknown_handler)
         add_message_handler('timeout', _timeout_handler)
-        elk.loop.run_until_complete(elk.connect())
+        elk.connect()
         if args.interactive:
             c.loop()
         else:

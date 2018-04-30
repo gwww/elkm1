@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## [0.4.0] Unreleased
+- Breaking change: no longer need to call 
+  elk.loop.run_until_complete(elk.connect()); now just call elk.connect()
+
 ## [0.3.7]
 - Add asyncio serial support
   - Add test program to test serial support (bin/test-serial); requires data

@@ -13,35 +13,38 @@ class Connection(asyncio.Protocol):
     """asyncio Protocol with line parsing and queuing writes"""
 
     # pylint: disable=too-many-instance-attributes
-    def __init__(self, elk=None, loop=None):
+    def __init__(self, loop, connected, disconnected, got_data):
+        self.loop = loop
+        self._connected_callback = connected
+        self._disconnected_callback = disconnected
+        self._got_data_callback = got_data
+
         self._transport = None
         self._waiting_for_response = None
         self._timeout_task = None
         self._queued_writes = []
-        self.elk = elk
         self._buffer = ''
         self._paused = False
-        self.loop = loop if loop else asyncio.get_event_loop()
 
     def connection_made(self, transport):
         LOG.debug("connected callback")
         self._transport = transport
-        self.elk._connection_made(transport, self)
+        self._connected_callback(transport, self)
 
     def connection_lost(self, exc):
         LOG.debug("disconnected callback")
         self._transport = None
         self._cleanup()
-        self.elk._connection_lost()
+        self._disconnected_callback()
 
-    def cleanup(self):
+    def _cleanup(self):
         self._cancel_timer()
         self._waiting_for_response = None
         self._queued_writes = []
         self._buffer = ''
 
     def pause(self):
-        self.cleanup()
+        self._cleanup()
         self._paused = True
 
     def resume(self):
@@ -65,7 +68,7 @@ class Connection(asyncio.Protocol):
             if get_elk_command(line) == self._waiting_for_response:
                 self._waiting_for_response = None
                 self._cancel_timer()
-            self.elk._got_data(line)
+            self._got_data_callback(line)
         self._process_write_queue()
 
     def _process_write_queue(self):

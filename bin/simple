@@ -9,7 +9,7 @@ def main():
     logging.basicConfig(level=logging.DEBUG, format='%(message)s')
     try:
         elk = Elk({'url': 'elk://192.168.1.142'})
-        elk.loop.run_until_complete(elk.connect())
+        elk.connect()
         elk.run()
     except KeyboardInterrupt:
         exit(0)

@@ -1,7 +1,7 @@
 """Definition of an ElkM1 Custom Value"""
 from .const import Max, TextDescriptions
 from .elements import Element, Elements
-from .message import add_message_handler, cx_encode
+from .message import add_message_handler, cx_encode, cv_encode
 
 
 class Counter(Element):
@@ -24,6 +24,13 @@ class Counters(Elements):
     def sync(self):
         """Retrieve values from ElkM1 on demand"""
         self.get_descriptions(TextDescriptions.COUNTER.value)
+
+    def _got_desc(self, descriptions):
+        super()._got_desc(descriptions)
+        # Only poll counters that have a name defined
+        for counter in self.elements:
+            if not counter.is_default_name():
+                self.elk.send(cv_encode(counter._index))
 
     def _cv_handler(self, counter, value):
         countr = self.elements[counter]

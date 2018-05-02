@@ -55,6 +55,12 @@ class Element:
         varstr = ' '.join("%s:%s" % item for item in varlist)
         return "{} '{}' {}".format(self._index, self.name, varstr)
 
+    def as_dict(self):
+        cdict = self.__dict__.copy()
+        del cdict['_elk']
+        del cdict['_callbacks']
+        return cdict
+
 class Elements:
     """Base for list of elements."""
     def __init__(self, elk, class_, max_elements):

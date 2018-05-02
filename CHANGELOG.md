@@ -4,8 +4,8 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ## [0.4.0] Unreleased
 - Breaking change: no longer need to call 
-  elk.loop.run_until_complete(elk.connect()); now just call elk.connect()
-- Retreive counter values that have a description
+  elk.loop.run_until_complete(elk.connect()); now call elk.connect()
+- Retrieve counter values that have a description
 
 ## [0.3.7]
 - Add asyncio serial support

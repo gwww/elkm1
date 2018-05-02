@@ -6,6 +6,7 @@ This project follows [Semantic Versioning](https://semver.org/).
 - Breaking change: no longer need to call 
   elk.loop.run_until_complete(elk.connect()); now call elk.connect()
 - Retrieve counter values that have a description
+- Fix for HASS Recorder errors about not being JSON serializable
 
 ## [0.3.7]
 - Add asyncio serial support

@@ -2,7 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](https://semver.org/).
 
-## [0.4.0] Unreleased
+## [0.4.1]
+- Add serial io dependency
+
+## [0.4.0]
 - Breaking change: no longer need to call 
   elk.loop.run_until_complete(elk.connect()); now call elk.connect()
 - Retrieve counter values that have a description

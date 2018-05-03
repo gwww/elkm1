@@ -20,7 +20,7 @@ AUTHOR = 'Glenn Waters'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
-#    'pyserial-asyncio',
+    'pyserial-asyncio',
 ]
 
 # The rest you shouldn't have to touch too much :)

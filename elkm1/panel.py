@@ -1,7 +1,7 @@
 """Definition of an ElkM1 Area"""
 from .const import ElkRPStatus
 from .elements import Element
-from .message import add_message_handler, vn_encode
+from .message import add_message_handler, vn_encode, lw_encode
 from .util import add_sync_handler, call_sync_handlers
 
 
@@ -23,6 +23,7 @@ class Panel(Element):
         add_message_handler('RP', self._rp_handler)
         add_message_handler('IE', call_sync_handlers)
         self._elk.send(vn_encode())
+        self._elk.send(lw_encode())
 
     def _vn_handler(self, elkm1_version, xep_version):
         self.setattr('elkm1_version', elkm1_version)

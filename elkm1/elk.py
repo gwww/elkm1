@@ -29,7 +29,7 @@ class Elk:
         else:
             self.element_list = ['panel', 'zones', 'lights', 'areas',
                                  'tasks', 'keypads', 'outputs', 'thermostats',
-                                 'counters', 'settings']
+                                 'counters', 'settings', 'users']
         for element in self.element_list:
             self._create_element(element)
 

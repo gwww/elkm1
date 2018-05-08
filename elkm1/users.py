@@ -5,8 +5,8 @@ from .elements import Element, Elements
 
 class User(Element):
     """Class representing an User"""
-    def __init__(self, index): # pylint: disable=useless-super-delegation
-        super().__init__(index)
+    def __init__(self, index, elk): # pylint: disable=useless-super-delegation
+        super().__init__(index, elk)
 
 class Users(Elements):
     """Handling for multiple areas"""

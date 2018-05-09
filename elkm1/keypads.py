@@ -19,6 +19,7 @@ class Keypads(Elements):
         add_message_handler('IC', self._ic_handler)
         add_message_handler('KA', self._ka_handler)
         add_message_handler('LW', self._lw_handler)
+        add_message_handler('ST', self._st_handler)
 
     def sync(self):
         """Retrieve areas from ElkM1"""
@@ -39,3 +40,6 @@ class Keypads(Elements):
         for keypad in self.elements:
             if keypad_temps[keypad.index] > -40:
                 keypad.setattr('temperature', keypad_temps[keypad.index])
+
+    def _st_handler(self, group, device, temperature):
+        self.elements[device].setattr('temperature', temperature)

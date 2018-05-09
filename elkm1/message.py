@@ -183,6 +183,18 @@ def _sd_decode(msg):
             'desc': (desc_ch1+msg[10:25]).rstrip(),
             'show_on_keypad': show_on_keypad}
 
+@call_handlers('ST')
+def _st_decode(msg):
+    """ST: Temperature update."""
+    group = int(msg[4:5])
+    temperature = int(msg[7:10])
+    if group == 0:
+        temperature -= 60
+    elif group == 1:
+        temperature -= 40
+
+    return {'group': group, 'device': int[5:7]-1, 'temperature': temperature}
+
 @call_handlers('TC')
 def _tc_decode(msg):
     """TC: Task change."""

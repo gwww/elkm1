@@ -24,6 +24,7 @@ class Thermostats(Elements):
     """Handling for multiple areas"""
     def __init__(self, elk):
         super().__init__(elk, Thermostat, Max.THERMOSTATS.value)
+        add_message_handler('ST', self._st_handler)
         add_message_handler('TR', self._tr_handler)
 
     def sync(self):
@@ -36,6 +37,9 @@ class Thermostats(Elements):
         for thermostat in self.elements:
             if not thermostat.is_default_name():
                 self.elk.send(tr_encode(thermostat._index))
+
+    def _st_handler(self, group, device, temperature):
+        self.elements[device].setattr('temperature', current_temp)
 
     # pylint: disable=too-many-arguments
     def _tr_handler(self, thermostat_index, mode, hold, fan, current_temp,

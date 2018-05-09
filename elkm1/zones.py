@@ -31,6 +31,7 @@ class Zones(Elements):
     def __init__(self, elk):
         super().__init__(elk, Zone, Max.ZONES.value)
         add_message_handler('LW', self._lw_handler)
+        add_message_handler('ST', self._st_handler)
         add_message_handler('ZB', self._zb_handler)
         add_message_handler('ZC', self._zc_handler)
         add_message_handler('ZD', self._zd_handler)
@@ -51,6 +52,9 @@ class Zones(Elements):
             zone = self.elements[i]
             if zone_temps[zone.index] > -60:
                 zone.setattr('temperature', zone_temps[zone.index])
+
+    def _st_handler(self, group, device, temperature):
+        self.elements[device].setattr('temperature', temperature)
 
     def _zb_handler(self, zone_number, zone_bypassed):
         self.elements[zone_number].setattr('bypassed', zone_bypassed)

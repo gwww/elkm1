@@ -193,7 +193,7 @@ def _st_decode(msg):
     elif group == 1:
         temperature -= 40
 
-    return {'group': group, 'device': int[5:7]-1, 'temperature': temperature}
+    return {'group': group, 'device': int(msg[5:7])-1, 'temperature': temperature}
 
 @call_handlers('TC')
 def _tc_decode(msg):

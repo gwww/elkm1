@@ -40,7 +40,7 @@ class Thermostats(Elements):
 
     def _st_handler(self, group, device, temperature):
         if group == 2:
-            self.elements[device].setattr('temperature', current_temp)
+            self.elements[device].setattr('current_temp', temperature)
 
     # pylint: disable=too-many-arguments
     def _tr_handler(self, thermostat_index, mode, hold, fan, current_temp,

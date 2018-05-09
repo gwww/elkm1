@@ -39,7 +39,8 @@ class Thermostats(Elements):
                 self.elk.send(tr_encode(thermostat._index))
 
     def _st_handler(self, group, device, temperature):
-        self.elements[device].setattr('temperature', current_temp)
+        if group == 2:
+            self.elements[device].setattr('temperature', current_temp)
 
     # pylint: disable=too-many-arguments
     def _tr_handler(self, thermostat_index, mode, hold, fan, current_temp,

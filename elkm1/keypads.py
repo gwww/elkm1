@@ -42,4 +42,5 @@ class Keypads(Elements):
                 keypad.setattr('temperature', keypad_temps[keypad.index])
 
     def _st_handler(self, group, device, temperature):
-        self.elements[device].setattr('temperature', temperature)
+        if group == 1:
+            self.elements[device].setattr('temperature', temperature)

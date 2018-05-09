@@ -54,7 +54,8 @@ class Zones(Elements):
                 zone.setattr('temperature', zone_temps[zone.index])
 
     def _st_handler(self, group, device, temperature):
-        self.elements[device].setattr('temperature', temperature)
+        if group == 0:
+            self.elements[device].setattr('temperature', temperature)
 
     def _zb_handler(self, zone_number, zone_bypassed):
         self.elements[zone_number].setattr('bypassed', zone_bypassed)

@@ -393,11 +393,11 @@ def sd_encode(desc_type, unit):
 
 def sp_encode(phrase):
     """sp: Speak phrase."""
-    return MessageEncode('09sp{:03d}00'.format(phrase+1), None)
+    return MessageEncode('09sp{:03d}00'.format(phrase), None)
 
 def sw_encode(word):
     """sp: Speak word."""
-    return MessageEncode('09sp{:03d}00'.format(word+1), None)
+    return MessageEncode('09sp{:03d}00'.format(word), None)
 
 def tn_encode(task):
     """tn: Activate task."""

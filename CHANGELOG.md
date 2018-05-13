@@ -2,6 +2,9 @@
 All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## [0.4.3]
+- Speak word, speak phrase helpers added (no constants for words/phrases)
+
 ## [0.4.2]
 - Add handling for ST (temperature) messages
 - Users were disabled and not working; enabled and fixed

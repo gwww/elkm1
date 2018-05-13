@@ -25,6 +25,14 @@ class Panel(Element):
         self._elk.send(vn_encode())
         self._elk.send(lw_encode())
 
+    def speak_word(self, word):
+        """(Helper) Speak word"""
+        self._elk.send(sw_encode(self._index, word))
+
+    def speak_phrase(self, phrase):
+        """(Helper) Speak phrase"""
+        self._elk.send(sp_encode(self._index, phrase))
+
     def _vn_handler(self, elkm1_version, xep_version):
         self.setattr('elkm1_version', elkm1_version)
         self.setattr('xep_version', xep_version)

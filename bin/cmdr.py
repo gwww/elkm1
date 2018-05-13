@@ -128,6 +128,9 @@ class Commands():
         if cmd in self.encode_cmds:
             return self.encoder(cmd, args)
 
+        if cmd == 'recv':
+            return self.elk._got_data(' '.join(args))
+
         if cmd in self.element_cmds:
             return self.element_cmds[cmd][0](cmd, args)
 

@@ -124,6 +124,13 @@ def _cv_decode(msg):
     """CV: Counter value."""
     return {'counter': int(msg[4:6])-1, 'value': int(msg[6:11])}
 
+@call_handlers('EE')
+def _ee_decode(msg):
+    """EE: Entry/exit timer report."""
+    return {'area': int(msg[4:5])-1, 'is_exit': msg[5:6] == '0',
+            'timer1': int(msg[6:9]), 'timer2': int(msg[9:12]),
+            'armed_status': int(msg[12:13])}
+
 @call_handlers('IC')
 def _ic_decode(msg):
     """IC: Send Valid Or Invalid User Code Format."""

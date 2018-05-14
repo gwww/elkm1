@@ -1,4 +1,6 @@
 """Definition of an ElkM1 Area"""
+import time
+
 from .const import Max, TextDescriptions
 from .elements import Element, Elements
 from .message import add_message_handler, as_encode, al_encode
@@ -11,6 +13,10 @@ class Area(Element):
         self.armed_status = None
         self.arm_up_state = None
         self.alarm_state = None
+        self.is_exit = False
+        self.timer1 = 0
+        self.timer2 = 0
+        self.timer_timerstamp = 0
 
     def arm(self, level, code):
         """(Helper) Arm system at specified level (away, vacation, etc)"""
@@ -25,6 +31,7 @@ class Areas(Elements):
     def __init__(self, elk):
         super().__init__(elk, Area, Max.AREAS.value)
         add_message_handler('AS', self._as_handler)
+        add_message_handler('EE', self._ee_handler)
 
     def sync(self):
         """Retrieve areas from ElkM1"""
@@ -36,3 +43,11 @@ class Areas(Elements):
             area.setattr('armed_status', armed_statuses[area.index])
             area.setattr('arm_up_state', arm_up_states[area.index])
             area.setattr('alarm_state', alarm_states[area.index])
+
+    def _ee_handler(self, area, is_exit, timer1, timer2, armed_status):
+        area = self.elements[area]
+        area.setattr('armed_status', armed_status)
+        area.setattr('timer1', timer1)
+        area.setattr('timer2', timer2)
+        area.setattr('is_exit', is_exit)
+        area.setattr('timer_timestamp', time.time())

@@ -2,6 +2,9 @@
 All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## [0.4.5]
+- Fixed typos
+
 ## [0.4.4]
 - Add entry/exit message handling
 

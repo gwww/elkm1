@@ -21,8 +21,8 @@ class Max(Enum):
 class ZoneType(Enum):
     """Types of Elk zones"""
     DISABLED = 0
-    BURLAR_ENTRY_EXIT_1 = 1
-    BURLAR_ENTRY_EXIT_2 = 2
+    BURGLAR_ENTRY_EXIT_1 = 1
+    BURGLAR_ENTRY_EXIT_2 = 2
     BURGLAR_PERIMETER_INSTANT = 3
     BURGLAR_INTERIOR = 4
     BURGLAR_INTERIOR_FOLLOWER = 5
@@ -100,7 +100,7 @@ class AlarmState(Enum):
     FIRE_ALARM = '3'
     MEDICAL_ALARM = '4'
     POLICE_ALARM = '5'
-    BURLAR_ALARM = '6'
+    BURGLAR_ALARM = '6'
     AUX_1_ALARM = '7'
     AUX_2_ALARM = '8'
     AUX_3_ALARM = '9'

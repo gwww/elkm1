@@ -2,6 +2,9 @@
 All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## [0.4.6]
+- Change ee_decode to return str for armed status (was int)
+
 ## [0.4.5]
 - Fixed typos
 

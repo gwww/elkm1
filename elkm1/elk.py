@@ -87,11 +87,12 @@ class Elk:
 
     def connect(self):
         """Connect to the panel"""
-        self.loop.run_until_complete(self._connect())
+        # self.loop.run_until_complete(self._connect())
+        coro = self._connect()
+        asyncio.ensure_future(coro)
 
     def _reconnect(self):
-        coro = self.connect()
-        asyncio.ensure_future(coro)
+        self.connect()
 
     def run(self):
         """Enter the asyncio loop."""

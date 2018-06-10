@@ -81,6 +81,10 @@ def main():
 
     elk = Elk(config)
 
+    def _heartbeat():
+        print("Tick")
+        elk.loop.call_later(5, _heartbeat)
+
     if args.interactive:
         c=cmdr.Commander('Elk console', cmd_cb=cmdr.Commands(elk))
         mystdout = StdOutWrapper(c)
@@ -93,6 +97,7 @@ def main():
         add_message_handler('unknown', _unknown_handler)
         add_message_handler('timeout', _timeout_handler)
         elk.connect()
+        elk.loop.call_later(5, _heartbeat)
         if args.interactive:
             c.loop()
         else:

@@ -150,3 +150,12 @@ All of the commands that send messages to the panel are automatically
 discovered and are all the XX_encode functions in the ``elkm1.message``
 module. The docstring and the XX_encode's parameters are shown as part
 of the help.
+
+## Development
+
+```git clone https://github.com/gwww/elkm1.git
+cd elkm1
+pip install pipenv
+pipenv install -e . --dev
+pipenv shell
+```

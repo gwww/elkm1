@@ -153,7 +153,8 @@ of the help.
 
 ## Development
 
-```git clone https://github.com/gwww/elkm1.git
+```
+git clone https://github.com/gwww/elkm1.git
 cd elkm1
 pip install pipenv
 pipenv install -e . --dev

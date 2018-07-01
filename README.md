@@ -153,12 +153,15 @@ of the help.
 
 ## Development
 
-This project uses ```pipenv``` for development dependencies. If needed,
-install it using ```pip install pipenv```.
+This project uses `pipenv` for development dependencies. If needed,
+install it using `pip install pipenv`.
+
+To get started developing:
 
 ```
 git clone https://github.com/gwww/elkm1.git
 cd elkm1
 pipenv install -e . --dev
 pipenv shell
+make test # to ensure everything installed properly
 ```

@@ -59,7 +59,7 @@ class Elk:
         except:
             LOG.debug("Connection failed. Retrying in {} seconds".format(
                 self._connection_retry_timer))
-            self.loop.call_later(self._connection_retry_timer, self._reconnect)
+            self.loop.call_later(self._connection_retry_timer, self.connect)
             self._connection_retry_timer = 2 * self._connection_retry_timer \
                 if self._connection_retry_timer < 256 else 300
 
@@ -76,7 +76,7 @@ class Elk:
         # TODO: callbk out of library
         LOG.debug("elk disconnected callback")
         self._conn = None
-        self.loop.call_later(self._connection_retry_timer, self._reconnect)
+        self.loop.call_later(self._connection_retry_timer, self.connect)
 
     def _got_data(self, data): # pylint: disable=no-self-use
         LOG.debug("got_data '%s'", data)
@@ -87,12 +87,8 @@ class Elk:
 
     def connect(self):
         """Connect to the panel"""
-        # self.loop.run_until_complete(self._connect())
         coro = self._connect()
         asyncio.ensure_future(coro)
-
-    def _reconnect(self):
-        self.connect()
 
     def run(self):
         """Enter the asyncio loop."""

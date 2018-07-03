@@ -218,8 +218,10 @@ def _tr_decode(msg):
 @call_handlers('VN')
 def _vn_decode(msg):
     """VN: Version information."""
-    elkm1_version = msg[4:10]
-    xep_version = msg[10:16]
+    elkm1_version = "{}.{}.{}".format( int(msg[4:6], 16), int(msg[6:8], 16),
+                                      int(msg[8:10], 16))
+    xep_version = "{}.{}.{}".format( int(msg[10:12], 16), int(msg[12:14], 16),
+                                      int(msg[14:16], 16))
     return {'elkm1_version': elkm1_version, 'xep_version': xep_version}
 
 @call_handlers('XK')

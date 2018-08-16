@@ -61,7 +61,7 @@ class Elk:
                 self._connection_retry_timer))
             self.loop.call_later(self._connection_retry_timer, self.connect)
             self._connection_retry_timer = 2 * self._connection_retry_timer \
-                if self._connection_retry_timer < 256 else 300
+                if self._connection_retry_timer < 64 else 120
 
     def _connected(self, _transport, conn):
         """Login and sync the ElkM1 panel to memory."""

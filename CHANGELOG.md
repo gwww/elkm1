@@ -4,6 +4,8 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ## [0.4.8]
 - Add formating to version strings
+- Lower retry max time on connection lost
+- Make `make clean` clean cleanerer
 
 ## [0.4.7]
 - Change connect/reconnect to not block for HASS

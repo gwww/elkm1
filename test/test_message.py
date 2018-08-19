@@ -7,10 +7,10 @@ from elkm1.message import add_message_handler, message_decode, MessageEncode, \
 def test_housecode_to_index_accepts_valid_codes():
     assert housecode_to_index('A01') == 0
     assert housecode_to_index('P16') == 255
+    assert housecode_to_index('f6') == 85
 
 def test_housecode_to_index_raises_error_on_invalid():
     with pytest.raises(ValueError): housecode_to_index('asdf')
-    with pytest.raises(ValueError): housecode_to_index('a01')
     with pytest.raises(ValueError): housecode_to_index('Q01')
     with pytest.raises(ValueError): housecode_to_index('A00')
     with pytest.raises(ValueError): housecode_to_index('A17')
@@ -23,11 +23,6 @@ def test_index_to_housecode_accepts_valid_indices():
 def test_index_to_housecode_raises_error_on_invalid():
     with pytest.raises(ValueError): index_to_housecode(-1)
     with pytest.raises(ValueError): index_to_housecode(256)
-
-# def test_chsum_returns_correct_value():
-#     assert cksum('09pfA0100') == 'BF'
-#     assert cksum('08XXtest') == '28'
-#     assert cksum('08test') == 'D8'
 
 def test_decode_raises_value_error_on_bad_message():
     with pytest.raises(ValueError): message_decode('a really really bad message')

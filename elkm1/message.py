@@ -36,7 +36,7 @@ def add_message_handler(message_type, handler):
 
 def housecode_to_index(housecode):
     """Convert a X10 housecode to a zero-based index"""
-    match = re.search(r'^([A-P])(\d\d)$', housecode)
+    match = re.search(r'^([A-P])(\d{1,2})$', housecode.upper())
     if match:
         house_index = int(match.group(2))
         if house_index >= 1 and house_index <= 16:

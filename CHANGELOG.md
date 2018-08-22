@@ -2,6 +2,13 @@
 All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## [0.5.0]
+- Many small fixes.
+  - Fix lint errors.
+  - Fix couple of syntax errors (speak_work for example)
+  - Changed a number of initial values to make it easier to use
+    library (examples are temperatures, initial area numbers)
+
 ## [0.4.9]
 - Allow lowercase and single digit housecodes
 

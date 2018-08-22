@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock, call
-from elkm1.proto import Connection
+from elkm1_lib.proto import Connection
 
 def test_receive_single_packet_and_pass_to_handler():
     mock_gotdata = Mock()

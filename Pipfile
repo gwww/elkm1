@@ -12,4 +12,4 @@ mock = "*"
 pytest-mock = "*"
 urwid = "*"
 attrs = '*'
-"elkm1" = {editable = true, path = "."}
+"elkm1_lib" = {editable = true, path = "."}

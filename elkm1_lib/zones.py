@@ -26,6 +26,7 @@ class Zone(Element):
                     volt=self.voltage, area=self.area, temp=self.temperature,
                     phys=ZonePhysicalStatus(self.physical_status).name)
 
+
 class Zones(Elements):
     """Handling for multiple zones"""
     def __init__(self, elk):

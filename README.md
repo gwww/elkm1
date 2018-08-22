@@ -19,7 +19,7 @@ serial port (serial port not implemented yet).
 ## Installation
 
 ```bash
-    $ pip install elkm1
+    $ pip install elkm1_lib
 ```
 
 ## Overview
@@ -27,7 +27,7 @@ serial port (serial port not implemented yet).
 Connect to the Elk panel:
 
 ```python
-    from elkm1 import Elk
+    from elkm1_lib import Elk
 
     elk = Elk({'url': 'elk://192.168.1.100'})
     elk.loop.run_until_complete(elk.connect())
@@ -53,7 +53,7 @@ representation so that it is easy to print its contents.
 All `Elements` are referenced starting at 0. Even though the Elk panel
 refers to, for example, zones 1-208, the library references them
 as zones 0-207. All translation from base 0 to 1 and vice-versa is
-handled internally in the `elkm1.message` module.
+handled internally in the `elkm1_lib.message` module.
 
 After creating the `Elk` object and connecting to the panel the 
 library code will synchronize all the elements to the data from the Elk panel.
@@ -72,7 +72,7 @@ of changing elements. The following user code shows registering a callback:
 ```
 
 The library encodes, decodes, and processes messages to/from the
-Elk panel. All the encoding and decoding is done in `elkm1.message` module.
+Elk panel. All the encoding and decoding is done in `elkm1_lib.message` module.
 
 Messages received are handled with callbacks. The library 
 internally registers callbacks so that decoded messages 
@@ -147,7 +147,7 @@ command for light number 3 (light 4 on the panel -- remember 0
 versus 1 base).
 
 All of the commands that send messages to the panel are automatically
-discovered and are all the XX_encode functions in the ``elkm1.message``
+discovered and are all the XX_encode functions in the ``elkm1_lib.message``
 module. The docstring and the XX_encode's parameters are shown as part
 of the help.
 

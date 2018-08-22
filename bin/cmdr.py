@@ -13,7 +13,7 @@ import urwid
 from importlib import import_module
 import attr
 
-import elkm1.message
+import elkm1_lib.message
 
 @attr.s
 class Command:
@@ -68,7 +68,7 @@ def find_class(module, class_name):
 
 def get_helpers(element, clas):
     helpers = {}
-    class_ = find_class(import_module('elkm1.' + element), clas)
+    class_ = find_class(import_module('elkm1_lib.' + element), clas)
     if class_:
         for function_name, fn in inspect.getmembers(class_[1], inspect.isfunction):
             if fn.__doc__ and fn.__doc__.startswith('(Helper)'):
@@ -89,7 +89,7 @@ class Commands():
         self._help_cmd = ['?', 'help', 'h']
 
         self.encode_cmds = {}
-        for fn_name, fn in inspect.getmembers(elkm1.message, inspect.isfunction):
+        for fn_name, fn in inspect.getmembers(elkm1_lib.message, inspect.isfunction):
             if not fn_name.endswith('_encode'):
                 continue
             cmd = fn_name[0:2]

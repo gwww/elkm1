@@ -25,6 +25,7 @@ class Area(Element):
         """(Helper) Disarm system."""
         self.arm(0, code)
 
+
 class Areas(Elements):
     """Handling for multiple areas"""
     def __init__(self, elk):

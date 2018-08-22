@@ -43,15 +43,16 @@ class Element:
 
     def default_name(self, separator='-'):
         """Return a default name for based on class and index of element"""
-        return self.__class__.__name__ + '{}{:03d}'.format(separator, self._index+1)
+        return self.__class__.__name__ + '{}{:03d}'.format(
+            separator, self._index+1)
 
     def is_default_name(self):
         """Check if the name assigned is the default_name"""
         return self.name == self.default_name()
 
     def __str__(self):
-        varlist = {k:v for (k, v) in vars(self).items() \
-           if not k.startswith('_') and k != 'name'}.items()
+        varlist = {k: v for (k, v) in vars(self).items()
+                   if not k.startswith('_') and k != 'name'}.items()
         varstr = ' '.join("%s:%s" % item for item in varlist)
         return "{} '{}' {}".format(self._index, self.name, varstr)
 
@@ -61,6 +62,7 @@ class Element:
         del cdict['_elk']
         del cdict['_callbacks']
         return cdict
+
 
 class Elements:
     """Base for list of elements."""

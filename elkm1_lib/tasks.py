@@ -9,13 +9,14 @@ from .message import add_message_handler, tn_encode
 class Task(Element):
     """Class representing an Task"""
 
-    def __init__(self, index, elk): # pylint: disable=useless-super-delegation
+    def __init__(self, index, elk):  # pylint: disable=useless-super-delegation
         super().__init__(index, elk)
         self.last_change = None
 
     def activate(self):
         """(Helper) Activate task"""
         self._elk.send(tn_encode(self._index))
+
 
 class Tasks(Elements):
     """Handling for multiple tasks"""

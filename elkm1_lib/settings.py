@@ -15,6 +15,7 @@ class Setting(Element):
         """(Helper) Set custom value."""
         self._elk.send(cw_encode(self._index, value, self.value_format))
 
+
 class Settings(Elements):
     """Handling for multiple custom values"""
     def __init__(self, elk):

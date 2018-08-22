@@ -6,8 +6,8 @@ import logging
 
 from .message import get_elk_command, timeout_decode
 
-
 LOG = logging.getLogger(__name__)
+
 
 class Connection(asyncio.Protocol):
     """asyncio Protocol with line parsing and queuing writes"""
@@ -94,8 +94,8 @@ class Connection(asyncio.Protocol):
         if response_required:
             self._waiting_for_response = response_required
             if timeout > 0:
-                self._timeout_task = \
-                    self.loop.call_later(timeout, self._response_required_timeout)
+                self._timeout_task = self.loop.call_later(
+                    timeout, self._response_required_timeout)
 
         if not raw:
             cksum = 256 - reduce(lambda x, y: x+y, map(ord, data)) % 256

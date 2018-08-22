@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock
 
-from elkm1.message import add_message_handler, message_decode, MessageEncode, \
+from elkm1_lib.message import add_message_handler, message_decode, MessageEncode, \
     housecode_to_index, index_to_housecode, ps_encode
 
 def test_housecode_to_index_accepts_valid_codes():

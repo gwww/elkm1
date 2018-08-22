@@ -27,6 +27,7 @@ class Light(Element):
         """(Helper) Toggle light"""
         self._elk.send(pt_encode(self._index))
 
+
 class Lights(Elements):
     """Handling for multiple lights"""
     def __init__(self, elk):

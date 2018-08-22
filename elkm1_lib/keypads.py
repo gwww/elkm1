@@ -12,6 +12,7 @@ class Keypad(Element):
         self.temperature = -40
         self.last_user = -1
 
+
 class Keypads(Elements):
     """Handling for multiple areas"""
     def __init__(self, elk):

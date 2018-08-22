@@ -4,6 +4,7 @@ Constants used across package
 
 from enum import Enum
 
+
 class Max(Enum):
     """Max number of elements on the panel"""
     AREAS = 8
@@ -17,6 +18,7 @@ class Max(Enum):
     LIGHTS = 256
     ZONES = 208
     ZONE_TEMPS = 16
+
 
 class ZoneType(Enum):
     """Types of Elk zones"""
@@ -58,6 +60,7 @@ class ZoneType(Enum):
     PHONE_KEY = 35
     INTERCOM_KEY = 36
 
+
 class ZonePhysicalStatus(Enum):
     """Zone physical status; name capitalized so can be used in displays"""
     UNCONFIGURED = 0
@@ -65,12 +68,14 @@ class ZonePhysicalStatus(Enum):
     EOL = 2
     SHORT = 3
 
+
 class ZoneLogicalStatus(Enum):
     """Zone logical status; name capitalized so can be used in displays"""
     NORMAL = 0
     TROUBLED = 1
     VIOLATED = 2
     BYPASSED = 3
+
 
 class ArmedStatus(Enum):
     """Area arming status: armed status"""
@@ -82,6 +87,7 @@ class ArmedStatus(Enum):
     ARMED_TO_NIGHT_INSTANT = '5'
     ARMED_TO_VACATION = '6'
 
+
 class ArmUpState(Enum):
     """Area arming status: Ability to arm"""
     NOT_READY_TO_ARM = '0'
@@ -91,6 +97,7 @@ class ArmUpState(Enum):
     FULLY_ARMED = '4'
     FORCE_ARMED = '5'
     ARMED_WITH_BYPASS = '6'
+
 
 class AlarmState(Enum):
     """Area arming status: Current alarm state"""
@@ -114,6 +121,7 @@ class AlarmState(Enum):
     FIRE_SUPERVISORY = 'A'
     VERIFY_FIRE = 'B'
 
+
 class ArmLevel(Enum):
     """Levels for Arm/Disarm al_encode messages"""
     DISARM = '0'
@@ -127,6 +135,7 @@ class ArmLevel(Enum):
     ARM_TO_NEXT_STAY_MODE = '8'
     FORCE_ARM_TO_AWAY_MODE = '9'
     FORCE_ARM_TO_STAY_MODE = ':'
+
 
 class ZoneAlarmState(Enum):
     """Alarm state for a zone"""
@@ -145,8 +154,8 @@ class ZoneAlarmState(Enum):
     FIRE_SUPERVISORY = '<'
     AUX_ALARM_1 = '='
     AUX_ALARM_2 = '>'
-    KEYFOB = '?'  # not used
-    NON_ALARM = '@' # not used
+    KEYFOB = '?'   # not used
+    NON_ALARM = '@'  # not used
     CARBON_MONOXIDE = 'A'
     EMERGENCY_ALARM = 'B'
     FREEZE_ALARM = 'C'
@@ -156,6 +165,7 @@ class ZoneAlarmState(Enum):
     POLICE_ALARM = 'G'
     POLICE_NO_INDICATION = 'H'
     WATER_ALARM = 'I'
+
 
 class TextDescriptions(Enum):
     """Types of description strings that can be retrieved from the panel"""
@@ -179,6 +189,7 @@ class TextDescriptions(Enum):
     FUNCTION_KEY_6 = 17
     AUDIO_ZONE = 18
     AUDIO_SOURCE = 19
+
 
 # Map to convert message code to descriptive string
 MESSAGE_MAP = {
@@ -295,6 +306,7 @@ MESSAGE_MAP = {
     'zv': "Request Zone analog voltage",
 }
 
+
 class ThermostatSetting(Enum):
     """Thermostat consts when setting"""
     MODE = 0
@@ -304,6 +316,7 @@ class ThermostatSetting(Enum):
     COOL_SETPOINT = 4
     HEAT_SETPOINT = 5
 
+
 class ThermostatMode(Enum):
     """Thermostat modes"""
     OFF = 0
@@ -312,21 +325,25 @@ class ThermostatMode(Enum):
     AUTO = 3
     EMERGENCY_HEAT = 4
 
+
 class ThermostatFan(Enum):
     """Thermostat fan"""
     AUTO = 0
     ON = 1
+
 
 class ThermostatHold(Enum):
     """Thermostat hold"""
     OFF = 0
     ON = 1
 
+
 class SettingFormat(Enum):
     """Types of values for settings."""
     NUMBER = 0
     TIMER = 1
     TIME_OF_DAY = 2
+
 
 class ElkRPStatus(Enum):
     """Elk remote programming status."""

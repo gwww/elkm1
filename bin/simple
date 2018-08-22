@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from elkm1 import Elk
+from elkm1_lib import Elk
 import logging
 
 LOG = logging.getLogger(__name__)

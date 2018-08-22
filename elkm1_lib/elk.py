@@ -9,8 +9,8 @@ from .message import message_decode
 from .proto import Connection
 from .util import call_sync_handlers, parse_url, url_scheme_is_secure
 
-
 LOG = logging.getLogger(__name__)
+
 
 class Elk:
     """Represents all the components on an Elk panel."""
@@ -34,7 +34,7 @@ class Elk:
             self._create_element(element)
 
     def _create_element(self, element):
-        module = import_module('elkm1.'+element)
+        module = import_module('elkm1_lib.'+element)
         class_ = getattr(module, element.capitalize())
         setattr(self, element, class_(self))
 
@@ -47,16 +47,17 @@ class Elk:
         try:
             if scheme == 'serial':
                 # pylint: disable=C0330
-                _coro = await serial_asyncio.create_serial_connection(self.loop,
-                            lambda: Connection(self.loop,
-                            self._connected, self._disconnected, self._got_data),
-                            dest, baudrate=param)
+                _coro = await serial_asyncio.create_serial_connection(
+                    self.loop,
+                    lambda: Connection(self.loop, self._connected,
+                                       self._disconnected, self._got_data),
+                    dest, baudrate=param)
             else:
                 # pylint: disable=C0330
                 _coro = await self.loop.create_connection(
-                        lambda: Connection(self.loop,
-                        self._connected, self._disconnected, self._got_data),
-                        host=dest, port=param, ssl=ssl_context)
+                    lambda: Connection(self.loop, self._connected,
+                                       self._disconnected, self._got_data),
+                    host=dest, port=param, ssl=ssl_context)
         except:
             LOG.debug("Connection failed. Retrying in %d seconds",
                       self._connection_retry_timer)
@@ -71,7 +72,6 @@ class Elk:
         if url_scheme_is_secure(self._config['url']):
             self._conn.write_data(self._config['userid'], raw=True)
             self._conn.write_data(self._config['password'], raw=True)
-        #self.loop.call_later(30, call_sync_handlers)
         call_sync_handlers()
 
     def _disconnected(self):
@@ -79,7 +79,7 @@ class Elk:
         self._conn = None
         self.loop.call_later(self._connection_retry_timer, self.connect)
 
-    def _got_data(self, data): # pylint: disable=no-self-use
+    def _got_data(self, data):  # pylint: disable=no-self-use
         LOG.debug("got_data '%s'", data)
         try:
             message_decode(data)

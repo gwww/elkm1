@@ -12,7 +12,7 @@ from shutil import rmtree
 from setuptools import find_packages, setup, Command
 
 # Package meta-data.
-NAME = 'elkm1'
+NAME = 'elkm1_lib'
 DESCRIPTION = 'Library for interacting with ElkM1 alarm/automation panel.'
 URL = 'https://github.com/gwww/elkm1'
 EMAIL = 'gwwaters+elkm1@gmail.com'

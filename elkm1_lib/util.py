@@ -4,22 +4,24 @@ import logging
 import ssl
 from .message import add_message_handler, sd_encode
 
-
 LOG = logging.getLogger(__name__)
 
 # pylint: disable=invalid-name
 get_descriptions_in_progress = {}
 sync_handlers = []
 
+
 def add_sync_handler(sync_handler):
     """Register a fn that synchronizes part of the panel."""
     sync_handlers.append(sync_handler)
+
 
 def call_sync_handlers():
     """Invoke the synchronization handlers."""
     LOG.debug("Synchronizing panel...")
     for sync_handler in sync_handlers:
         sync_handler()
+
 
 def get_descriptions(elk, desc, callback):
     """
@@ -29,9 +31,11 @@ def get_descriptions(elk, desc, callback):
     desc_type = desc[0]
     max_units = desc[1]
     results = [None] * max_units
-    get_descriptions_in_progress[desc_type] = (max_units, callback, results, elk)
+    get_descriptions_in_progress[desc_type] = (max_units, callback,
+                                               results, elk)
     add_message_handler('SD', sd_handler)
     elk.send(sd_encode(desc_type=desc_type, unit=0))
+
 
 # pylint: disable=unused-argument
 def sd_handler(desc_type, unit, desc, show_on_keypad):
@@ -52,10 +56,12 @@ def sd_handler(desc_type, unit, desc, show_on_keypad):
     results[unit] = desc
     elk.send(sd_encode(desc_type=desc_type, unit=unit+1))
 
+
 def url_scheme_is_secure(url):
     """Check if the URL is one that requires SSL/TLS."""
     scheme, _dest = url.split('://')
     return scheme == 'elks'
+
 
 def parse_url(url):
     """Parse a Elk connection string """
@@ -73,6 +79,7 @@ def parse_url(url):
     else:
         raise ValueError("Invalid scheme '%s'" % scheme)
     return (scheme, host, int(port), ssl_context)
+
 
 def pretty_const(value):
     """Make a constant pretty for printing in GUI"""

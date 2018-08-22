@@ -9,9 +9,9 @@ import sys
 import textwrap
 import traceback
 
-from elkm1 import Elk
-from elkm1.message import add_message_handler, MessageEncode
-from elkm1.const import Max
+from elkm1_lib import Elk
+from elkm1_lib.message import add_message_handler, MessageEncode
+from elkm1_lib.const import Max
 import cmdr
 
 

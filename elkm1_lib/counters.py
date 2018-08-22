@@ -14,6 +14,7 @@ class Counter(Element):
         """(Helper) Set counter to value"""
         self._elk.send(cx_encode(self._index, value))
 
+
 # pylint: disable=R0903
 class Counters(Elements):
     """Handling for multiple counters"""

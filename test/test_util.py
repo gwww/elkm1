@@ -1,9 +1,9 @@
 import pytest
 from unittest.mock import Mock
 
-from elkm1.const import TextDescriptions
-from elkm1.message import message_decode, MessageEncode
-from elkm1.util import parse_url, get_descriptions, sd_handler, pretty_const
+from elkm1_lib.const import TextDescriptions
+from elkm1_lib.message import message_decode, MessageEncode
+from elkm1_lib.util import parse_url, get_descriptions, sd_handler, pretty_const
 
 def test_get_descriptions_sets_up_correctly():
     mock_elk = Mock()

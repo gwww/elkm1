@@ -2,6 +2,9 @@
 All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## [0.6.0]
+- Rename package from elkm1 to elkm1_lib (due to conflicts with HASS component)
+
 ## [0.5.0]
 - Many small fixes.
   - Fix lint errors.

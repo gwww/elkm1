@@ -323,11 +323,13 @@ class ThermostatHold(Enum):
     ON = 1
 
 class SettingFormat(Enum):
+    """Types of values for settings."""
     NUMBER = 0
     TIMER = 1
     TIME_OF_DAY = 2
 
 class ElkRPStatus(Enum):
+    """Elk remote programming status."""
     DISCONNECTED = 0
     CONNECTED = 1
     INITIALIZING = 2

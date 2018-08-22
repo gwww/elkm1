@@ -8,9 +8,9 @@ class Keypad(Element):
     """Class representing an Keypad"""
     def __init__(self, index, elk):
         super().__init__(index, elk)
-        self.area = None
-        self.temperature = None
-        self.last_user = None
+        self.area = -1
+        self.temperature = -40
+        self.last_user = -1
 
 class Keypads(Elements):
     """Handling for multiple areas"""
@@ -26,6 +26,7 @@ class Keypads(Elements):
         self.elk.send(ka_encode())
         self.get_descriptions(TextDescriptions.KEYPAD.value)
 
+    # pylint: disable=unused-argument
     def _ic_handler(self, code, user, keypad):
         # If user is negative then invalid code entered
         self.elements[keypad].setattr('last_user', user)

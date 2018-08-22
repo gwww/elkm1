@@ -10,12 +10,12 @@ class Zone(Element):
     def __init__(self, index, elk):
         super().__init__(index, elk)
         self.definition = 0
-        self.area = 0
+        self.area = -1
         self.bypassed = False
         self.logical_status = 0
         self.physical_status = 0
-        self.voltage = None
-        self.temperature = None
+        self.voltage = 0
+        self.temperature = -60
 
     def __str__(self):
         return ("{indx:d} '{name}' type:{typ} status:{logl}/{phys}"

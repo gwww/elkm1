@@ -44,10 +44,12 @@ class Connection(asyncio.Protocol):
         self._buffer = ''
 
     def pause(self):
+        """Pause the connection from sending/receiving."""
         self._cleanup()
         self._paused = True
 
     def resume(self):
+        """Restart the connection from sending/receiving."""
         self._paused = False
 
     def _response_required_timeout(self):

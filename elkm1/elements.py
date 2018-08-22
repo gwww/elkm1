@@ -31,7 +31,7 @@ class Element:
     def _call_callbacks(self, changed_attribute, new_value):
         """Callbacks when attribute of element changes"""
         for callback in self._callbacks:
-            callback(changed_attribute, new_value)
+            callback(self, changed_attribute, new_value)
 
     def setattr(self, attr, new_value):
         """If attribute value has changed then set it and call the callbacks"""
@@ -56,6 +56,7 @@ class Element:
         return "{} '{}' {}".format(self._index, self.name, varstr)
 
     def as_dict(self):
+        """Package up the attributes as a dict."""
         cdict = self.__dict__.copy()
         del cdict['_elk']
         del cdict['_callbacks']

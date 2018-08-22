@@ -8,7 +8,7 @@ class Setting(Element):
     """Class representing an Custom Value"""
     def __init__(self, index, elk):
         super().__init__(index, elk)
-        self.value_format = None
+        self.value_format = 0
         self.value = None
 
     def set(self, value):

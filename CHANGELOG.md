@@ -2,6 +2,9 @@
 All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## [0.4.9]
+- Allow lowercase and single digit housecodes
+
 ## [0.4.8]
 - Add formating to version strings
 - Lower retry max time on connection lost

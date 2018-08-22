@@ -46,10 +46,11 @@ class Elk:
         scheme, dest, param, ssl_context = parse_url(url)
         try:
             if scheme == 'serial':
+                # pylint: disable=C0330
                 _coro = await serial_asyncio.create_serial_connection(self.loop,
-                        lambda: Connection(self.loop,
-                        self._connected, self._disconnected, self._got_data),
-                        dest, baudrate=param)
+                            lambda: Connection(self.loop,
+                            self._connected, self._disconnected, self._got_data),
+                            dest, baudrate=param)
             else:
                 # pylint: disable=C0330
                 _coro = await self.loop.create_connection(
@@ -57,8 +58,8 @@ class Elk:
                         self._connected, self._disconnected, self._got_data),
                         host=dest, port=param, ssl=ssl_context)
         except:
-            LOG.debug("Connection failed. Retrying in {} seconds".format(
-                self._connection_retry_timer))
+            LOG.debug("Connection failed. Retrying in %d seconds",
+                      self._connection_retry_timer)
             self.loop.call_later(self._connection_retry_timer, self.connect)
             self._connection_retry_timer = 2 * self._connection_retry_timer \
                 if self._connection_retry_timer < 64 else 120
@@ -70,10 +71,10 @@ class Elk:
         if url_scheme_is_secure(self._config['url']):
             self._conn.write_data(self._config['userid'], raw=True)
             self._conn.write_data(self._config['password'], raw=True)
+        #self.loop.call_later(30, call_sync_handlers)
         call_sync_handlers()
 
     def _disconnected(self):
-        # TODO: callbk out of library
         LOG.debug("elk disconnected callback")
         self._conn = None
         self.loop.call_later(self._connection_retry_timer, self.connect)
@@ -84,6 +85,10 @@ class Elk:
             message_decode(data)
         except ValueError as err:
             LOG.debug(err)
+
+    def is_connected(self):
+        """Status of connection to Elk."""
+        return self._conn is not None
 
     def connect(self):
         """Connect to the panel"""
@@ -99,7 +104,9 @@ class Elk:
         self._conn.write_data(msg.message, msg.response_command)
 
     def pause(self):
+        """Pause the connection from sending/receiving."""
         self._conn.pause()
 
     def resume(self):
+        """Restart the connection from sending/receiving."""
         self._conn.resume()

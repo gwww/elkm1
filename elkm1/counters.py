@@ -30,7 +30,7 @@ class Counters(Elements):
         # Only poll counters that have a name defined
         for counter in self.elements:
             if not counter.is_default_name():
-                self.elk.send(cv_encode(counter._index))
+                self.elk.send(cv_encode(counter.index))
 
     def _cv_handler(self, counter, value):
         countr = self.elements[counter]

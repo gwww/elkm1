@@ -16,7 +16,6 @@ class Area(Element):
         self.is_exit = False
         self.timer1 = 0
         self.timer2 = 0
-        self.timer_timerstamp = 0
 
     def arm(self, level, code):
         """(Helper) Arm system at specified level (away, vacation, etc)"""
@@ -44,6 +43,7 @@ class Areas(Elements):
             area.setattr('arm_up_state', arm_up_states[area.index])
             area.setattr('alarm_state', alarm_states[area.index])
 
+    # pylint: disable=too-many-arguments
     def _ee_handler(self, area, is_exit, timer1, timer2, armed_status):
         area = self.elements[area]
         area.setattr('armed_status', armed_status)

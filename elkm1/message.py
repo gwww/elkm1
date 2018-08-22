@@ -39,9 +39,9 @@ def housecode_to_index(housecode):
     match = re.search(r'^([A-P])(\d{1,2})$', housecode.upper())
     if match:
         house_index = int(match.group(2))
-        if house_index >= 1 and house_index <= 16:
+        if 1 <= house_index <= 16:
             return (ord(match.group(1)) - ord('A')) * 16 + house_index - 1
-    raise ValueError
+    raise ValueError("Invalid X10 housecode: %s" % housecode)
 
 def index_to_housecode(index):
     """Convert a zero-based index to a X10 housecode."""
@@ -218,10 +218,10 @@ def _tr_decode(msg):
 @call_handlers('VN')
 def _vn_decode(msg):
     """VN: Version information."""
-    elkm1_version = "{}.{}.{}".format( int(msg[4:6], 16), int(msg[6:8], 16),
+    elkm1_version = "{}.{}.{}".format(int(msg[4:6], 16), int(msg[6:8], 16),
                                       int(msg[8:10], 16))
-    xep_version = "{}.{}.{}".format( int(msg[10:12], 16), int(msg[12:14], 16),
-                                      int(msg[14:16], 16))
+    xep_version = "{}.{}.{}".format(int(msg[10:12], 16), int(msg[12:14], 16),
+                                    int(msg[14:16], 16))
     return {'elkm1_version': elkm1_version, 'xep_version': xep_version}
 
 @call_handlers('XK')
@@ -309,7 +309,6 @@ def message_decode(msg):
 
 def al_encode(arm_mode, area, user_code):
     """al: Arm system. Note in 'al' the 'l' can vary"""
-    # TODO: AS message not always returned; IC msg could be returned
     return MessageEncode('0Da{}{:1d}{:06d}00'.format(arm_mode, area+1,
                                                      user_code), 'AS')
 

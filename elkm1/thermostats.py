@@ -18,7 +18,7 @@ class Thermostat(Element):
 
     def set(self, element_to_set, value):
         """(Helper) Set thermostat"""
-        self._elk.send(ts_encode(self._index, value, element_to_set))
+        self._elk.send(ts_encode(self.index, value, element_to_set))
 
 class Thermostats(Elements):
     """Handling for multiple areas"""
@@ -36,7 +36,7 @@ class Thermostats(Elements):
         # Only poll thermostats that have a name defined
         for thermostat in self.elements:
             if not thermostat.is_default_name():
-                self.elk.send(tr_encode(thermostat._index))
+                self.elk.send(tr_encode(thermostat.index))
 
     def _st_handler(self, group, device, temperature):
         if group == 2:

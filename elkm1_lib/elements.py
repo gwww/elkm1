@@ -58,10 +58,8 @@ class Element:
 
     def as_dict(self):
         """Package up the attributes as a dict."""
-        cdict = self.__dict__.copy()
-        del cdict['_elk']
-        del cdict['_callbacks']
-        return cdict
+        attrs = vars(self)
+        return {key: attrs[key] for key in attrs if not key.startswith('_')}
 
 
 class Elements:

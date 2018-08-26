@@ -58,9 +58,9 @@ class Elk:
                     lambda: Connection(self.loop, self._connected,
                                        self._disconnected, self._got_data),
                     host=dest, port=param, ssl=ssl_context)
-        except:
-            LOG.debug("Connection failed. Retrying in %d seconds",
-                      self._connection_retry_timer)
+        except (ValueError, OSError) as err:
+            LOG.debug("Connection failed (%s). Retrying in %d seconds",
+                      err, self._connection_retry_timer)
             self.loop.call_later(self._connection_retry_timer, self.connect)
             self._connection_retry_timer = 2 * self._connection_retry_timer \
                 if self._connection_retry_timer < 64 else 120

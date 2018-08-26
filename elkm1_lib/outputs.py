@@ -37,8 +37,8 @@ class Outputs(Elements):
         self.get_descriptions(TextDescriptions.OUTPUT.value)
 
     def _cc_handler(self, output, output_status):
-        self.elements[output].setattr('output_on', output_status)
+        self.elements[output].setattr('output_on', output_status, True)
 
     def _cs_handler(self, output_status):
         for output in self.elements:
-            output.setattr('output_on', output_status[output.index])
+            output.setattr('output_on', output_status[output.index], True)

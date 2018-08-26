@@ -40,15 +40,14 @@ class Areas(Elements):
 
     def _as_handler(self, armed_statuses, arm_up_states, alarm_states):
         for area in self.elements:
-            area.setattr('armed_status', armed_statuses[area.index])
-            area.setattr('arm_up_state', arm_up_states[area.index])
-            area.setattr('alarm_state', alarm_states[area.index])
+            area.setattr('armed_status', armed_statuses[area.index], False)
+            area.setattr('arm_up_state', arm_up_states[area.index], False)
+            area.setattr('alarm_state', alarm_states[area.index], True)
 
     # pylint: disable=too-many-arguments
     def _ee_handler(self, area, is_exit, timer1, timer2, armed_status):
         area = self.elements[area]
-        area.setattr('armed_status', armed_status)
-        area.setattr('timer1', timer1)
-        area.setattr('timer2', timer2)
-        area.setattr('is_exit', is_exit)
-        area.setattr('timer_timestamp', time.time())
+        area.setattr('armed_status', armed_status, False)
+        area.setattr('timer1', timer1, False)
+        area.setattr('timer2', timer2, False)
+        area.setattr('is_exit', is_exit, True)

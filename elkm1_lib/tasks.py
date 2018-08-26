@@ -29,4 +29,4 @@ class Tasks(Elements):
         self.get_descriptions(TextDescriptions.TASK.value)
 
     def _tc_handler(self, task):
-        self.elements[task].setattr('last_change', time())
+        self.elements[task].setattr('last_change', time(), True)

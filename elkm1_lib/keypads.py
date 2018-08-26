@@ -30,19 +30,19 @@ class Keypads(Elements):
     # pylint: disable=unused-argument
     def _ic_handler(self, code, user, keypad):
         # If user is negative then invalid code entered
-        self.elements[keypad].setattr('last_user', user)
+        self.elements[keypad].setattr('last_user', user, True)
 
     def _ka_handler(self, keypad_areas):
         for keypad in self.elements:
             if keypad_areas[keypad.index] >= 0:
-                keypad.setattr('area', keypad_areas[keypad.index])
+                keypad.setattr('area', keypad_areas[keypad.index], True)
 
     # pylint: disable=unused-argument
     def _lw_handler(self, keypad_temps, zone_temps):
         for keypad in self.elements:
             if keypad_temps[keypad.index] > -40:
-                keypad.setattr('temperature', keypad_temps[keypad.index])
+                keypad.setattr('temperature', keypad_temps[keypad.index], True)
 
     def _st_handler(self, group, device, temperature):
         if group == 1:
-            self.elements[device].setattr('temperature', temperature)
+            self.elements[device].setattr('temperature', temperature, True)

@@ -40,16 +40,16 @@ class Thermostats(Elements):
 
     def _st_handler(self, group, device, temperature):
         if group == 2:
-            self.elements[device].setattr('current_temp', temperature)
+            self.elements[device].setattr('current_temp', temperature, True)
 
     # pylint: disable=too-many-arguments
     def _tr_handler(self, thermostat_index, mode, hold, fan, current_temp,
                     heat_setpoint, cool_setpoint, humidity):
         thermostat = self.elements[thermostat_index]
-        thermostat.setattr('mode', mode)
-        thermostat.setattr('hold', hold)
-        thermostat.setattr('fan', fan)
-        thermostat.setattr('current_temp', current_temp)
-        thermostat.setattr('heat_setpoint', heat_setpoint)
-        thermostat.setattr('cool_setpoint', cool_setpoint)
-        thermostat.setattr('humidity', humidity)
+        thermostat.setattr('mode', mode, False)
+        thermostat.setattr('hold', hold, False)
+        thermostat.setattr('fan', fan, False)
+        thermostat.setattr('current_temp', current_temp, False)
+        thermostat.setattr('heat_setpoint', heat_setpoint, False)
+        thermostat.setattr('cool_setpoint', cool_setpoint, False)
+        thermostat.setattr('humidity', humidity, True)

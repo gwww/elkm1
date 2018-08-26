@@ -14,7 +14,7 @@ class Panel(Element):
         self.elkm1_version = None
         self.xep_version = None
         self.remote_programming_status = 0
-        self.setattr('name', 'ElkM1')
+        self.setattr('name', 'ElkM1', True)
         add_sync_handler(self.sync)
 
     def sync(self):
@@ -35,15 +35,15 @@ class Panel(Element):
         self._elk.send(sp_encode(phrase))
 
     def _vn_handler(self, elkm1_version, xep_version):
-        self.setattr('elkm1_version', elkm1_version)
-        self.setattr('xep_version', xep_version)
+        self.setattr('elkm1_version', elkm1_version, False)
+        self.setattr('xep_version', xep_version, True)
 
     def _xk_handler(self, real_time_clock):
-        self.setattr('real_time_clock', real_time_clock)
+        self.setattr('real_time_clock', real_time_clock, True)
 
     def _rp_handler(self, remote_programming_status):
         if remote_programming_status == ElkRPStatus.DISCONNECTED.value:
             self._elk.resume()
         else:
             self._elk.pause()
-        self.setattr('remote_programming_status', remote_programming_status)
+        self.setattr('remote_programming_status', remote_programming_status, True)

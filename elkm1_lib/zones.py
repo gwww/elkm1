@@ -52,31 +52,31 @@ class Zones(Elements):
         for i in range(16):
             zone = self.elements[i]
             if zone_temps[zone.index] > -60:
-                zone.setattr('temperature', zone_temps[zone.index])
+                zone.setattr('temperature', zone_temps[zone.index], True)
 
     def _st_handler(self, group, device, temperature):
         if group == 0:
-            self.elements[device].setattr('temperature', temperature)
+            self.elements[device].setattr('temperature', temperature, True)
 
     def _zb_handler(self, zone_number, zone_bypassed):
-        self.elements[zone_number].setattr('bypassed', zone_bypassed)
+        self.elements[zone_number].setattr('bypassed', zone_bypassed, True)
 
     def _zc_handler(self, zone_number, zone_status):
-        self.elements[zone_number].setattr('logical_status', zone_status[0])
-        self.elements[zone_number].setattr('physical_status', zone_status[1])
+        self.elements[zone_number].setattr('logical_status', zone_status[0], False)
+        self.elements[zone_number].setattr('physical_status', zone_status[1], True)
 
     def _zd_handler(self, zone_definitions):
         for zone in self.elements:
-            zone.setattr('definition', zone_definitions[zone.index])
+            zone.setattr('definition', zone_definitions[zone.index], True)
 
     def _zp_handler(self, zone_partitions):
         for zone in self.elements:
-            zone.setattr('area', zone_partitions[zone.index])
+            zone.setattr('area', zone_partitions[zone.index], True)
 
     def _zs_handler(self, zone_statuses):
         for zone in self.elements:
-            zone.setattr('logical_status', zone_statuses[zone.index][0])
-            zone.setattr('physical_status', zone_statuses[zone.index][1])
+            zone.setattr('logical_status', zone_statuses[zone.index][0], False)
+            zone.setattr('physical_status', zone_statuses[zone.index][1], True)
 
     def _zv_handler(self, zone_number, zone_voltage):
-        self.elements[zone_number].setattr('voltage', zone_voltage)
+        self.elements[zone_number].setattr('voltage', zone_voltage, True)

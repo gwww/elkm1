@@ -13,7 +13,7 @@ class Element:
         self._elk = elk
         self._callbacks = []
         self.name = self.default_name()
-        self._changeset = []
+        self._changeset = {}
 
     @property
     def index(self):
@@ -33,14 +33,14 @@ class Element:
         """Callbacks when attribute of element changes"""
         for callback in self._callbacks:
             callback(self, self._changeset)
-        self._changeset = []
+        self._changeset = {}
 
     def setattr(self, attr, new_value, close_the_changeset=True):
         """If attribute value has changed then set it and call the callbacks"""
         existing_value = getattr(self, attr, None)
         if existing_value != new_value:
             setattr(self, attr, new_value)
-            self._changeset.append((attr, new_value))
+            self._changeset[attr] = new_value
 
         if close_the_changeset and self._changeset:
             self._call_callbacks()

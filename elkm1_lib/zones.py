@@ -31,6 +31,7 @@ class Zones(Elements):
     """Handling for multiple zones"""
     def __init__(self, elk):
         super().__init__(elk, Zone, Max.ZONES.value)
+        add_message_handler('AZ', self._az_handler)
         add_message_handler('LW', self._lw_handler)
         add_message_handler('ST', self._st_handler)
         add_message_handler('ZB', self._zb_handler)
@@ -46,6 +47,10 @@ class Zones(Elements):
         self.elk.send(zp_encode())
         self.elk.send(zs_encode())
         self.get_descriptions(TextDescriptions.ZONE.value)
+
+    def _az_handler(self, alarm_status):
+        for zone in self.elements:
+            zone.setattr('triggered_alarm', alarm_status[zone.index] != '0', True)
 
     # pylint: disable=unused-argument
     def _lw_handler(self, keypad_temps, zone_temps):

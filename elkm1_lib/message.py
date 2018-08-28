@@ -215,6 +215,12 @@ def _sd_decode(msg):
             'show_on_keypad': show_on_keypad}
 
 
+@call_handlers('SS')
+def _ss_decode(msg):
+    """SS: System status."""
+    return {'system_trouble_status': msg[4:-2]}
+
+
 @call_handlers('ST')
 def _st_decode(msg):
     """ST: Temperature update."""
@@ -465,6 +471,11 @@ def sd_encode(desc_type, unit):
 def sp_encode(phrase):
     """sp: Speak phrase."""
     return MessageEncode('09sp{:03d}00'.format(phrase), None)
+
+
+def ss_encode():
+    """ss: Get system trouble status."""
+    return MessageEncode('06ss00', 'SS')
 
 
 def sw_encode(word):

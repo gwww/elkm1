@@ -2,7 +2,7 @@
 from .const import ElkRPStatus
 from .elements import Element
 from .message import (add_message_handler, vn_encode, lw_encode,
-                      sw_encode, sp_encode)
+                      sw_encode, sp_encode, ss_encode)
 from .util import add_sync_handler, call_sync_handlers
 
 
@@ -14,6 +14,7 @@ class Panel(Element):
         self.elkm1_version = None
         self.xep_version = None
         self.remote_programming_status = 0
+        self.system_trouble_status = ''
         self.setattr('name', 'ElkM1', True)
         add_sync_handler(self.sync)
 
@@ -23,8 +24,10 @@ class Panel(Element):
         add_message_handler('XK', self._xk_handler)
         add_message_handler('RP', self._rp_handler)
         add_message_handler('IE', call_sync_handlers)
+        add_message_handler('SS', self._ss_handler)
         self._elk.send(vn_encode())
         self._elk.send(lw_encode())
+        self._elk.send(ss_encode())
 
     def speak_word(self, word):
         """(Helper) Speak word."""
@@ -40,6 +43,9 @@ class Panel(Element):
 
     def _xk_handler(self, real_time_clock):
         self.setattr('real_time_clock', real_time_clock, True)
+
+    def _ss_handler(self, system_trouble_status):
+        self.setattr('system_trouble_status', system_trouble_status, True)
 
     def _rp_handler(self, remote_programming_status):
         if remote_programming_status == ElkRPStatus.DISCONNECTED.value:

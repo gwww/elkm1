@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## [0.7.4]
+- Fix triggered_alarm attr to zone
+- Add support for system trouble status (attached to panel)
+
 ## [0.7.3]
 - Add triggered_alarm attr to zone
 

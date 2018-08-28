@@ -16,6 +16,7 @@ class Zone(Element):
         self.physical_status = 0
         self.voltage = 0
         self.temperature = -60
+        self.triggered_alarm = False
 
     def __str__(self):
         return ("{indx:d} '{name}' type:{typ} status:{logl}/{phys}"

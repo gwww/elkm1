@@ -14,10 +14,10 @@ install:
 build:
 	python setup.py sdist
 
-upload.test: build
-	twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+# upload.test: build
+# 	twine upload --repository-url https://test.pypi.org/legacy/ dist/*
 
-upload.prod: build
+upload: build
 	twine upload dist/*
 
 isort:

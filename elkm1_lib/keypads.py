@@ -30,6 +30,7 @@ class Keypads(Elements):
     # pylint: disable=unused-argument
     def _ic_handler(self, code, user, keypad):
         # If user is negative then invalid code entered
+        self.elements[keypad].setattr('code', code if user < 0 else '****', False)
         self.elements[keypad].setattr('last_user', user, True)
 
     def _ka_handler(self, keypad_areas):

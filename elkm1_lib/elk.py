@@ -5,7 +5,7 @@ import logging
 from importlib import import_module
 import serial_asyncio
 
-from .message import message_decode
+from .message import add_message_handler, message_decode
 from .proto import Connection
 from .util import call_sync_handlers, parse_url, url_scheme_is_secure
 
@@ -20,8 +20,12 @@ class Elk:
         self.loop = loop if loop else asyncio.get_event_loop()
         self._config = config
         self._conn = None
+        self._transport = None
         self.connection_lost_callbk = None
         self._connection_retry_timer = 1
+
+        self._heartbeat = None
+        add_message_handler('XK', self._xk_handler)
 
         # Setup for all the types of elements tracked
         if 'element_list' in config:
@@ -65,19 +69,37 @@ class Elk:
             self._connection_retry_timer = 2 * self._connection_retry_timer \
                 if self._connection_retry_timer < 64 else 120
 
-    def _connected(self, _transport, conn):
+    def _connected(self, transport, conn):
         """Login and sync the ElkM1 panel to memory."""
         self._conn = conn
+        self._transport = transport
         self._connection_retry_timer = 1
         if url_scheme_is_secure(self._config['url']):
             self._conn.write_data(self._config['userid'], raw=True)
             self._conn.write_data(self._config['password'], raw=True)
         call_sync_handlers()
+        if not self._config['url'].startswith('serial://'):
+            self._heartbeat = self.loop.call_later(120, self._reset_connection)
+
+    def _reset_connection(self):
+        LOG.warn("ElkM1 connection heartbeat timed out")
+        self._transport.close()
+        self._heartbeat = None
+        self.connect()
+
+    def _xk_handler(self, real_time_clock):
+        if not self._heartbeat:
+            return
+        self._heartbeat.cancel()
+        self._heartbeat = self.loop.call_later(120, self._reset_connection)
 
     def _disconnected(self):
-        LOG.debug("elk disconnected callback")
+        LOG.warn("ElkM1 disconnected")
         self._conn = None
         self.loop.call_later(self._connection_retry_timer, self.connect)
+        if self._heartbeat:
+            self._heartbeat.cancel()
+            self._heartbeat = None
 
     def _got_data(self, data):  # pylint: disable=no-self-use
         LOG.debug("got_data '%s'", data)

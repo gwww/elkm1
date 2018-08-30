@@ -62,7 +62,7 @@ class ZoneType(Enum):
 
 
 class ZonePhysicalStatus(Enum):
-    """Zone physical status; name capitalized so can be used in displays"""
+    """Zone physical status."""
     UNCONFIGURED = 0
     OPEN = 1
     EOL = 2
@@ -70,7 +70,7 @@ class ZonePhysicalStatus(Enum):
 
 
 class ZoneLogicalStatus(Enum):
-    """Zone logical status; name capitalized so can be used in displays"""
+    """Zone logical status."""
     NORMAL = 0
     TROUBLED = 1
     VIOLATED = 2

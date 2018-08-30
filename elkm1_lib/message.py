@@ -77,9 +77,7 @@ class call_handlers():  # pylint: disable=invalid-name,too-few-public-methods
         def wrapped_f(msg):
             """Calls handlers"""
             decoded_msg = decode_func(msg)
-            handlers = _message_handlers[self.cmd] \
-                if self.cmd in _message_handlers else []
-            for handler in handlers:
+            for handler in _message_handlers.get(self.cmd, []):
                 handler(**decoded_msg)
         return wrapped_f
 
@@ -150,11 +148,9 @@ def _ee_decode(msg):
 @call_handlers('IC')
 def _ic_decode(msg):
     """IC: Send Valid Or Invalid User Code Format."""
-    code = 0
-    start = 4
-    for _ in range(6):
-        code = code * 10 + int(msg[start:start+2])
-        start += 2
+    code = msg[4:16]
+    if re.match('(0\d){6}', code):
+        code = re.sub(r'0(\d)', r'\1', code)
     return {'code': code, 'user': int(msg[16:19])-1,
             'keypad': int(msg[19:21])-1}
 

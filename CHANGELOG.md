@@ -2,6 +2,16 @@
 All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## [0.7.6]
+- Set user name to default name if not configured
+- Enhance IC decode to handle prox
+- IC handler now saves user code
+- Heartbeat bug; connect was called on heartbeat timeout AND then again on
+  disconnect callback
+- Made log messages on connect/disconnect/error clearer and more consistent
+- Change max time on connection retry to 60 seconds (was 120 seconds)
+- Tidied up a couple of comments
+
 ## [0.7.5]
 - Add heartbeat
 

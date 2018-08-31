@@ -61,7 +61,7 @@ class Element:
         return "{} '{}' {}".format(self._index, self.name, varstr)
 
     def as_dict(self):
-        """Package up the attributes as a dict."""
+        """Package up the public attributes as a dict."""
         attrs = vars(self)
         return {key: attrs[key] for key in attrs if not key.startswith('_')}
 

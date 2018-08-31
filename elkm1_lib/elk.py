@@ -46,7 +46,7 @@ class Elk:
         """Asyncio connection to Elk."""
         self.connection_lost_callbk = connection_lost_callbk
         url = self._config['url']
-        LOG.debug("Elk connect to %s", url)
+        LOG.info("Connecting to ElkM1 at %s", url)
         scheme, dest, param, ssl_context = parse_url(url)
         try:
             if scheme == 'serial':
@@ -63,14 +63,15 @@ class Elk:
                                        self._disconnected, self._got_data),
                     host=dest, port=param, ssl=ssl_context)
         except (ValueError, OSError) as err:
-            LOG.debug("Connection failed (%s). Retrying in %d seconds",
+            LOG.warn("Could not connect to ElkM1 (%s). Retrying in %d seconds",
                       err, self._connection_retry_timer)
             self.loop.call_later(self._connection_retry_timer, self.connect)
             self._connection_retry_timer = 2 * self._connection_retry_timer \
-                if self._connection_retry_timer < 64 else 120
+                if self._connection_retry_timer < 32 else 60
 
     def _connected(self, transport, conn):
         """Login and sync the ElkM1 panel to memory."""
+        LOG.info("Connected to ElkM1")
         self._conn = conn
         self._transport = transport
         self._connection_retry_timer = 1
@@ -82,10 +83,9 @@ class Elk:
             self._heartbeat = self.loop.call_later(120, self._reset_connection)
 
     def _reset_connection(self):
-        LOG.warn("ElkM1 connection heartbeat timed out")
+        LOG.warn("ElkM1 connection heartbeat timed out, disconnecting")
         self._transport.close()
         self._heartbeat = None
-        self.connect()
 
     def _xk_handler(self, real_time_clock):
         if not self._heartbeat:
@@ -123,12 +123,15 @@ class Elk:
 
     def send(self, msg):
         """Send a message to Elk panel."""
-        self._conn.write_data(msg.message, msg.response_command)
+        if self._conn:
+            self._conn.write_data(msg.message, msg.response_command)
 
     def pause(self):
         """Pause the connection from sending/receiving."""
-        self._conn.pause()
+        if self._conn:
+            self._conn.pause()
 
     def resume(self):
         """Restart the connection from sending/receiving."""
-        self._conn.resume()
+        if self._conn:
+            self._conn.resume()

@@ -26,4 +26,3 @@ class Users(Elements):
         for user in self.elements:
             if re.match(r'^USER \d\d\d', user.name):
                 user.name = user.default_name()
-

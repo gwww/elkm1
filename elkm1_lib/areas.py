@@ -1,5 +1,4 @@
 """Definition of an ElkM1 Area"""
-import time
 
 from .const import Max, TextDescriptions
 from .elements import Element, Elements

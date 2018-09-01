@@ -1,6 +1,7 @@
 """Master class that combines all ElkM1 pieces together."""
 
 import asyncio
+from functools import partial
 import logging
 from importlib import import_module
 import serial_asyncio
@@ -48,23 +49,18 @@ class Elk:
         url = self._config['url']
         LOG.info("Connecting to ElkM1 at %s", url)
         scheme, dest, param, ssl_context = parse_url(url)
+        conn = partial(Connection, self.loop, self._connected,
+                       self._disconnected, self._got_data)
         try:
             if scheme == 'serial':
-                # pylint: disable=C0330
-                _coro = await serial_asyncio.create_serial_connection(
-                    self.loop,
-                    lambda: Connection(self.loop, self._connected,
-                                       self._disconnected, self._got_data),
-                    dest, baudrate=param)
+                await serial_asyncio.create_serial_connection(
+                    self.loop, conn, dest, baudrate=param)
             else:
-                # pylint: disable=C0330
-                _coro = await self.loop.create_connection(
-                    lambda: Connection(self.loop, self._connected,
-                                       self._disconnected, self._got_data),
-                    host=dest, port=param, ssl=ssl_context)
-        except (ValueError, OSError) as err:
-            LOG.warn("Could not connect to ElkM1 (%s). Retrying in %d seconds",
-                      err, self._connection_retry_timer)
+                await asyncio.wait_for(self.loop.create_connection(
+                    conn, host=dest, port=param, ssl=ssl_context), timeout=30)
+        except (ValueError, OSError, asyncio.TimeoutError) as err:
+            LOG.warning("Could not connect to ElkM1 (%s). Retrying in %d seconds",
+                        err, self._connection_retry_timer)
             self.loop.call_later(self._connection_retry_timer, self.connect)
             self._connection_retry_timer = 2 * self._connection_retry_timer \
                 if self._connection_retry_timer < 32 else 60
@@ -83,10 +79,11 @@ class Elk:
             self._heartbeat = self.loop.call_later(120, self._reset_connection)
 
     def _reset_connection(self):
-        LOG.warn("ElkM1 connection heartbeat timed out, disconnecting")
+        LOG.warning("ElkM1 connection heartbeat timed out, disconnecting")
         self._transport.close()
         self._heartbeat = None
 
+    # pylint: disable=unused-argument
     def _xk_handler(self, real_time_clock):
         if not self._heartbeat:
             return
@@ -94,7 +91,7 @@ class Elk:
         self._heartbeat = self.loop.call_later(120, self._reset_connection)
 
     def _disconnected(self):
-        LOG.warn("ElkM1 disconnected")
+        LOG.warning("ElkM1 disconnected")
         self._conn = None
         self.loop.call_later(self._connection_retry_timer, self.connect)
         if self._heartbeat:
@@ -114,8 +111,7 @@ class Elk:
 
     def connect(self):
         """Connect to the panel"""
-        coro = self._connect()
-        asyncio.ensure_future(coro)
+        asyncio.ensure_future(self._connect())
 
     def run(self):
         """Enter the asyncio loop."""

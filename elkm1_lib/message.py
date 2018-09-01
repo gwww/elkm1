@@ -149,7 +149,7 @@ def _ee_decode(msg):
 def _ic_decode(msg):
     """IC: Send Valid Or Invalid User Code Format."""
     code = msg[4:16]
-    if re.match('(0\d){6}', code):
+    if re.match(r'(0\d){6}', code):
         code = re.sub(r'0(\d)', r'\1', code)
     return {'code': code, 'user': int(msg[16:19])-1,
             'keypad': int(msg[19:21])-1}

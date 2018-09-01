@@ -2,7 +2,8 @@
 from .const import Max, TextDescriptions, ZoneType, \
                    ZoneLogicalStatus, ZonePhysicalStatus
 from .elements import Element, Elements
-from .message import add_message_handler, zd_encode, zp_encode, zs_encode
+from .message import (add_message_handler, zd_encode, zp_encode,
+                      zs_encode, zt_encode)
 
 
 class Zone(Element):
@@ -26,6 +27,10 @@ class Zone(Element):
                     logl=ZoneLogicalStatus(self.logical_status).name,
                     volt=self.voltage, area=self.area, temp=self.temperature,
                     phys=ZonePhysicalStatus(self.physical_status).name)
+
+    def zone_trigger(self):
+        """(Helper) Trigger zone."""
+        self._elk.send(zt_encode(self._index))
 
 
 class Zones(Elements):

@@ -527,6 +527,11 @@ def zs_encode():
     return MessageEncode('06zs00', 'ZS')
 
 
+def zt_encode(zone):
+    """zt: Trigger zone."""
+    return MessageEncode('09zt{zone:03d}00'.format(zone=zone+1), None)
+
+
 def zv_encode(zone):
     """zv: Get zone voltage"""
     return MessageEncode('09zv{zone:03d}00'.format(zone=zone+1), 'ZV')

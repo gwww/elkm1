@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## [0.7.7]
+- Add 30 second timeout to create connection
+- lint cleanups
+
 ## [0.7.6]
 - Set user name to default name if not configured
 - Enhance IC decode to handle prox

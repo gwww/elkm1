@@ -6,7 +6,7 @@ from .message import add_message_handler, tr_encode, ts_encode
 
 class Thermostat(Element):
     """Class representing an Thermostat"""
-    def __init__(self, index, elk): # pylint: disable=useless-super-delegation
+    def __init__(self, index, elk):  # pylint: disable=useless-super-delegation
         super().__init__(index, elk)
         self.mode = 0
         self.hold = False
@@ -19,6 +19,7 @@ class Thermostat(Element):
     def set(self, element_to_set, value):
         """(Helper) Set thermostat"""
         self._elk.send(ts_encode(self.index, value, element_to_set))
+
 
 class Thermostats(Elements):
     """Handling for multiple areas"""

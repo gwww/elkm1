@@ -30,7 +30,7 @@ Connect to the Elk panel:
     from elkm1_lib import Elk
 
     elk = Elk({'url': 'elk://192.168.1.100'})
-    elk.loop.run_until_complete(elk.connect())
+    elk.connect()
     elk.run()
 ```
 

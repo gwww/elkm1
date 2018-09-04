@@ -14,7 +14,7 @@ This package is created as a library to interact with an ElkM1 alarm/automation
 pattern. The motivation to write this was to use with the Home Assistant
 automation platform. The library can be used for writing other ElkM1 integration
 applications. The IO with the panel is asynchronous over TCP or over the
-serial port (serial port not implemented yet).
+serial port.
 
 ## Installation
 
@@ -24,7 +24,7 @@ serial port (serial port not implemented yet).
 
 ## Overview
 
-Connect to the Elk panel:
+Basic connection to the Elk panel:
 
 ```python
     from elkm1_lib import Elk
@@ -37,7 +37,7 @@ Connect to the Elk panel:
 The above will connect to the Elk panel at IP address 192.168.1.100. the `elk://`
 prefix specifies that the connect is plaintext. Alternatively, `elks://` will 
 connect over TLS. In this case a userid and password must be specified
-and the call to `Elk` would be:
+and the call to `Elk` changes to:
 
 ```python
     elk = Elk({'url': 'elks://192.168.1.100',
@@ -59,13 +59,13 @@ After creating the `Elk` object and connecting to the panel the
 library code will synchronize all the elements to the data from the Elk panel.
 
 Many Elk messages are handled by the library, caching their contents. When a
-message causes a change to an attribute of an `Element`,
+message causes a change to an attribute of an `Element`, registered
 callbacks are called so that user use of the library can be notified
 of changing elements. The following user code shows registering a callback:
 
 ```python
-    def call_me(attribute, value):
-       print(attribute_that_changed, new_value)
+    def call_me(element, changeset):
+       print(changeset)
 
     for zone_number in range(Max.ZONES.value):
       elk.zones[zone_number].add_callback(call_me)
@@ -82,7 +82,7 @@ may have multiple callbacks.
 
 When the message is received it is decoded 
 and some validation is done. The message handler is called
-with the fields of from the decoded message. Each type of 
+with the fields of from the decoded message. Each type of
 message has parameters that match the message type. All handler parameters
 are named parameters.
 
@@ -119,6 +119,8 @@ the "no plans to implement" list.
 The `simple` Python script is a trivial use of the ElkM1 library.
 It connects to the panel, syncs to internal memory, and
 continues listening for any messages from the panel.
+The IP address is hard coded in this file. Edit the file to the
+IP address on your Elk panel.
 
 ### `elk`
 
@@ -133,7 +135,7 @@ that has a command line and an output window. `TAB` switches between
 the command line and output windows. In the output window the arrow keys
 and scrollwheel scroll the contents of the window.
 
-In the command line there are a
+In the command line when running `elk -i` there are a
 number of commands. Start with `help`. Then `help <command>` for 
 details on each command. In general there are commands to dump the internal
 state of elements and to invoke any of the encoders to send a message 

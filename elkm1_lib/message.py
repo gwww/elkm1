@@ -416,9 +416,10 @@ def cx_encode(counter, value):
 # pylint: disable=too-many-arguments
 def dm_encode(keypad_area, clear, beep, timeout, line1, line2):
     """dm: Display message on keypad."""
-    return MessageEncode('2Edm{:1d}{:1d}{:1d}{:05d}{:^<16.16}{:^<16.16}00'
-                         .format(keypad_area+1, clear, beep,
-                                 timeout, line1, line2), None)
+    return MessageEncode(
+        '2Edm{:1d}{:1d}{:1d}{:05d}{:^<16.16}{:^<16.16}00'
+        .format(keypad_area+1, clear, beep, timeout, line1, line2), None
+    )
 
 
 def ka_encode():

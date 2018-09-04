@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## [0.7.8]
+- Add zt decode and helper
+- Add dm helper
+
 ## [0.7.7]
 - Add 30 second timeout to create connection
 - lint cleanups

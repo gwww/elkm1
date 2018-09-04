@@ -2,7 +2,7 @@
 
 from .const import Max, TextDescriptions
 from .elements import Element, Elements
-from .message import add_message_handler, as_encode, al_encode
+from .message import add_message_handler, as_encode, al_encode, dm_encode
 
 
 class Area(Element):
@@ -23,6 +23,12 @@ class Area(Element):
     def disarm(self, code):
         """(Helper) Disarm system."""
         self.arm(0, code)
+
+    def display_message(self, clear, beep, timeout, line1, line2):
+        """Display a message on all of the keypads in this area."""
+        self._elk.send(
+            dm_encode(self._index, clear, beep, timeout, line1, line2)
+        )
 
 
 class Areas(Elements):

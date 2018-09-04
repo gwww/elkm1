@@ -28,7 +28,13 @@ Connect to the Elk panel:
 
 ```python
     from elkm1_lib import Elk
+    import logging
 
+    # Print to STDOUT
+    LOG = logging.getLogger(__name__)
+    logging.basicConfig(level=logging.DEBUG, format='%(message)s')
+    
+    # Connect to elk
     elk = Elk({'url': 'elk://192.168.1.100'})
     elk.connect()
     elk.run()

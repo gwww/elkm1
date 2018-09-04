@@ -5,6 +5,7 @@ This project follows [Semantic Versioning](https://semver.org/).
 ## [0.7.8]
 - Add zt decode and helper
 - Add dm helper
+- Fix speak word. Was using wrong Elk message code.
 
 ## [0.7.7]
 - Add 30 second timeout to create connection

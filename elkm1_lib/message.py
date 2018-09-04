@@ -477,7 +477,7 @@ def ss_encode():
 
 def sw_encode(word):
     """sp: Speak word."""
-    return MessageEncode('09sp{:03d}00'.format(word), None)
+    return MessageEncode('09sw{:03d}00'.format(word), None)
 
 
 def tn_encode(task):

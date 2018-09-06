@@ -40,9 +40,12 @@ connect over TLS. In this case a userid and password must be specified
 and the call to `Elk` changes to:
 
 ```python
-    elk = Elk({'url': 'elks://192.168.1.100',
-                  'userid': 'testuser', 'password': 'testpass'})
+    elk = Elk(
+        {'url': 'elks://192.168.1.100', 'userid': 'test', 'password': 'pass'}
+    )
 ```
+
+To see working example code take a look at the script `bin/simple`.
 
 The `Elk` object supports the concept of `Elements`. An `Element`
 is the base class representation of `Zones`, `Lights`, etc. So, for
@@ -117,10 +120,9 @@ the "no plans to implement" list.
 ### `simple`
 
 The `simple` Python script is a trivial use of the ElkM1 library.
-It connects to the panel, syncs to internal memory, and
-continues listening for any messages from the panel.
-The IP address is hard coded in this file. Edit the file to the
-IP address on your Elk panel.
+It connects to the panel, syncs to internal memory, and continues
+listening for any messages from the panel. The URL of the ElkM1 to
+connect to is retrieved from an environment variable named `ELKM1_URL`.
 
 ### `elk`
 

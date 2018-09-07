@@ -1,4 +1,7 @@
 """Definition of an ElkM1 Keypad."""
+import pytz
+import datetime as dt
+
 from .const import Max, TextDescriptions
 from .elements import Element, Elements
 from .message import add_message_handler, ka_encode
@@ -10,7 +13,9 @@ class Keypad(Element):
         super().__init__(index, elk)
         self.area = -1
         self.temperature = -40
+        self.last_update_time = dt.datetime.now(pytz.UTC)
         self.last_user = -1
+        self.code = ''
 
 
 class Keypads(Elements):
@@ -29,9 +34,14 @@ class Keypads(Elements):
 
     # pylint: disable=unused-argument
     def _ic_handler(self, code, user, keypad):
+        keypad_ = self.elements[keypad]
+
+        # By setting a time this will force the IC change to always be reported
+        keypad_.setattr('last_update_time', dt.datetime.now(pytz.UTC), False)
+
         # If user is negative then invalid code entered
-        self.elements[keypad].setattr('code', code if user < 0 else '****', False)
-        self.elements[keypad].setattr('last_user', user, True)
+        keypad_.setattr('code', code if user < 0 else '****', False)
+        keypad_.setattr('last_user', user, True)
 
     def _ka_handler(self, keypad_areas):
         for keypad in self.elements:

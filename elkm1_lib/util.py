@@ -88,3 +88,15 @@ def pretty_const(value):
     for word in words[1:]:
         pretty += ' ' + word.lower()
     return pretty
+
+def username(elk, user_number):
+    """Return name of user."""
+    if user_number >= 0 and user_number < elk.users.max_elements:
+        return elk.users[user_number].name
+    if user_number == 201:
+        return "*Program*"
+    if user_number == 202:
+        return "*Elk RP*"
+    if user_number == 203:
+        return "*Quick arm*"
+    return ""

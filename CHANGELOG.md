@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## [0.7.9]
+- Add time of change to IC message. The will force callbacks to be called.
+  Useful when multiple IC messages with same content come in. This way the
+  app using the callback can record the multiple attempts.
+- Add username utility function to get a user's name from an user number
+
 ## [0.7.8]
 - Add zt decode and helper
 - Add dm helper

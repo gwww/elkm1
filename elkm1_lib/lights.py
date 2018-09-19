@@ -12,16 +12,14 @@ class Light(Element):
         super().__init__(index, elk)
         self.status = 0
 
-    def turn_off(self):
-        """(Helper) Turn off light"""
-        self._elk.send(pf_encode(self._index))
-
-    def turn_on(self, brightness=100, time=0):
-        """(Helper) Turn on light"""
-        if brightness == 100:
+    def level(self, level, time=0):
+        """(Helper) Set light to specified level"""
+        if level <= 0:
+            self._elk.send(pf_encode(self._index))
+        elif level >= 98:
             self._elk.send(pn_encode(self._index))
         else:
-            self._elk.send(pc_encode(self._index, 9, brightness, time))
+            self._elk.send(pc_encode(self._index, 9, level, time))
 
     def toggle(self):
         """(Helper) Toggle light"""

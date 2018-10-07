@@ -12,4 +12,5 @@ mock = "*"
 pytest-mock = "*"
 urwid = "*"
 attrs = '*'
+colorlog = '*'
 "elkm1_lib" = {editable = true, path = "."}

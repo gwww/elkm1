@@ -2,6 +2,9 @@
 All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## [0.7.11] -- Pending
+- Add pytz as dependency
+
 ## [0.7.10]
 - Add level() helper to control lights
 - Remove turn_on and turn_off for lights

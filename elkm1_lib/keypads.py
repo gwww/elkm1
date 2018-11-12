@@ -16,6 +16,7 @@ class Keypad(Element):
         self.last_user_time = dt.datetime.now(pytz.UTC)
         self.last_user = -1
         self.code = ''
+        self.last_keypress = None
 
 
 class Keypads(Elements):
@@ -24,6 +25,7 @@ class Keypads(Elements):
         super().__init__(elk, Keypad, Max.KEYPADS.value)
         add_message_handler('IC', self._ic_handler)
         add_message_handler('KA', self._ka_handler)
+        add_message_handler('KC', self._kc_handler)
         add_message_handler('LW', self._lw_handler)
         add_message_handler('ST', self._st_handler)
 
@@ -47,6 +49,10 @@ class Keypads(Elements):
         for keypad in self.elements:
             if keypad_areas[keypad.index] >= 0:
                 keypad.setattr('area', keypad_areas[keypad.index], True)
+
+    def _kc_handler(self, keypad, key):
+        if key > 0:
+            self.elements[keypad].setattr('last_keypress', key, True)
 
     # pylint: disable=unused-argument
     def _lw_handler(self, keypad_temps, zone_temps):

@@ -167,6 +167,28 @@ class ZoneAlarmState(Enum):
     WATER_ALARM = 'I'
 
 
+class KeypadKeys(Enum):
+    """Keys on the keypad."""
+    STAR = 11
+    POUND = 12
+    F1 = 13
+    F2 = 14
+    F3 = 15
+    F4 = 16
+    STAY = 17
+    EXIT = 18
+    CHIME = 19
+    BYPASS = 20
+    ELK = 21
+    DOWN = 22
+    UP = 23
+    RIGHT = 24
+    LEFT = 25
+    F6 = 26
+    F5 = 27
+    DATA_KEY_MODE = 28
+
+
 class TextDescriptions(Enum):
     """Types of description strings that can be retrieved from the panel"""
     ZONE = (0, Max.ZONES.value)

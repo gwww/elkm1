@@ -167,6 +167,12 @@ def _ka_decode(msg):
     return {'keypad_areas': [ord(x)-0x31 for x in msg[4:4+Max.KEYPADS.value]]}
 
 
+@call_handlers('KC')
+def _kc_decode(msg):
+    """KC: Keypad key change."""
+    return {'keypad': int(msg[4:6])-1, 'key': int(msg[6:8])}
+
+
 @call_handlers('LW')
 def _lw_decode(msg):
     """LW: temperatures from all keypads and zones 1-16."""

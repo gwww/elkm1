@@ -4,6 +4,7 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ## [0.7.11] -- Pending
 - Add pytz as dependency
+- Add KC (keypress) handling
 
 ## [0.7.10]
 - Add level() helper to control lights

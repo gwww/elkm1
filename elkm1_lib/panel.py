@@ -45,7 +45,39 @@ class Panel(Element):
         self.setattr('real_time_clock', real_time_clock, True)
 
     def _ss_handler(self, system_trouble_status):
-        self.setattr('system_trouble_status', system_trouble_status, True)
+        def _get_status(index, trouble, zone_encoded=False):
+            if system_trouble_status[index] != '0':
+                if zone_encoded:
+                    zone = ord(system_trouble_status[index]) - 0x30
+                    statuses.append('{} zone {}'.format(trouble, zone))
+                else:
+                    statuses.append(trouble)
+
+        statuses = []
+        _get_status(0, "AC Fail")
+        _get_status(1, "Box Tamper", True)
+        _get_status(2, "Fail To Communicate")
+        _get_status(3, "EEProm Memory Error")
+        _get_status(4, "Low Battery Control")
+        _get_status(5, "Transmitter Low Battery", True)
+        _get_status(6, "Over Current")
+        _get_status(7, "Telephone Fault")
+        _get_status(9, "Output 2")
+        _get_status(10, "Missing Keypad")
+        _get_status(11, "Zone Expander")
+        _get_status(12, "Output Expander")
+        _get_status(14, "ELKRP Remote Access")
+        _get_status(16, "Common Area Not Armed")
+        _get_status(17, "Flash Memory Error")
+        _get_status(18, "Security Alert", True)
+        _get_status(19, "Serial Port Expander")
+        _get_status(20, "Lost Transmitter", True)
+        _get_status(21, "GE Smoke CleanMe")
+        _get_status(22, "Ethernet")
+        _get_status(31, "Display Message In Keypad Line 1")
+        _get_status(32, "Display Message In Keypad Line 2")
+        _get_status(33, "Fire", True)
+        self.setattr('system_trouble_status', ', '.join(statuses), True)
 
     def _rp_handler(self, remote_programming_status):
         if remote_programming_status == ElkRPStatus.DISCONNECTED.value:

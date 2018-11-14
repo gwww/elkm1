@@ -2,7 +2,12 @@
 All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](https://semver.org/).
 
-## [0.7.11] -- Pending
+## [0.7.13] -- Pending
+
+## [0.7.12]
+- Add system_trouble_status decoding.
+
+## [0.7.11]
 - Add pytz as dependency
 - Add KC (keypress) handling
 

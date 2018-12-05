@@ -2,7 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](https://semver.org/).
 
-## [0.7.13] -- Pending
+## [0.7.14] -- Pending
+
+## [0.7.13]
+- Fix updating counter value
+- Add alarm memory processing
 
 ## [0.7.12]
 - Add system_trouble_status decoding.

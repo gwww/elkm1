@@ -34,5 +34,4 @@ class Counters(Elements):
                 self.elk.send(cv_encode(counter.index))
 
     def _cv_handler(self, counter, value):
-        countr = self.elements[counter]
-        countr.value = value
+        self.elements[counter].setattr('value', value, True)

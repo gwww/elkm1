@@ -2,8 +2,8 @@
 from .const import Max, TextDescriptions, ZoneType, \
                    ZoneLogicalStatus, ZonePhysicalStatus
 from .elements import Element, Elements
-from .message import (add_message_handler, zd_encode, zp_encode,
-                      zs_encode, zt_encode)
+from .message import (add_message_handler, az_encode, zd_encode,
+                      zp_encode, zs_encode, zt_encode)
 
 
 class Zone(Element):
@@ -21,10 +21,11 @@ class Zone(Element):
 
     def __str__(self):
         return ("{indx:d} '{name}' type:{typ} status:{logl}/{phys}"
-                " area:{area:d} v:{volt} temp:{temp}").format(
+                " area:{area:d} trig:{trig} v:{volt} temp:{temp}").format(
                     name=self.name, indx=self._index,
                     typ=ZoneType(self.definition).name,
                     logl=ZoneLogicalStatus(self.logical_status).name,
+                    trig=self.triggered_alarm,
                     volt=self.voltage, area=self.area, temp=self.temperature,
                     phys=ZonePhysicalStatus(self.physical_status).name)
 
@@ -49,6 +50,7 @@ class Zones(Elements):
 
     def sync(self):
         """Retrieve zones from ElkM1"""
+        self.elk.send(az_encode())
         self.elk.send(zd_encode())
         self.elk.send(zp_encode())
         self.elk.send(zs_encode())

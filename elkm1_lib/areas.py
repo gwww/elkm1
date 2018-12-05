@@ -2,7 +2,8 @@
 
 from .const import Max, TextDescriptions
 from .elements import Element, Elements
-from .message import add_message_handler, as_encode, al_encode, dm_encode
+from .message import (add_message_handler, as_encode, az_encode,
+                      al_encode, dm_encode)
 
 
 class Area(Element):
@@ -50,10 +51,17 @@ class Areas(Elements):
             area.setattr('alarm_memory', alarm_memory[area.index], True)
 
     def _as_handler(self, armed_statuses, arm_up_states, alarm_states):
+        update_alarm_triggers = False
         for area in self.elements:
             area.setattr('armed_status', armed_statuses[area.index], False)
             area.setattr('arm_up_state', arm_up_states[area.index], False)
+            if area.alarm_state != alarm_states[area.index] or \
+                alarm_states[area.index] != '0':
+                update_alarm_triggers = True
             area.setattr('alarm_state', alarm_states[area.index], True)
+
+        if update_alarm_triggers:
+            self.elk.send(az_encode())
 
     # pylint: disable=too-many-arguments
     def _ee_handler(self, area, is_exit, timer1, timer2, armed_status):

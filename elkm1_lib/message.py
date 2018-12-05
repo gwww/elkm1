@@ -82,6 +82,12 @@ class call_handlers():  # pylint: disable=invalid-name,too-few-public-methods
         return wrapped_f
 
 
+@call_handlers('AM')
+def _am_decode(msg):
+    """AM: Alarm memory by area report."""
+    return {'alarm_memory': [x for x in msg[4:4+Max.AREAS.value]]}
+
+
 @call_handlers('AS')
 def _as_decode(msg):
     """AS: Arming status report."""

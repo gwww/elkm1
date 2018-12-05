@@ -215,6 +215,7 @@ class TextDescriptions(Enum):
 
 # Map to convert message code to descriptive string
 MESSAGE_MAP = {
+    'AM': "Alarm memory update",
     'AP': "Send ASCII String",
     'AR': "Alarm Reporting to Ethernet",
     'AS': "Arming status report data",

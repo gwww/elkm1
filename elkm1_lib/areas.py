@@ -12,6 +12,7 @@ class Area(Element):
         self.armed_status = None
         self.arm_up_state = None
         self.alarm_state = None
+        self.alarm_memory = None
         self.is_exit = False
         self.timer1 = 0
         self.timer2 = 0
@@ -35,6 +36,7 @@ class Areas(Elements):
     """Handling for multiple areas"""
     def __init__(self, elk):
         super().__init__(elk, Area, Max.AREAS.value)
+        add_message_handler('AM', self._am_handler)
         add_message_handler('AS', self._as_handler)
         add_message_handler('EE', self._ee_handler)
 
@@ -42,6 +44,10 @@ class Areas(Elements):
         """Retrieve areas from ElkM1"""
         self.elk.send(as_encode())
         self.get_descriptions(TextDescriptions.AREA.value)
+
+    def _am_handler(self, alarm_memory):
+        for area in self.elements:
+            area.setattr('alarm_memory', alarm_memory[area.index], True)
 
     def _as_handler(self, armed_statuses, arm_up_states, alarm_states):
         for area in self.elements:

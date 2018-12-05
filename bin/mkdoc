@@ -8,9 +8,9 @@ import elkm1_lib.message
 
 def main():
     """Create markdown doc with messages that have encoders/decoders"""
-    no_plans_to_implement = {'ar', 'AR', 'at', 'AT',
-        'ca', 'CA', 'cd', 'CD', 'ds', 'DS', 'DK', 'NS', 'NZ',
-        'RE', 'rr', 'RR', 'rs', 'ua', 'UA', 'XB', 'xk'}
+    no_plans_to_implement = {'AP', 'ar', 'AR', 'at', 'AT',
+        'ca', 'CA', 'cd', 'CD', 'ds', 'DS', 'DK', 'ip', 'IP', 'ir', 'IR',
+        'NS', 'NZ', 'RE', 'rr', 'RR', 'rs', 'ua', 'UA', 'XB', 'xk'}
 
     # There is one "magic" encoder 'al' which is used to encode
     # messages a0-a8

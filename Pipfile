@@ -14,3 +14,4 @@ pytest-mock = "*"
 urwid = "*"
 attrs = '*'
 colorlog = '*'
+v = {version = "*", editable = true}

@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "434e115e204e8123a8f32a73ada583aafeef03ec1c94c1ec712e4c9695d30b09"
+            "sha256": "11801c91c53c4045962819a663d981dee2a352099531e678a3a06a428adde890"
         },
         "pipfile-spec": 6,
         "requires": {},
@@ -31,11 +31,11 @@
         },
         "pytz": {
             "hashes": [
-                "sha256:a061aa0a9e06881eb8b3b2b43f05b9439d6583c206d0a6c340ff72a7b6669053",
-                "sha256:ffb9ef1de172603304d9d2819af6f5ece76f2e85ec10692a524dd876e72bf277"
+                "sha256:31cb35c89bd7d333cd32c5f278fca91b523b0834369e757f4c5641ea252236ca",
+                "sha256:8e0f8568c118d3077b46be7d654cc8167fa916092e28320cde048e54bfc9f1e6"
             ],
             "index": "pypi",
-            "version": "==2018.5"
+            "version": "==2018.7"
         }
     },
     "develop": {
@@ -80,10 +80,10 @@
         },
         "pbr": {
             "hashes": [
-                "sha256:ab94783019179bf48f5784edc63f5bc8328ec5ff93f33591567f266d21ac7323",
-                "sha256:bfcff1a3878eebf559392c2130a17f612a03f96a0d44c3559d9c1e62a4235a2d"
+                "sha256:f59d71442f9ece3dffc17bc36575768e1ee9967756e6b6535f0ee1f0054c3d68",
+                "sha256:f6d5b23f226a2ba58e14e49aa3b1bfaf814d0199144b95d78458212444de1387"
             ],
-            "version": "==5.0.0"
+            "version": "==5.1.1"
         },
         "pluggy": {
             "hashes": [
@@ -101,11 +101,11 @@
         },
         "pytest": {
             "hashes": [
-                "sha256:10e59f84267370ab20cec9305bafe7505ba4d6b93ecbf66a1cce86193ed511d5",
-                "sha256:8c827e7d4816dfe13e9329c8226aef8e6e75d65b939bc74fda894143b6d1df59"
+                "sha256:1d131cc532be0023ef8ae265e2a779938d0619bb6c2510f52987ffcba7fa1ee4",
+                "sha256:ca4761407f1acc85ffd1609f464ca20bb71a767803505bd4127d0e45c5a50e23"
             ],
             "index": "pypi",
-            "version": "==3.9.1"
+            "version": "==4.0.1"
         },
         "pytest-mock": {
             "hashes": [
@@ -128,6 +128,14 @@
             ],
             "index": "pypi",
             "version": "==2.0.1"
+        },
+        "v": {
+            "hashes": [
+                "sha256:605a936bb41413ea696d92acc74dcf1a1eadde03e73b13655591c2b9074b9dd8",
+                "sha256:c2d77319519fc8b48bafd0677a9117d2717d266fa8a7512ad2158a6a40b31c01"
+            ],
+            "index": "pypi",
+            "version": "==4.0.0"
         }
     }
 }

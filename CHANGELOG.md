@@ -2,7 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](https://semver.org/).
 
-## [0.7.14] -- Pending
+## [0.7.15] -- Pending
+
+## [0.7.14]
+- Support multiple elk instances in same process by associating
+  _message_handlers with elk object rather than as a file global.
 
 ## [0.7.13]
 - Fix updating counter value

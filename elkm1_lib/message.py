@@ -23,15 +23,13 @@ from .const import Max
 
 MessageEncode = namedtuple('MessageEncode', ['message', 'response_command'])
 
-_message_handlers = {}  # pylint: disable=invalid-name
 
-
-def add_message_handler(message_type, handler):
+def add_message_handler(message_handlers, message_type, handler):
     """Manage callbacks for message handlers."""
-    if message_type not in _message_handlers:
-        _message_handlers[message_type] = []
+    if message_type not in message_handlers:
+        message_handlers[message_type] = []
 
-    handlers = _message_handlers[message_type]
+    handlers = message_handlers[message_type]
     if handler not in handlers:
         handlers.append(handler)
 
@@ -74,10 +72,10 @@ class call_handlers():  # pylint: disable=invalid-name,too-few-public-methods
         self.cmd = cmd
 
     def __call__(self, decode_func):
-        def wrapped_f(msg):
+        def wrapped_f(message_handlers, msg):
             """Calls handlers"""
             decoded_msg = decode_func(msg)
-            for handler in _message_handlers.get(self.cmd, []):
+            for handler in message_handlers.get(self.cmd, []):
                 handler(**decoded_msg)
         return wrapped_f
 
@@ -344,7 +342,7 @@ def _check_message_valid(msg):
         raise ValueError("Elk message length incorrect")
 
 
-def message_decode(msg):
+def message_decode(message_handlers, msg):
     """Decode an Elk message by passing to appropriate decoder"""
     _check_message_valid(msg)
 
@@ -357,9 +355,9 @@ def message_decode(msg):
         if not callable(globals()[decoder_name]):
             raise ValueError
     except (KeyError, ValueError):
-        _unknown_decode(msg)
+        _unknown_decode(message_handlers, msg)
         return
-    globals()[decoder_name](msg)
+    globals()[decoder_name](message_handlers, msg)
 
 
 def al_encode(arm_mode, area, user_code):

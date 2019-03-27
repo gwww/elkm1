@@ -10,6 +10,7 @@ LOG = logging.getLogger(__name__)
 get_descriptions_in_progress = {}
 sync_handlers = []
 
+_message_handlers = {}  # pylint: disable=invalid-name
 
 def add_sync_handler(sync_handler):
     """Register a fn that synchronizes part of the panel."""
@@ -33,7 +34,7 @@ def get_descriptions(elk, desc, callback):
     results = [None] * max_units
     get_descriptions_in_progress[desc_type] = (max_units, callback,
                                                results, elk)
-    add_message_handler('SD', sd_handler)
+    add_message_handler(_message_handlers, 'SD', sd_handler)
     elk.send(sd_encode(desc_type=desc_type, unit=0))
 
 

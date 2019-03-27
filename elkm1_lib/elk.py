@@ -24,9 +24,10 @@ class Elk:
         self._transport = None
         self.connection_lost_callbk = None
         self._connection_retry_timer = 1
+        self._message_handlers = {}
 
         self._heartbeat = None
-        add_message_handler('XK', self._xk_handler)
+        add_message_handler(self._message_handlers, 'XK', self._xk_handler)
 
         # Setup for all the types of elements tracked
         if 'element_list' in config:
@@ -91,7 +92,7 @@ class Elk:
         self._heartbeat = self.loop.call_later(120, self._reset_connection)
 
     def _disconnected(self):
-        LOG.warning("ElkM1 disconnected")
+        LOG.warning("ElkM1 at %s disconnected", self._config['url'])
         self._conn = None
         self.loop.call_later(self._connection_retry_timer, self.connect)
         if self._heartbeat:
@@ -101,7 +102,7 @@ class Elk:
     def _got_data(self, data):  # pylint: disable=no-self-use
         LOG.debug("got_data '%s'", data)
         try:
-            message_decode(data)
+            message_decode(self._message_handlers, data)
         except ValueError as err:
             LOG.debug(err)
 

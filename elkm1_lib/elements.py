@@ -4,7 +4,7 @@
 
 from abc import abstractmethod
 from .util import add_sync_handler, get_descriptions
-
+from .message import add_message_handler
 
 class Element:
     """Element class"""
@@ -28,6 +28,9 @@ class Element:
         """Callbacks when attribute of element changes"""
         if callback in self._callbacks:
             self._callbacks.remove(callback)
+
+    def add_message_handler(self, message_type, handler):
+        add_message_handler(self._elk._message_handlers, message_type, handler)
 
     def _call_callbacks(self):
         """Callbacks when attribute of element changes"""

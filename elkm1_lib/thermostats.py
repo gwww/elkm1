@@ -1,7 +1,7 @@
 """Definition of an ElkM1 Thermostat"""
 from .const import Max, TextDescriptions
 from .elements import Element, Elements
-from .message import add_message_handler, tr_encode, ts_encode
+from .message import tr_encode, ts_encode
 
 
 class Thermostat(Element):
@@ -25,8 +25,8 @@ class Thermostats(Elements):
     """Handling for multiple areas"""
     def __init__(self, elk):
         super().__init__(elk, Thermostat, Max.THERMOSTATS.value)
-        add_message_handler('ST', self._st_handler)
-        add_message_handler('TR', self._tr_handler)
+        self.add_message_handler('ST', self._st_handler)
+        self.add_message_handler('TR', self._tr_handler)
 
     def sync(self):
         """Retrieve areas from ElkM1"""

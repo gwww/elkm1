@@ -2,8 +2,8 @@
 
 from .const import Max, TextDescriptions
 from .elements import Element, Elements
-from .message import add_message_handler, ps_encode, pc_encode, pf_encode, \
-                     pn_encode, pt_encode
+from .message import ( ps_encode, pc_encode, pf_encode, 
+                       pn_encode, pt_encode )
 
 
 class Light(Element):
@@ -30,8 +30,8 @@ class Lights(Elements):
     """Handling for multiple lights"""
     def __init__(self, elk):
         super().__init__(elk, Light, Max.LIGHTS.value)
-        add_message_handler('PC', self._pc_handler)
-        add_message_handler('PS', self._ps_handler)
+        self.add_message_handler('PC', self._pc_handler)
+        self.add_message_handler('PS', self._ps_handler)
 
     def sync(self):
         """Retrieve lights from ElkM1"""

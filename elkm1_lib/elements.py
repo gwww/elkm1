@@ -91,6 +91,9 @@ class Elements:
             if descriptions[element.index] is not None:
                 element.setattr('name', descriptions[element.index], True)
 
+    def add_message_handler(self, message_type, handler):
+        add_message_handler(self._elk._message_handlers, message_type, handler)
+
     def get_descriptions(self, description_type):
         """Get the list of descriptions for the element."""
         get_descriptions(self.elk, description_type, self._got_desc)

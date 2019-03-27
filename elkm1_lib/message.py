@@ -110,15 +110,15 @@ def _cr_one_custom_value_decode(msg):
     return {'index': index, 'value': value, 'value_format': value_format}
 
 
-def _cr_decode(msg):
+def _cr_decode(message_handlers, msg):
     """CR: Custom values"""
     if int(msg[4:6]) > 0:
-        _cr_one_custom_value_decode(msg)
+        _cr_one_custom_value_decode(message_handlers, msg)
     else:
         part = 6
         for i in range(Max.SETTINGS.value):
             newmsg = '0ECR{cv:02d}{val:s}'.format(cv=i+1, val=msg[part:part+6])
-            _cr_one_custom_value_decode(newmsg)
+            _cr_one_custom_value_decode(message_handlers, newmsg)
             part += 6
 
 

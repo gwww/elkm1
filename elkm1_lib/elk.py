@@ -106,8 +106,8 @@ class Elk:
         except ValueError as err:
             LOG.debug(err)
 
-    def _add_message_handler(message_type, handler):
-        add_message_hander(_message_handlers, message_type, handler)
+    def _add_message_handler(self, message_type, handler):
+        add_message_handler(_message_handlers, message_type, handler)
 
     def is_connected(self):
         """Status of connection to Elk."""

@@ -20,11 +20,11 @@ class Panel(Element):
 
     def sync(self):
         """Retrieve panel information from ElkM1"""
-        self.add_message_handler('VN', self._vn_handler)
-        self.add_message_handler('XK', self._xk_handler)
-        self.add_message_handler('RP', self._rp_handler)
-        self.add_message_handler('IE', call_sync_handlers)
-        self.add_message_handler('SS', self._ss_handler)
+        self._add_message_handler('VN', self._vn_handler)
+        self._add_message_handler('XK', self._xk_handler)
+        self._add_message_handler('RP', self._rp_handler)
+        self._add_message_handler('IE', call_sync_handlers)
+        self._add_message_handler('SS', self._ss_handler)
         self._elk.send(vn_encode())
         self._elk.send(lw_encode())
         self._elk.send(ss_encode())

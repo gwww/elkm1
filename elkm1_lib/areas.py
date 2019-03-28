@@ -37,9 +37,9 @@ class Areas(Elements):
     """Handling for multiple areas"""
     def __init__(self, elk):
         super().__init__(elk, Area, Max.AREAS.value)
-        self.add_message_handler('AM', self._am_handler)
-        self.add_message_handler('AS', self._as_handler)
-        self.add_message_handler('EE', self._ee_handler)
+        self._add_message_handler('AM', self._am_handler)
+        self._add_message_handler('AS', self._as_handler)
+        self._add_message_handler('EE', self._ee_handler)
 
     def sync(self):
         """Retrieve areas from ElkM1"""

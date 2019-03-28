@@ -28,8 +28,8 @@ class Outputs(Elements):
     """Handling for multiple areas"""
     def __init__(self, elk):
         super().__init__(elk, Output, Max.OUTPUTS.value)
-        self.add_message_handler('CC', self._cc_handler)
-        self.add_message_handler('CS', self._cs_handler)
+        self._add_message_handler('CC', self._cc_handler)
+        self._add_message_handler('CS', self._cs_handler)
 
     def sync(self):
         """Retrieve areas from ElkM1"""

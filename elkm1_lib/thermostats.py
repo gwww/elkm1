@@ -25,8 +25,8 @@ class Thermostats(Elements):
     """Handling for multiple areas"""
     def __init__(self, elk):
         super().__init__(elk, Thermostat, Max.THERMOSTATS.value)
-        self.add_message_handler('ST', self._st_handler)
-        self.add_message_handler('TR', self._tr_handler)
+        self._add_message_handler('ST', self._st_handler)
+        self._add_message_handler('TR', self._tr_handler)
 
     def sync(self):
         """Retrieve areas from ElkM1"""

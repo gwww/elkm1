@@ -20,7 +20,7 @@ class Settings(Elements):
     """Handling for multiple custom values"""
     def __init__(self, elk):
         super().__init__(elk, Setting, Max.SETTINGS.value)
-        self.add_message_handler('CR', self._cr_handler)
+        self._add_message_handler('CR', self._cr_handler)
 
     def sync(self):
         """Retrieve custom values from ElkM1"""

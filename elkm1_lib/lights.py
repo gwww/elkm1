@@ -30,8 +30,8 @@ class Lights(Elements):
     """Handling for multiple lights"""
     def __init__(self, elk):
         super().__init__(elk, Light, Max.LIGHTS.value)
-        self.add_message_handler('PC', self._pc_handler)
-        self.add_message_handler('PS', self._ps_handler)
+        self._add_message_handler('PC', self._pc_handler)
+        self._add_message_handler('PS', self._ps_handler)
 
     def sync(self):
         """Retrieve lights from ElkM1"""

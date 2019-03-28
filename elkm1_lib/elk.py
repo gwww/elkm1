@@ -27,7 +27,7 @@ class Elk:
         self._message_handlers = {}
 
         self._heartbeat = None
-        add_message_handler(self._message_handlers, 'XK', self._xk_handler)
+        self._add_message_handler('XK', self._xk_handler)
 
         # Setup for all the types of elements tracked
         if 'element_list' in config:
@@ -105,6 +105,9 @@ class Elk:
             message_decode(self._message_handlers, data)
         except ValueError as err:
             LOG.debug(err)
+
+    def _add_message_handler(message_type, handler):
+        add_message_hander(_message_handlers, message_type, handler)
 
     def is_connected(self):
         """Status of connection to Elk."""

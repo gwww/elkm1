@@ -38,15 +38,15 @@ class Zones(Elements):
     """Handling for multiple zones"""
     def __init__(self, elk):
         super().__init__(elk, Zone, Max.ZONES.value)
-        self.add_message_handler('AZ', self._az_handler)
-        self.add_message_handler('LW', self._lw_handler)
-        self.add_message_handler('ST', self._st_handler)
-        self.add_message_handler('ZB', self._zb_handler)
-        self.add_message_handler('ZC', self._zc_handler)
-        self.add_message_handler('ZD', self._zd_handler)
-        self.add_message_handler('ZP', self._zp_handler)
-        self.add_message_handler('ZS', self._zs_handler)
-        self.add_message_handler('ZV', self._zv_handler)
+        self._add_message_handler('AZ', self._az_handler)
+        self._add_message_handler('LW', self._lw_handler)
+        self._add_message_handler('ST', self._st_handler)
+        self._add_message_handler('ZB', self._zb_handler)
+        self._add_message_handler('ZC', self._zc_handler)
+        self._add_message_handler('ZD', self._zd_handler)
+        self._add_message_handler('ZP', self._zp_handler)
+        self._add_message_handler('ZS', self._zs_handler)
+        self._add_message_handler('ZV', self._zv_handler)
 
     def sync(self):
         """Retrieve zones from ElkM1"""

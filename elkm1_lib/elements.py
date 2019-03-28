@@ -4,7 +4,6 @@
 
 from abc import abstractmethod
 from .util import add_sync_handler, get_descriptions
-from .message import add_message_handler
 
 class Element:
     """Element class"""
@@ -29,8 +28,8 @@ class Element:
         if callback in self._callbacks:
             self._callbacks.remove(callback)
 
-    def add_message_handler(self, message_type, handler):
-        add_message_handler(self._elk._message_handlers, message_type, handler)
+    def _add_message_handler(self, message_type, handler):
+        self._elk._add_message_handler(message_type, handler)
 
     def _call_callbacks(self):
         """Callbacks when attribute of element changes"""
@@ -91,8 +90,8 @@ class Elements:
             if descriptions[element.index] is not None:
                 element.setattr('name', descriptions[element.index], True)
 
-    def add_message_handler(self, message_type, handler):
-        add_message_handler(self.elk._message_handlers, message_type, handler)
+    def _add_message_handler(self, message_type, handler):
+        self.elk._add_message_handler(message_type, handler)
 
     def get_descriptions(self, description_type):
         """Get the list of descriptions for the element."""

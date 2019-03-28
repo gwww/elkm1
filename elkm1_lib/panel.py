@@ -3,7 +3,6 @@ from .const import ElkRPStatus
 from .elements import Element
 from .message import (vn_encode, lw_encode,
                       sw_encode, sp_encode, ss_encode)
-from .util import add_sync_handler, call_sync_handlers
 
 
 class Panel(Element):
@@ -16,14 +15,14 @@ class Panel(Element):
         self.remote_programming_status = 0
         self.system_trouble_status = ''
         self.setattr('name', 'ElkM1', True)
-        add_sync_handler(self.sync)
+        self._elk._add_sync_handler(self.sync)
 
     def sync(self):
         """Retrieve panel information from ElkM1"""
         self._add_message_handler('VN', self._vn_handler)
         self._add_message_handler('XK', self._xk_handler)
         self._add_message_handler('RP', self._rp_handler)
-        self._add_message_handler('IE', call_sync_handlers)
+        self._add_message_handler('IE', self._elk._call_sync_handlers)
         self._add_message_handler('SS', self._ss_handler)
         self._elk.send(vn_encode())
         self._elk.send(lw_encode())

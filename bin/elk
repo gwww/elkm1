@@ -90,8 +90,8 @@ def main():
         logging.basicConfig(level=logging.DEBUG, format='%(message)s')
 
     try:
-        add_message_handler('unknown', _unknown_handler)
-        add_message_handler('timeout', _timeout_handler)
+        elk._add_message_handler('unknown', _unknown_handler)
+        elk._add_message_handler('timeout', _timeout_handler)
         elk.connect()
         if args.interactive:
             c.loop()

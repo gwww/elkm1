@@ -1,7 +1,7 @@
 """Definition of an ElkM1 Output"""
 from .const import Max, TextDescriptions
 from .elements import Element, Elements
-from .message import add_message_handler, cs_encode, cf_encode, \
+from .message import cs_encode, cf_encode, \
                      cn_encode, ct_encode
 
 
@@ -28,8 +28,8 @@ class Outputs(Elements):
     """Handling for multiple areas"""
     def __init__(self, elk):
         super().__init__(elk, Output, Max.OUTPUTS.value)
-        add_message_handler('CC', self._cc_handler)
-        add_message_handler('CS', self._cs_handler)
+        elk.add_handler('CC', self._cc_handler)
+        elk.add_handler('CS', self._cs_handler)
 
     def sync(self):
         """Retrieve areas from ElkM1"""

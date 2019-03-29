@@ -4,7 +4,7 @@ import asyncio
 from functools import reduce
 import logging
 
-from .message import get_elk_command, timeout_decode
+from .message import get_elk_command
 
 LOG = logging.getLogger(__name__)
 
@@ -53,7 +53,7 @@ class Connection(asyncio.Protocol):
         self._paused = False
 
     def _response_required_timeout(self):
-        timeout_decode(self._waiting_for_response)
+        #timeout_decode(self._waiting_for_response)
         self._timeout_task = None
         self._waiting_for_response = None
         self._process_write_queue()

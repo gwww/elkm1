@@ -1,7 +1,7 @@
 """Definition of an ElkM1 Custom Value"""
 from .const import Max, TextDescriptions
 from .elements import Element, Elements
-from .message import add_message_handler, cx_encode, cv_encode
+from .message import cx_encode, cv_encode
 
 
 class Counter(Element):
@@ -20,7 +20,7 @@ class Counters(Elements):
     """Handling for multiple counters"""
     def __init__(self, elk):
         super().__init__(elk, Counter, Max.COUNTERS.value)
-        add_message_handler('CV', self._cv_handler)
+        elk.add_handler('CV', self._cv_handler)
 
     def sync(self):
         """Retrieve values from ElkM1 on demand"""

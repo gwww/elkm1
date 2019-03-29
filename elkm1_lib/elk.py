@@ -27,7 +27,7 @@ class Elk:
         self._handlers = Message()
 
         self._heartbeat = None
-        add_message_handler('XK', self._xk_handler)
+        self.add_handler('XK', self._xk_handler)
 
         # Setup for all the types of elements tracked
         if 'element_list' in config:
@@ -99,10 +99,13 @@ class Elk:
             self._heartbeat.cancel()
             self._heartbeat = None
 
+    def add_handler(self, msg_type, handler):
+        self._handlers.add_handler(msg_type, handler)
+
     def _got_data(self, data):  # pylint: disable=no-self-use
         LOG.debug("got_data '%s'", data)
         try:
-            message_decode(data)
+            self._handlers.decode(data)
         except ValueError as err:
             LOG.debug(err)
 

@@ -52,31 +52,31 @@ class Message:
         if handler not in self._handlers[message_type]:
             self._handlers[message_type].append(handler)
 
-    def decode(msg):
+    def decode(self, msg):
         """Decode an Elk message by passing to appropriate decoder"""
         _check_message_valid(msg)
         decoder_name = '_' + msg[2:4].lower() + '_decode'
         getattr(self, decoder_name, '_unknown_decode')(msg)
 
     @call_handlers('AM')
-    def _am_decode(msg):
+    def _am_decode(self, msg):
         """AM: Alarm memory by area report."""
         return {'alarm_memory': [x for x in msg[4:4+Max.AREAS.value]]}
 
     @call_handlers('AS')
-    def _as_decode(msg):
+    def _as_decode(self, msg):
         """AS: Arming status report."""
         return {'armed_statuses': [x for x in msg[4:12]],
                 'arm_up_states': [x for x in msg[12:20]],
                 'alarm_states': [x for x in msg[20:28]]}
 
     @call_handlers('AZ')
-    def _az_decode(msg):
+    def _az_decode(self, msg):
         """AZ: Alarm by zone report."""
         return {'alarm_status': [x for x in msg[4:4+Max.ZONES.value]]}
 
     @call_handlers('CR')
-    def _cr_one_custom_value_decode(msg):
+    def _cr_one_custom_value_decode(self, msg):
         index = int(msg[4:6])-1
         value = int(msg[6:11])
         value_format = int(msg[11])
@@ -84,42 +84,42 @@ class Message:
             value = ((value >> 8) & 0xff, value & 0xff)
         return {'index': index, 'value': value, 'value_format': value_format}
 
-    def _cr_decode(msg):
+    def _cr_decode(self, msg):
         """CR: Custom values"""
         if int(msg[4:6]) > 0:
-            _cr_one_custom_value_decode(msg)
+            self._cr_one_custom_value_decode(msg)
         else:
             part = 6
             for i in range(Max.SETTINGS.value):
                 newmsg = '0ECR{cv:02d}{val:s}'.format(cv=i+1, val=msg[part:part+6])
-                _cr_one_custom_value_decode(newmsg)
+                self._cr_one_custom_value_decode(newmsg)
                 part += 6
 
     @call_handlers('CC')
-    def _cc_decode(msg):
+    def _cc_decode(self, msg):
         """CC: Output status for single output."""
         return {'output': int(msg[4:7])-1, 'output_status': msg[7] == '1'}
 
     @call_handlers('CS')
-    def _cs_decode(msg):
+    def _cs_decode(self, msg):
         """CS: Output status for all outputs."""
         output_status = [x == '1' for x in msg[4:4+Max.OUTPUTS.value]]
         return {'output_status': output_status}
 
     @call_handlers('CV')
-    def _cv_decode(msg):
+    def _cv_decode(self, msg):
         """CV: Counter value."""
         return {'counter': int(msg[4:6])-1, 'value': int(msg[6:11])}
 
     @call_handlers('EE')
-    def _ee_decode(msg):
+    def _ee_decode(self, msg):
         """EE: Entry/exit timer report."""
         return {'area': int(msg[4:5])-1, 'is_exit': msg[5:6] == '0',
                 'timer1': int(msg[6:9]), 'timer2': int(msg[9:12]),
                 'armed_status': msg[12:13]}
 
     @call_handlers('IC')
-    def _ic_decode(msg):
+    def _ic_decode(self, msg):
         """IC: Send Valid Or Invalid User Code Format."""
         code = msg[4:16]
         if re.match(r'(0\d){6}', code):
@@ -128,22 +128,22 @@ class Message:
                 'keypad': int(msg[19:21])-1}
 
     @call_handlers('IE')
-    def _ie_decode(_msg):
+    def _ie_decode(self, _msg):
         """IE: Installer mode exited."""
         return {}
 
     @call_handlers('KA')
-    def _ka_decode(msg):
+    def _ka_decode(self, msg):
         """KA: Keypad areas for all keypads."""
         return {'keypad_areas': [ord(x)-0x31 for x in msg[4:4+Max.KEYPADS.value]]}
 
     @call_handlers('KC')
-    def _kc_decode(msg):
+    def _kc_decode(self, msg):
         """KC: Keypad key change."""
         return {'keypad': int(msg[4:6])-1, 'key': int(msg[6:8])}
 
     @call_handlers('LW')
-    def _lw_decode(msg):
+    def _lw_decode(self, msg):
         """LW: temperatures from all keypads and zones 1-16."""
         keypad_temps = []
         zone_temps = []
@@ -153,25 +153,25 @@ class Message:
         return {'keypad_temps': keypad_temps, 'zone_temps': zone_temps}
 
     @call_handlers('PC')
-    def _pc_decode(msg):
+    def _pc_decode(self, msg):
         """PC: PLC (lighting) change."""
         housecode = msg[4:7]
         return {'housecode': housecode, 'index': housecode_to_index(housecode),
                 'light_level': int(msg[7:9])}
 
     @call_handlers('PS')
-    def _ps_decode(msg):
+    def _ps_decode(self, msg):
         """PS: PLC (lighting) status."""
         return {'bank': ord(msg[4]) - 0x30,
                 'statuses': [ord(x)-0x30 for x in msg[5:69]]}
 
     @call_handlers('RP')
-    def _rp_decode(msg):
+    def _rp_decode(self, msg):
         """RP: Remote programming status."""
         return {'remote_programming_status': int(msg[4:6])}
 
     @call_handlers('SD')
-    def _sd_decode(msg):
+    def _sd_decode(self, msg):
         """SD: Description text."""
         desc_ch1 = msg[9]
         show_on_keypad = ord(desc_ch1) >= 0x80
@@ -182,12 +182,12 @@ class Message:
                 'show_on_keypad': show_on_keypad}
 
     @call_handlers('SS')
-    def _ss_decode(msg):
+    def _ss_decode(self, msg):
         """SS: System status."""
         return {'system_trouble_status': msg[4:-2]}
 
     @call_handlers('ST')
-    def _st_decode(msg):
+    def _st_decode(self, msg):
         """ST: Temperature update."""
         group = int(msg[4:5])
         temperature = int(msg[7:10])
@@ -199,12 +199,12 @@ class Message:
                 'temperature': temperature}
 
     @call_handlers('TC')
-    def _tc_decode(msg):
+    def _tc_decode(self, msg):
         """TC: Task change."""
         return {'task': int(msg[4:7])-1}
 
     @call_handlers('TR')
-    def _tr_decode(msg):
+    def _tr_decode(self, msg):
         """TR: Thermostat data response."""
         return {'thermostat_index': int(msg[4:6])-1, 'mode': int(msg[6]),
                 'hold': msg[7] == '1', 'fan': int(msg[8]),
@@ -212,7 +212,7 @@ class Message:
                 'cool_setpoint': int(msg[13:15]), 'humidity': int(msg[15:17])}
 
     @call_handlers('VN')
-    def _vn_decode(msg):
+    def _vn_decode(self, msg):
         """VN: Version information."""
         elkm1_version = "{}.{}.{}".format(int(msg[4:6], 16), int(msg[6:8], 16),
                                           int(msg[8:10], 16))
@@ -221,51 +221,51 @@ class Message:
         return {'elkm1_version': elkm1_version, 'xep_version': xep_version}
 
     @call_handlers('XK')
-    def _xk_decode(msg):
+    def _xk_decode(self, msg):
         """XK: Ethernet Test."""
         return {'real_time_clock': msg[4:20]}
 
     @call_handlers('ZB')
-    def _zb_decode(msg):
+    def _zb_decode(self, msg):
         """ZB: Zone bypass report."""
         return {'zone_number': int(msg[4:7])-1, 'zone_bypassed': msg[7] == '1'}
 
     @call_handlers('ZC')
-    def _zc_decode(msg):
+    def _zc_decode(self, msg):
         """ZC: Zone Change."""
         status = _status_decode(int(msg[7:8], 16))
         return {'zone_number': int(msg[4:7])-1, 'zone_status': status}
 
     @call_handlers('ZD')
-    def _zd_decode(msg):
+    def _zd_decode(self, msg):
         """ZD: Zone definitions."""
         zone_definitions = [ord(x)-0x30 for x in msg[4:4+Max.ZONES.value]]
         return {'zone_definitions': zone_definitions}
 
     @call_handlers('ZP')
-    def _zp_decode(msg):
+    def _zp_decode(self, msg):
         """ZP: Zone partitions."""
         zone_partitions = [ord(x)-0x31 for x in msg[4:4+Max.ZONES.value]]
         return {'zone_partitions': zone_partitions}
 
     @call_handlers('ZS')
-    def _zs_decode(msg):
+    def _zs_decode(self, msg):
         """ZS: Zone statuses."""
         status = [_status_decode(int(x, 16)) for x in msg[4:4+Max.ZONES.value]]
         return {'zone_statuses': status}
 
     @call_handlers('ZV')
-    def _zv_decode(msg):
+    def _zv_decode(self, msg):
         """ZV: Zone voltage."""
         return {'zone_number': int(msg[4:7])-1, 'zone_voltage': int(msg[7:10])/10}
 
     @call_handlers('unknown')
-    def _unknown_decode(msg):
+    def _unknown_decode(self, msg):
         """Generic handler called when no specific handler exists"""
         return {'msg_code': msg[2:4], 'data': msg[4:-2]}
 
     @call_handlers('timeout')
-    def timeout_decode(msg_code):
+    def timeout_decode(self, msg_code):
         """Called directly when a timeout happens when response not received"""
         return {'msg_code': msg_code}
 

@@ -103,7 +103,6 @@ class Elements:
         results = [None] * max_units
         self.elk._descriptions_in_prog[desc_type] = (max_units, results,
                                                      self._got_desc)
-        LOG.info("sending for " + str(desc_type))
         self.elk.send(sd_encode(desc_type=desc_type, unit=0))
 
     @abstractmethod

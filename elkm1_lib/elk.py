@@ -6,7 +6,7 @@ import logging
 from importlib import import_module
 import serial_asyncio
 
-from .message import add_message_handler, message_decode
+from .message import Message
 from .proto import Connection
 from .util import call_sync_handlers, parse_url, url_scheme_is_secure
 
@@ -24,6 +24,7 @@ class Elk:
         self._transport = None
         self.connection_lost_callbk = None
         self._connection_retry_timer = 1
+        self._handlers = Message()
 
         self._heartbeat = None
         add_message_handler('XK', self._xk_handler)

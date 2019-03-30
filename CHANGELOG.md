@@ -6,7 +6,10 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ## [0.7.14]
 - Support multiple elk instances in same process by associating
-  _message_handlers with elk object rather than as a file global.
+  _message_handlers, _sync_handlers, and the description processing
+  code with elk object rather than as file globals.
+- Moved message encoders/decoders into new MessageDecode class
+  to facilitate the above.
 
 ## [0.7.13]
 - Fix updating counter value

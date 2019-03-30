@@ -24,7 +24,7 @@ from .const import Max
 MessageEncode = namedtuple('MessageEncode', ['message', 'response_command'])
 
 
-class Message:
+class MessageDecode:
     """Message decode and dispatcher."""
     def __init__(self):
         """Initialize a new Message instance."""

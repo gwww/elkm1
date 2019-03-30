@@ -23,11 +23,11 @@ class Keypads(Elements):
     """Handling for multiple areas"""
     def __init__(self, elk):
         super().__init__(elk, Keypad, Max.KEYPADS.value)
-        self._add_message_handler('IC', self._ic_handler)
-        self._add_message_handler('KA', self._ka_handler)
-        self._add_message_handler('KC', self._kc_handler)
-        self._add_message_handler('LW', self._lw_handler)
-        self._add_message_handler('ST', self._st_handler)
+        elk.add_handler('IC', self._ic_handler)
+        elk.add_handler('KA', self._ka_handler)
+        elk.add_handler('KC', self._kc_handler)
+        elk.add_handler('LW', self._lw_handler)
+        elk.add_handler('ST', self._st_handler)
 
     def sync(self):
         """Retrieve areas from ElkM1"""

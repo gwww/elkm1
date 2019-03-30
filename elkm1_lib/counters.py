@@ -20,7 +20,7 @@ class Counters(Elements):
     """Handling for multiple counters"""
     def __init__(self, elk):
         super().__init__(elk, Counter, Max.COUNTERS.value)
-        self._add_message_handler('CV', self._cv_handler)
+        elk.add_handler('CV', self._cv_handler)
 
     def sync(self):
         """Retrieve values from ElkM1 on demand"""

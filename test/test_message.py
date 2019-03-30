@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock
 
-from elkm1_lib.message import add_message_handler, message_decode, MessageEncode, \
+from elkm1_lib.message import MessageDecode, MessageEncode, \
     housecode_to_index, index_to_housecode, ps_encode
 
 _message_handlers = {}  # pylint: disable=invalid-name
@@ -27,30 +27,33 @@ def test_index_to_housecode_raises_error_on_invalid():
     with pytest.raises(ValueError): index_to_housecode(256)
 
 def test_decode_raises_value_error_on_bad_message():
-    with pytest.raises(ValueError): message_decode(_message_handlers,
-                                                   'a really really bad message')
+    decoder = MessageDecode()
+    with pytest.raises(ValueError): decoder.decode('a really really bad message')
 
 def test_decode_calls_unknown_handler_on_bad_command_or_not_implemented():
     mock_unknown_handler = Mock()
-    add_message_handler(_message_handlers, 'unknown', mock_unknown_handler)
-    message_decode(_message_handlers, '08XXtest28')
+    decoder = MessageDecode()
+    decoder.add_handler('unknown', mock_unknown_handler)
+    decoder.decode('08XXtest28')
     mock_unknown_handler.assert_called_once_with(msg_code='XX', data='test')
 
 def test_decode_raises_value_error_on_length_too_long():
+    decoder = MessageDecode()
     with pytest.raises(ValueError) as excinfo:
-        message_decode(_message_handlers, '42CV01000990030')
+        decoder.decode('42CV01000990030')
     assert str(excinfo.value) == 'Elk message length incorrect'
 
 def test_decode_raises_value_error_on_length_too_short():
+    decoder = MessageDecode()
     with pytest.raises(ValueError) as excinfo:
-        message_decode(_message_handlers, '02CV01000990030')
+        decoder.decode('02CV01000990030')
     assert str(excinfo.value) == 'Elk message length incorrect'
 
 def test_decode_raises_value_error_on_bad_checksum():
+    decoder = MessageDecode()
     with pytest.raises(ValueError) as excinfo:
-        message_decode(_message_handlers, '0DCV01000990042')
+        decoder.decode('0DCV01000990042')
     assert str(excinfo.value) == 'Elk message checksum invalid'
 
 def test_encode_message_with_a_variable():
     assert ps_encode(1) == ('07ps100', 'PS')
-

@@ -22,7 +22,7 @@ class Tasks(Elements):
     """Handling for multiple tasks"""
     def __init__(self, elk):
         super().__init__(elk, Task, Max.TASKS.value)
-        self._add_message_handler('TC', self._tc_handler)
+        elk.add_handler('TC', self._tc_handler)
 
     def sync(self):
         """Retrieve tasks from ElkM1"""

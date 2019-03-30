@@ -6,7 +6,7 @@ import logging
 from importlib import import_module
 import serial_asyncio
 
-from .message import add_message_handler, message_decode, sd_encode
+from .message import MessageDecode
 from .proto import Connection
 from .util import parse_url, url_scheme_is_secure
 
@@ -24,13 +24,13 @@ class Elk:
         self._transport = None
         self.connection_lost_callbk = None
         self._connection_retry_timer = 1
-        self._message_handlers = {}
+        self._message_decode = MessageDecode()
         self._sync_handlers = []
         self._descriptions_in_prog = {}
-        self._add_message_handler('SD', self._sd_handler)
-
         self._heartbeat = None
-        self._add_message_handler('XK', self._xk_handler)
+        
+        self.add_handler('XK', self._xk_handler)
+        self.add_handler('SD', self._sd_handler)
 
         # Setup for all the types of elements tracked
         if 'element_list' in config:
@@ -54,7 +54,7 @@ class Elk:
         LOG.info("Connecting to ElkM1 at %s", url)
         scheme, dest, param, ssl_context = parse_url(url)
         conn = partial(Connection, self.loop, self._connected,
-                       self._disconnected, self._got_data)
+                       self._disconnected, self._got_data, self._timeout)
         try:
             if scheme == 'serial':
                 await serial_asyncio.create_serial_connection(
@@ -102,15 +102,18 @@ class Elk:
             self._heartbeat.cancel()
             self._heartbeat = None
 
+    def add_handler(self, msg_type, handler):
+        self._message_decode.add_handler(msg_type, handler)
+
     def _got_data(self, data):  # pylint: disable=no-self-use
         LOG.debug("got_data '%s'", data)
         try:
-            message_decode(self._message_handlers, data)
-        except ValueError as err:
+            self._message_decode.decode(data)
+        except (ValueError, AttributeError) as err:
             LOG.debug(err)
 
-    def _add_message_handler(self, message_type, handler):
-        add_message_handler(self._message_handlers, message_type, handler)
+    def _timeout(self, msg_code):
+        self._message_decode.timeout_handler(msg_code)
 
     def _add_sync_handler(self, sync_handler):
         """Register a fn that synchronizes part of the panel."""

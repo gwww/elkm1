@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import Mock
 
 from elkm1_lib.const import TextDescriptions
-from elkm1_lib.message import message_decode, MessageEncode
+from elkm1_lib.message import MessageDecode, MessageEncode
 from elkm1_lib.util import parse_url, pretty_const
 
 #def test_get_descriptions_sets_up_correctly():

@@ -10,7 +10,7 @@ import textwrap
 import traceback
 
 from elkm1_lib import Elk
-from elkm1_lib.message import add_message_handler, MessageEncode
+from elkm1_lib.message import MessageEncode
 from elkm1_lib.const import Max
 import cmdr
 
@@ -90,8 +90,8 @@ def main():
         logging.basicConfig(level=logging.DEBUG, format='%(message)s')
 
     try:
-        elk._add_message_handler('unknown', _unknown_handler)
-        elk._add_message_handler('timeout', _timeout_handler)
+        elk.add_handler('unknown', _unknown_handler)
+        elk.add_handler('timeout', _timeout_handler)
         elk.connect()
         if args.interactive:
             c.loop()

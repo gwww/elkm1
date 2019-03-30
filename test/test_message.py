@@ -4,8 +4,6 @@ from unittest.mock import Mock
 from elkm1_lib.message import MessageDecode, MessageEncode, \
     housecode_to_index, index_to_housecode, ps_encode
 
-_message_handlers = {}  # pylint: disable=invalid-name
-
 def test_housecode_to_index_accepts_valid_codes():
     assert housecode_to_index('A01') == 0
     assert housecode_to_index('P16') == 255

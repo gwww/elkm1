@@ -2,32 +2,6 @@ import pytest
 from unittest.mock import Mock
 
 from elkm1_lib.const import TextDescriptions
-from elkm1_lib.message import MessageDecode, MessageEncode
-from elkm1_lib.util import parse_url, pretty_const
-
-#def test_get_descriptions_sets_up_correctly():
-#    mock_elk = Mock()
-#    get_descriptions(mock_elk, TextDescriptions.ZONE.value, None)
-#    mock_elk.send.assert_called_with(MessageEncode('0Bsd0000100','SD'))
-#
-#def test_sd_handler_get_next_works():
-#    mock_elk = Mock()
-#    mock_callback = Mock()
-#    desc = TextDescriptions.ZONE.value
-#    get_descriptions(mock_elk, desc, mock_callback)
-#    sd_handler(0, 0, 'Front door', False)
-#    mock_elk.send.assert_called_with(MessageEncode('0Bsd0000200','SD'))
-#    mock_callback.assert_not_called()
-#
-#def test_sd_handler_ends_when_getnext_wraps():
-#    mock_elk = Mock()
-#    mock_callback = Mock()
-#    desc = TextDescriptions.ZONE.value
-#    get_descriptions(mock_elk, desc, mock_callback)
-#    sd_handler(0, -1, '', False)
-#    # print(mock_callback.method_calls)
-#    mock_elk.send.assert_called_with(MessageEncode('0Bsd0000100','SD'))
-#    mock_callback.assert_called_once_with([None] * desc[1])
 
 def test_parse_url_valid_non_ssl_socket():
     (scheme, host, port, ssl) = parse_url('elk://some.host:1234')

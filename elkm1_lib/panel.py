@@ -14,14 +14,14 @@ class Panel(Element):
         self.remote_programming_status = 0
         self.system_trouble_status = ''
         self.setattr('name', 'ElkM1', True)
-        self._elk._add_sync_handler(self.sync)
+        self._elk.add_sync_handler(self.sync)
 
     def sync(self):
         """Retrieve panel information from ElkM1"""
         self._elk.add_handler('VN', self._vn_handler)
         self._elk.add_handler('XK', self._xk_handler)
         self._elk.add_handler('RP', self._rp_handler)
-        self._elk.add_handler('IE', self._elk._call_sync_handlers)
+        self._elk.add_handler('IE', self._elk.call_sync_handlers)
         self._elk.add_handler('SS', self._ss_handler)
         self._elk.send(vn_encode())
         self._elk.send(lw_encode())

@@ -28,9 +28,6 @@ class Element:
         if callback in self._callbacks:
             self._callbacks.remove(callback)
 
-    def _add_message_handler(self, message_type, handler):
-        self._elk._add_message_handler(message_type, handler)
-
     def _call_callbacks(self):
         """Callbacks when attribute of element changes"""
         for callback in self._callbacks:
@@ -90,9 +87,6 @@ class Elements:
             if descriptions[element.index] is not None:
                 element.setattr('name', descriptions[element.index], True)
 
-    def _add_message_handler(self, message_type, handler):
-        self.elk._add_message_handler(message_type, handler)
-
     def get_descriptions(self, description_type):
         """
         Gets the descriptions for specified type.
@@ -100,8 +94,9 @@ class Elements:
         """
         (desc_type, max_units) = description_type
         results = [None] * max_units
-        self.elk._descriptions_in_prog[desc_type] = (max_units, results,
-                                                     self._got_desc)
+        self.elk._descriptions_in_progress[desc_type] = (max_units,
+                                                         results,
+                                                         self._got_desc)
         self.elk.send(sd_encode(desc_type=desc_type, unit=0))
 
     @abstractmethod

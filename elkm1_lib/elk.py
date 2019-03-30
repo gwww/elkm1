@@ -6,7 +6,7 @@ import logging
 from importlib import import_module
 import serial_asyncio
 
-from .message import MessageDecode
+from .message import MessageDecode, sd_encode
 from .proto import Connection
 from .util import parse_url, url_scheme_is_secure
 
@@ -26,7 +26,7 @@ class Elk:
         self._connection_retry_timer = 1
         self._message_decode = MessageDecode()
         self._sync_handlers = []
-        self._descriptions_in_prog = {}
+        self._descriptions_in_progress = {}
         self._heartbeat = None
         
         self.add_handler('XK', self._xk_handler)
@@ -78,7 +78,7 @@ class Elk:
         if url_scheme_is_secure(self._config['url']):
             self._conn.write_data(self._config['userid'], raw=True)
             self._conn.write_data(self._config['password'], raw=True)
-        self._call_sync_handlers()
+        self.call_sync_handlers()
         if not self._config['url'].startswith('serial://'):
             self._heartbeat = self.loop.call_later(120, self._reset_connection)
 
@@ -115,11 +115,11 @@ class Elk:
     def _timeout(self, msg_code):
         self._message_decode.timeout_handler(msg_code)
 
-    def _add_sync_handler(self, sync_handler):
+    def add_sync_handler(self, sync_handler):
         """Register a fn that synchronizes part of the panel."""
         self._sync_handlers.append(sync_handler)
 
-    def _call_sync_handlers(self):
+    def call_sync_handlers(self):
         """Invoke the synchronization handlers."""
         LOG.debug("Synchronizing panel...")
         for sync_handler in self._sync_handlers:
@@ -128,19 +128,20 @@ class Elk:
     # pylint: disable=unused-argument
     def _sd_handler(self, desc_type, unit, desc, show_on_keypad):
         """Text description"""
-        if desc_type not in self._descriptions_in_prog:
+        if desc_type not in self._descriptions_in_progress:
             LOG.debug("Text description response ignored for " + str(desc_type))
             return
 
-        (max_units, results, callback) = self._descriptions_in_prog[desc_type]
+        (max_units,
+         results,
+         callback) = self._descriptions_in_progress[desc_type]
         LOG.info("unit = " + str(unit))
         if unit < 0 or unit >= max_units:
             callback(results)
-            del self._descriptions_in_prog[desc_type]
+            del self._descriptions_in_progress[desc_type]
             return
 
         results[unit] = desc
-        LOG.info("sd_handler sending for " + str(desc_type) + "; unit = " + str(unit+1))
         self.send(sd_encode(desc_type=desc_type, unit=unit+1))
 
     def is_connected(self):

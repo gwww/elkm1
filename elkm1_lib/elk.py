@@ -132,10 +132,7 @@ class Elk:
             LOG.debug("Text description response ignored for " + str(desc_type))
             return
 
-        (max_units,
-         results,
-         callback) = self._descriptions_in_progress[desc_type]
-        LOG.info("unit = " + str(unit))
+        (max_units, results, callback) = self._descriptions_in_progress[desc_type]
         if unit < 0 or unit >= max_units:
             callback(results)
             del self._descriptions_in_progress[desc_type]

@@ -227,9 +227,10 @@ class Message:
         """Generic handler called when no specific handler exists"""
         return {'msg_code': msg[2:4], 'data': msg[4:-2]}
 
-    # def timeout_decode(self, msg_code):
-    #     """Called directly when a timeout happens when response not received"""
-    #     return {'msg_code': msg_code}
+    def timeout_handler(self, msg_code):
+        """Called directly when a timeout happens when response not received"""
+        for handler in self._handlers.get('timeout', []):
+            handler({'msg_code': msg_code})
 
 
 def housecode_to_index(housecode):

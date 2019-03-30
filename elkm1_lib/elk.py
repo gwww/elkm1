@@ -51,7 +51,7 @@ class Elk:
         LOG.info("Connecting to ElkM1 at %s", url)
         scheme, dest, param, ssl_context = parse_url(url)
         conn = partial(Connection, self.loop, self._connected,
-                       self._disconnected, self._got_data)
+                       self._disconnected, self._got_data, self._timeout)
         try:
             if scheme == 'serial':
                 await serial_asyncio.create_serial_connection(
@@ -108,6 +108,9 @@ class Elk:
             self._handlers.decode(data)
         except (ValueError, AttributeError) as err:
             LOG.debug(err)
+
+    def _timeout(self, msg_code):
+        self._handlers.timeout_handler(msg_code)
 
     def is_connected(self):
         """Status of connection to Elk."""

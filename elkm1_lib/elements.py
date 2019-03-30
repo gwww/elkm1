@@ -5,7 +5,6 @@
 from abc import abstractmethod
 from .message import sd_encode
 
-
 class Element:
     """Element class"""
     def __init__(self, index, elk):
@@ -75,7 +74,7 @@ class Elements:
         self.elk = elk
         self.max_elements = max_elements
         self.elements = [class_(i, elk) for i in range(max_elements)]
-        self.elk._add_sync_handler(self.sync)
+        self.elk.add_sync_handler(self.sync)
 
     def __iter__(self):
         for element in self.elements:

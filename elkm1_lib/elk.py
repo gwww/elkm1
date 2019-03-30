@@ -6,9 +6,9 @@ import logging
 from importlib import import_module
 import serial_asyncio
 
-from .message import MessageDecode
+from .message import MessageDecode, sd_encode
 from .proto import Connection
-from .util import call_sync_handlers, parse_url, url_scheme_is_secure
+from .util import parse_url, url_scheme_is_secure
 
 LOG = logging.getLogger(__name__)
 
@@ -25,9 +25,12 @@ class Elk:
         self.connection_lost_callbk = None
         self._connection_retry_timer = 1
         self._message_decode = MessageDecode()
-
+        self._sync_handlers = []
+        self._descriptions_in_progress = {}
         self._heartbeat = None
+        
         self.add_handler('XK', self._xk_handler)
+        self.add_handler('SD', self._sd_handler)
 
         # Setup for all the types of elements tracked
         if 'element_list' in config:
@@ -75,7 +78,7 @@ class Elk:
         if url_scheme_is_secure(self._config['url']):
             self._conn.write_data(self._config['userid'], raw=True)
             self._conn.write_data(self._config['password'], raw=True)
-        call_sync_handlers()
+        self.call_sync_handlers()
         if not self._config['url'].startswith('serial://'):
             self._heartbeat = self.loop.call_later(120, self._reset_connection)
 
@@ -92,7 +95,7 @@ class Elk:
         self._heartbeat = self.loop.call_later(120, self._reset_connection)
 
     def _disconnected(self):
-        LOG.warning("ElkM1 disconnected")
+        LOG.warning("ElkM1 at %s disconnected", self._config['url'])
         self._conn = None
         self.loop.call_later(self._connection_retry_timer, self.connect)
         if self._heartbeat:
@@ -111,6 +114,35 @@ class Elk:
 
     def _timeout(self, msg_code):
         self._message_decode.timeout_handler(msg_code)
+
+    def add_sync_handler(self, sync_handler):
+        """Register a fn that synchronizes part of the panel."""
+        self._sync_handlers.append(sync_handler)
+
+    def call_sync_handlers(self):
+        """Invoke the synchronization handlers."""
+        LOG.debug("Synchronizing panel...")
+        for sync_handler in self._sync_handlers:
+            sync_handler()
+
+    # pylint: disable=unused-argument
+    def _sd_handler(self, desc_type, unit, desc, show_on_keypad):
+        """Text description"""
+        if desc_type not in self._descriptions_in_progress:
+            LOG.debug("Text description response ignored for " + str(desc_type))
+            return
+
+        (max_units,
+         results,
+         callback) = self._descriptions_in_progress[desc_type]
+        LOG.info("unit = " + str(unit))
+        if unit < 0 or unit >= max_units:
+            callback(results)
+            del self._descriptions_in_progress[desc_type]
+            return
+
+        results[unit] = desc
+        self.send(sd_encode(desc_type=desc_type, unit=unit+1))
 
     def is_connected(self):
         """Status of connection to Elk."""

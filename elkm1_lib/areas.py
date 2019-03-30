@@ -2,7 +2,7 @@
 
 from .const import Max, TextDescriptions
 from .elements import Element, Elements
-from .message import (as_encode, az_encode, al_encode, dm_encode)
+from .message import as_encode, az_encode, al_encode, dm_encode
 
 
 class Area(Element):

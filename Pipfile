@@ -14,4 +14,5 @@ pytest-mock = "*"
 urwid = "*"
 attrs = '*'
 colorlog = '*'
-v = {version = "*", editable = true}
+v = {version = "*",editable = true}
+elkm1-lib = {editable = true,path = "."}

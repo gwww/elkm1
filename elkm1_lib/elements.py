@@ -3,8 +3,7 @@
 """
 
 from abc import abstractmethod
-from .util import add_sync_handler, get_descriptions
-
+from .message import sd_encode
 
 class Element:
     """Element class"""
@@ -72,7 +71,7 @@ class Elements:
         self.elk = elk
         self.max_elements = max_elements
         self.elements = [class_(i, elk) for i in range(max_elements)]
-        add_sync_handler(self.sync)
+        self.elk.add_sync_handler(self.sync)
 
     def __iter__(self):
         for element in self.elements:
@@ -89,8 +88,16 @@ class Elements:
                 element.setattr('name', descriptions[element.index], True)
 
     def get_descriptions(self, description_type):
-        """Get the list of descriptions for the element."""
-        get_descriptions(self.elk, description_type, self._got_desc)
+        """
+        Gets the descriptions for specified type.
+        When complete the callback is called with a list of descriptions
+        """
+        (desc_type, max_units) = description_type
+        results = [None] * max_units
+        self.elk._descriptions_in_progress[desc_type] = (max_units,
+                                                         results,
+                                                         self._got_desc)
+        self.elk.send(sd_encode(desc_type=desc_type, unit=0))
 
     @abstractmethod
     def sync(self):

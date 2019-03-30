@@ -2,8 +2,7 @@
 
 from .const import Max, TextDescriptions
 from .elements import Element, Elements
-from .message import (add_message_handler, as_encode, az_encode,
-                      al_encode, dm_encode)
+from .message import (as_encode, az_encode, al_encode, dm_encode)
 
 
 class Area(Element):
@@ -37,9 +36,9 @@ class Areas(Elements):
     """Handling for multiple areas"""
     def __init__(self, elk):
         super().__init__(elk, Area, Max.AREAS.value)
-        add_message_handler('AM', self._am_handler)
-        add_message_handler('AS', self._as_handler)
-        add_message_handler('EE', self._ee_handler)
+        elk.add_handler('AM', self._am_handler)
+        elk.add_handler('AS', self._as_handler)
+        elk.add_handler('EE', self._ee_handler)
 
     def sync(self):
         """Retrieve areas from ElkM1"""

@@ -2,7 +2,7 @@
 
 import logging
 import ssl
-from .message import add_message_handler, sd_encode
+from .message import sd_encode
 
 LOG = logging.getLogger(__name__)
 
@@ -33,7 +33,7 @@ def get_descriptions(elk, desc, callback):
     results = [None] * max_units
     get_descriptions_in_progress[desc_type] = (max_units, callback,
                                                results, elk)
-    add_message_handler('SD', sd_handler)
+    elk.add_handler('SD', sd_handler)
     elk.send(sd_encode(desc_type=desc_type, unit=0))
 
 

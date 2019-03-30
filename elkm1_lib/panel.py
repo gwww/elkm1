@@ -1,8 +1,7 @@
 """Definition of an ElkM1 Area"""
 from .const import ElkRPStatus
 from .elements import Element
-from .message import (add_message_handler, vn_encode, lw_encode,
-                      sw_encode, sp_encode, ss_encode)
+from .message import vn_encode, lw_encode, sw_encode, sp_encode, ss_encode
 from .util import add_sync_handler, call_sync_handlers
 
 
@@ -20,11 +19,11 @@ class Panel(Element):
 
     def sync(self):
         """Retrieve panel information from ElkM1"""
-        add_message_handler('VN', self._vn_handler)
-        add_message_handler('XK', self._xk_handler)
-        add_message_handler('RP', self._rp_handler)
-        add_message_handler('IE', call_sync_handlers)
-        add_message_handler('SS', self._ss_handler)
+        self._elk.add_handler('VN', self._vn_handler)
+        self._elk.add_handler('XK', self._xk_handler)
+        self._elk.add_handler('RP', self._rp_handler)
+        self._elk.add_handler('IE', call_sync_handlers)
+        self._elk.add_handler('SS', self._ss_handler)
         self._elk.send(vn_encode())
         self._elk.send(lw_encode())
         self._elk.send(ss_encode())

@@ -95,7 +95,7 @@ Here is an example of a message handler being registered and how it is called:
     def zone_status_change_handler(zone_number, zone_status):
       print(zone_number, zone_status)
 
-    add_message_handler('ZC', zone_status_change_handler)
+    elk.add_handler('ZC', zone_status_change_handler)
 ```
 
 The above code registers a callback for 'ZC' (Elk zone status change)

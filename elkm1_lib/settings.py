@@ -1,7 +1,7 @@
 """Definition of an ElkM1 Custom Value"""
 from .const import Max, TextDescriptions
 from .elements import Element, Elements
-from .message import add_message_handler, cp_encode, cw_encode
+from .message import cp_encode, cw_encode
 
 
 class Setting(Element):
@@ -20,14 +20,15 @@ class Settings(Elements):
     """Handling for multiple custom values"""
     def __init__(self, elk):
         super().__init__(elk, Setting, Max.SETTINGS.value)
-        add_message_handler('CR', self._cr_handler)
+        elk.add_handler('CR', self._cr_handler)
 
     def sync(self):
         """Retrieve custom values from ElkM1"""
         self.elk.send(cp_encode())
         self.get_descriptions(TextDescriptions.SETTING.value)
 
-    def _cr_handler(self, index, value, value_format):
-        custom_value = self.elements[index]
-        custom_value.value_format = value_format
-        custom_value.value = value
+    def _cr_handler(self, values):
+        for value in values:
+            custom_value = self.elements[value['index']]
+            custom_value.value_format = value['value_format']
+            custom_value.value = value['value']

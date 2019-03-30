@@ -6,7 +6,7 @@ import logging
 from importlib import import_module
 import serial_asyncio
 
-from .message import Message
+from .message import MessageDecode
 from .proto import Connection
 from .util import call_sync_handlers, parse_url, url_scheme_is_secure
 
@@ -24,7 +24,7 @@ class Elk:
         self._transport = None
         self.connection_lost_callbk = None
         self._connection_retry_timer = 1
-        self._handlers = Message()
+        self._message_decode = MessageDecode()
 
         self._heartbeat = None
         self.add_handler('XK', self._xk_handler)
@@ -51,7 +51,7 @@ class Elk:
         LOG.info("Connecting to ElkM1 at %s", url)
         scheme, dest, param, ssl_context = parse_url(url)
         conn = partial(Connection, self.loop, self._connected,
-                       self._disconnected, self._got_data)
+                       self._disconnected, self._got_data, self._timeout)
         try:
             if scheme == 'serial':
                 await serial_asyncio.create_serial_connection(
@@ -100,14 +100,17 @@ class Elk:
             self._heartbeat = None
 
     def add_handler(self, msg_type, handler):
-        self._handlers.add_handler(msg_type, handler)
+        self._message_decode.add_handler(msg_type, handler)
 
     def _got_data(self, data):  # pylint: disable=no-self-use
         LOG.debug("got_data '%s'", data)
         try:
-            self._handlers.decode(data)
+            self._message_decode.decode(data)
         except (ValueError, AttributeError) as err:
             LOG.debug(err)
+
+    def _timeout(self, msg_code):
+        self._message_decode.timeout_handler(msg_code)
 
     def is_connected(self):
         """Status of connection to Elk."""

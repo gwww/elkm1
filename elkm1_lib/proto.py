@@ -13,11 +13,12 @@ class Connection(asyncio.Protocol):
     """asyncio Protocol with line parsing and queuing writes"""
 
     # pylint: disable=too-many-instance-attributes
-    def __init__(self, loop, connected, disconnected, got_data):
+    def __init__(self, loop, connected, disconnected, got_data, timeout):
         self.loop = loop
         self._connected_callback = connected
         self._disconnected_callback = disconnected
         self._got_data_callback = got_data
+        self._timeout = timeout
 
         self._transport = None
         self._waiting_for_response = None
@@ -53,7 +54,7 @@ class Connection(asyncio.Protocol):
         self._paused = False
 
     def _response_required_timeout(self):
-        #timeout_decode(self._waiting_for_response)
+        self._timeout(self._waiting_for_response)
         self._timeout_task = None
         self._waiting_for_response = None
         self._process_write_queue()

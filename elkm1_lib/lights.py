@@ -2,8 +2,7 @@
 
 from .const import Max, TextDescriptions
 from .elements import Element, Elements
-from .message import ps_encode, pc_encode, pf_encode, \
-                     pn_encode, pt_encode
+from .message import ps_encode, pc_encode, pf_encode, pn_encode, pt_encode
 
 
 class Light(Element):

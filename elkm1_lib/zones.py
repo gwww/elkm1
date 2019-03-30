@@ -2,8 +2,7 @@
 from .const import Max, TextDescriptions, ZoneType, \
                    ZoneLogicalStatus, ZonePhysicalStatus
 from .elements import Element, Elements
-from .message import (az_encode, zd_encode,
-                      zp_encode, zs_encode, zt_encode)
+from .message import az_encode, zd_encode, zp_encode, zs_encode, zt_encode
 
 
 class Zone(Element):

@@ -42,8 +42,11 @@ class Message:
         """Decode an Elk message by passing to appropriate decoder"""
         _check_message_valid(msg)
         cmd = msg[2:4]
-        decoder_name = '_' + cmd.lower() + '_decode'
-        decoded_msg = getattr(self, decoder_name, '_unknown_decode')(msg)
+        decoder = getattr(self, '_{}_decode'.format(cmd.lower()), None)
+        if not decoder:
+            cmd = 'unknown'
+            decoder = self._unknown_decode
+        decoded_msg = decoder(msg)
         for handler in self._handlers.get(cmd, []):
             handler(**decoded_msg)
 

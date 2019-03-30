@@ -1,8 +1,7 @@
 """Definition of an ElkM1 Area"""
 from .const import ElkRPStatus
 from .elements import Element
-from .message import (vn_encode, lw_encode,
-                      sw_encode, sp_encode, ss_encode)
+from .message import vn_encode, lw_encode, sw_encode, sp_encode, ss_encode
 from .util import add_sync_handler, call_sync_handlers
 
 

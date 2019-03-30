@@ -106,7 +106,7 @@ class Elk:
         LOG.debug("got_data '%s'", data)
         try:
             self._handlers.decode(data)
-        except ValueError as err:
+        except (ValueError, AttributeError) as err:
             LOG.debug(err)
 
     def is_connected(self):

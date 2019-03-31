@@ -1,0 +1,36 @@
+[tool.poetry]
+name = "elkm1-lib"
+version = "0.7.15"
+description = "Library to interacting with ElkM1 alarm/automation panel."
+homepage = "https://github.com/gwww/elkm1"
+authors = ["Glenn Waters <gwwaters+elkm1@gmail.com>"]
+readme = "README.md"
+license = "MIT"
+classifiers = [
+  'Development Status :: 4 - Beta',
+  'Intended Audience :: Developers',
+  'License :: OSI Approved :: MIT License',
+  'Programming Language :: Python',
+  'Programming Language :: Python :: 3.5',
+  'Programming Language :: Python :: 3.6',
+  'Programming Language :: Python :: 3.7',
+]
+include = ["CHANGELOG.md", "bin/**/*"]
+exclude = ["test"]
+
+[tool.poetry.dependencies]
+python = "^3.5"
+pytz = "^2018.9"
+pyserial-asyncio = "^0.4.0"
+
+[tool.poetry.dev-dependencies]
+pytest = "^4.3"
+mock = "^2.0"
+pytest-mock = "^1.10"
+urwid = "^2.0"
+attrs = "^19.1"
+colorlog = "^4.0"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"

@@ -1,4 +1,0 @@
-recursive-include bin *
-include LICENSE
-include MANIFEST.in
-include README.md

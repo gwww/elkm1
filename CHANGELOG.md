@@ -2,7 +2,12 @@
 All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](https://semver.org/).
 
-## [0.7.15] -- Pending
+## [0.7.16] -- Pending
+
+## [0.7.15]
+- Switch to `poetry` from `pipenv` for dependency management; allowed
+  removal of __version.py__, setup.py, setup.cfg, and of course
+  Pipfile*
 
 ## [0.7.14]
 - Support multiple elk instances in same process by associating

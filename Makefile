@@ -9,25 +9,22 @@ clean:
 	rm -rf build dist *.egg-info
 
 install:
-	pip install -e .
+	poetry install
 
 build:
-	python setup.py sdist
+	poetry build
 
-# upload.test: build
-# 	twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+upload.test: build
+	poetry publish --repository test
 
 upload: build
-	twine upload dist/*
+	poetry publish
 
 isort:
 	sh -c "isort --skip-glob=.tox --recursive . "
 
 lint:
 	pylint --msg-template='{msg_id}({symbol}):{line:3d},{column}: {obj}: {msg}' elkm1_lib
-
-debug:
-	python -m pdb temp/test.py
 
 run:
 	bin/elk -i

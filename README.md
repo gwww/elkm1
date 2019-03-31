@@ -163,15 +163,19 @@ of the help.
 
 ## Development
 
-This project uses `pipenv` for development dependencies. If needed,
-install it using `pip install pipenv`.
+This project uses [poetry](https://poetry.eustace.io/) for development dependencies. Installation instructions are on their website.
 
 To get started developing:
 
 ```
 git clone https://github.com/gwww/elkm1.git
 cd elkm1
-pipenv install -e . --dev
-pipenv shell
+poetry install
+poetry shell # Or activate the created virtual environment
 make test # to ensure everything installed properly
 ```
+
+There is a `Makefile` in the root directory as well. The `make` command
+followed by one of the targets in the `Makefile` can be used. If you don't
+have or wish to use `make` the `Makefile` serves as examples of common
+commands that can be run.

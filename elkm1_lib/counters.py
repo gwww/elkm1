@@ -6,6 +6,7 @@ from .message import cx_encode, cv_encode
 
 class Counter(Element):
     """Class representing an Counter"""
+
     def __init__(self, index, elk):
         super().__init__(index, elk)
         self.value = None
@@ -18,9 +19,10 @@ class Counter(Element):
 # pylint: disable=R0903
 class Counters(Elements):
     """Handling for multiple counters"""
+
     def __init__(self, elk):
         super().__init__(elk, Counter, Max.COUNTERS.value)
-        elk.add_handler('CV', self._cv_handler)
+        elk.add_handler("CV", self._cv_handler)
 
     def sync(self):
         """Retrieve values from ElkM1 on demand"""
@@ -34,4 +36,4 @@ class Counters(Elements):
                 self.elk.send(cv_encode(counter.index))
 
     def _cv_handler(self, counter, value):
-        self.elements[counter].setattr('value', value, True)
+        self.elements[counter].setattr("value", value, True)

@@ -24,7 +24,7 @@ class Connection(asyncio.Protocol):
         self._waiting_for_response = None
         self._timeout_task = None
         self._queued_writes = []
-        self._buffer = ''
+        self._buffer = ""
         self._paused = False
 
     def connection_made(self, transport):
@@ -42,7 +42,7 @@ class Connection(asyncio.Protocol):
         self._cancel_timer()
         self._waiting_for_response = None
         self._queued_writes = []
-        self._buffer = ''
+        self._buffer = ""
 
     def pause(self):
         """Pause the connection from sending/receiving."""
@@ -65,7 +65,7 @@ class Connection(asyncio.Protocol):
             self._timeout_task = None
 
     def data_received(self, data):
-        self._buffer += data.decode('ISO-8859-1')
+        self._buffer += data.decode("ISO-8859-1")
         while "\r\n" in self._buffer:
             line, self._buffer = self._buffer.split("\r\n", 1)
             if get_elk_command(line) == self._waiting_for_response:
@@ -96,13 +96,14 @@ class Connection(asyncio.Protocol):
             self._waiting_for_response = response_required
             if timeout > 0:
                 self._timeout_task = self.loop.call_later(
-                    timeout, self._response_required_timeout)
+                    timeout, self._response_required_timeout
+                )
 
         if not raw:
-            cksum = 256 - reduce(lambda x, y: x+y, map(ord, data)) % 256
-            data = data + '{:02X}'.format(cksum)
-            if int(data[0:2], 16) != len(data)-2:
+            cksum = 256 - reduce(lambda x, y: x + y, map(ord, data)) % 256
+            data = data + "{:02X}".format(cksum)
+            if int(data[0:2], 16) != len(data) - 2:
                 LOG.debug("message length wrong: %s", data)
 
         LOG.debug("write_data '%s'", data)
-        self._transport.write((data + '\r\n').encode())
+        self._transport.write((data + "\r\n").encode())

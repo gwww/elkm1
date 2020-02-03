@@ -20,13 +20,14 @@ class Task(Element):
 
 class Tasks(Elements):
     """Handling for multiple tasks"""
+
     def __init__(self, elk):
         super().__init__(elk, Task, Max.TASKS.value)
-        elk.add_handler('TC', self._tc_handler)
+        elk.add_handler("TC", self._tc_handler)
 
     def sync(self):
         """Retrieve tasks from ElkM1"""
         self.get_descriptions(TextDescriptions.TASK.value)
 
     def _tc_handler(self, task):
-        self.elements[task].setattr('last_change', time(), True)
+        self.elements[task].setattr("last_change", time(), True)

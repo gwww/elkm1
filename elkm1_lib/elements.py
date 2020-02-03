@@ -5,8 +5,10 @@
 from abc import abstractmethod
 from .message import sd_encode
 
+
 class Element:
     """Element class"""
+
     def __init__(self, index, elk):
         self._index = index
         self._elk = elk
@@ -44,29 +46,32 @@ class Element:
         if close_the_changeset and self._changeset:
             self._call_callbacks()
 
-    def default_name(self, separator='-'):
+    def default_name(self, separator="-"):
         """Return a default name for based on class and index of element"""
-        return self.__class__.__name__ + '{}{:03d}'.format(
-            separator, self._index+1)
+        return self.__class__.__name__ + "{}{:03d}".format(separator, self._index + 1)
 
     def is_default_name(self):
         """Check if the name assigned is the default_name"""
         return self.name == self.default_name()
 
     def __str__(self):
-        varlist = {k: v for (k, v) in vars(self).items()
-                   if not k.startswith('_') and k != 'name'}.items()
-        varstr = ' '.join("%s:%s" % item for item in varlist)
+        varlist = {
+            k: v
+            for (k, v) in vars(self).items()
+            if not k.startswith("_") and k != "name"
+        }.items()
+        varstr = " ".join("%s:%s" % item for item in varlist)
         return "{} '{}' {}".format(self._index, self.name, varstr)
 
     def as_dict(self):
         """Package up the public attributes as a dict."""
         attrs = vars(self)
-        return {key: attrs[key] for key in attrs if not key.startswith('_')}
+        return {key: attrs[key] for key in attrs if not key.startswith("_")}
 
 
 class Elements:
     """Base for list of elements."""
+
     def __init__(self, elk, class_, max_elements):
         self.elk = elk
         self.max_elements = max_elements
@@ -85,7 +90,7 @@ class Elements:
             if element.index >= len(descriptions):
                 break
             if descriptions[element.index] is not None:
-                element.setattr('name', descriptions[element.index], True)
+                element.setattr("name", descriptions[element.index], True)
 
     def get_descriptions(self, description_type):
         """
@@ -94,9 +99,11 @@ class Elements:
         """
         (desc_type, max_units) = description_type
         results = [None] * max_units
-        self.elk._descriptions_in_progress[desc_type] = (max_units,
-                                                         results,
-                                                         self._got_desc)
+        self.elk._descriptions_in_progress[desc_type] = (
+            max_units,
+            results,
+            self._got_desc,
+        )
         self.elk.send(sd_encode(desc_type=desc_type, unit=0))
 
     @abstractmethod

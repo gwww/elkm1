@@ -27,6 +27,7 @@ class Elk:
         self._message_decode = MessageDecode()
         self._sync_handlers = []
         self._descriptions_in_progress = {}
+        self._sync_event = asyncio.Event()
         self._heartbeat = None
 
         self.add_handler("XK", self._xk_handler)
@@ -35,9 +36,10 @@ class Elk:
         # Setup for all the types of elements tracked
         if "element_list" in config:
             self.element_list = config["element_list"]
+            if "panel" in self.element_list:
+                self.element_list.remove("panel")
         else:
             self.element_list = [
-                "panel",
                 "zones",
                 "lights",
                 "areas",
@@ -49,8 +51,16 @@ class Elk:
                 "settings",
                 "users",
             ]
+        # Always sync panel last so we
+        # can tell when sync is completed
+        self.element_list.append("panel")
+        self.add_handler("SS", self._sync_complete)
+
         for element in self.element_list:
             self._create_element(element)
+
+    def _sync_complete(self, **kwargs):
+        self._sync_event.set()
 
     def _create_element(self, element):
         module = import_module("elkm1_lib." + element)
@@ -149,8 +159,12 @@ class Elk:
     def call_sync_handlers(self):
         """Invoke the synchronization handlers."""
         LOG.debug("Synchronizing panel...")
+        self._sync_event.clear()
         for sync_handler in self._sync_handlers:
             sync_handler()
+
+    async def sync_complete(self):
+        return await self._sync_event.wait()
 
     # pylint: disable=unused-argument
     def _sd_handler(self, desc_type, unit, desc, show_on_keypad):

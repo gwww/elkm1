@@ -15,11 +15,17 @@ class Element:
         self._callbacks = []
         self.name = self.default_name()
         self._changeset = {}
+        self._configured = False
 
     @property
     def index(self):
         """Get the index, immutable once class created"""
         return self._index
+
+    @property
+    def configured(self):
+        """If a callback has ever been triggered this will be true."""
+        return self._configured
 
     def add_callback(self, callback):
         """Callbacks when attribute of element changes"""
@@ -32,6 +38,7 @@ class Element:
 
     def _call_callbacks(self):
         """Callbacks when attribute of element changes"""
+        self._configured = True
         for callback in self._callbacks:
             callback(self, self._changeset)
         self._changeset = {}

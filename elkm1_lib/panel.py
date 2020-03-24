@@ -26,6 +26,8 @@ class Panel(Element):
         self._elk.add_handler("SS", self._ss_handler)
         self._elk.send(vn_encode())
         self._elk.send(lw_encode())
+        # We always send ss last so we know when
+        # the sync is completed
         self._elk.send(ss_encode())
 
     def speak_word(self, word):

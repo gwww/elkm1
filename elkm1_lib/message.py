@@ -206,6 +206,15 @@ class MessageDecode:
             "humidity": int(msg[15:17]),
         }
 
+    def _ua_decode(self, msg):
+        """UA: Valid User Code Areas."""
+        # UA is intentially not decoded
+        # because it is used to tell when a sync
+        # is completed.  If you need to add UA
+        # support, switch _sync_complete to another
+        # unused command in elk.py
+        return {}
+
     def _vn_decode(self, msg):
         """VN: Version information."""
         elkm1_version = "{}.{}.{}".format(
@@ -505,3 +514,8 @@ def zt_encode(zone):
 def zv_encode(zone):
     """zv: Get zone voltage"""
     return MessageEncode("09zv{zone:03d}00".format(zone=zone + 1), "ZV")
+
+
+def ua_encode(code):
+    """ua: Requst valid user code areas"""
+    return MessageEncode("0Cua{code:06d}00".format(code=code), "UA")

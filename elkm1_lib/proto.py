@@ -36,13 +36,20 @@ class Connection(asyncio.Protocol):
         LOG.debug("disconnected callback")
         self._transport = None
         self._cleanup()
-        self._disconnected_callback()
+        if self._disconnected_callback:
+            self._disconnected_callback()
 
     def _cleanup(self):
         self._cancel_timer()
         self._waiting_for_response = None
         self._queued_writes = []
         self._buffer = ""
+
+    def stop(self):
+        """Stop the connection from sending/receiving/reconnecting."""
+        self._transport = None
+        self._cleanup()
+        self._disconnected_callback = None
 
     def pause(self):
         """Pause the connection from sending/receiving."""

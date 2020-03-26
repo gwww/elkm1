@@ -30,7 +30,8 @@ class Elk:
         self._sync_event = asyncio.Event()
         self._heartbeat = None
         self._invalid_auth = False
-        self._stopped = False
+        self._connection_retry_task = None
+        self._disconnect_requested = False
 
         self.add_handler("XK", self._xk_handler)
         self.add_handler("SD", self._sd_handler)
@@ -52,18 +53,8 @@ class Elk:
                 "settings",
                 "users",
             ]
-        # Previously we issued a "ss" command at the
-        # end of the sync so we know when the sync
-        # was completed.  If the system is in a trouble
-        # state it will automaticlly send "SS" replies
-        # every 30 seconds which lead to a race condition
-        # where we would think that the system had completed
-        # syncing when it was actually in a trouble state.
-        #
-        # To resolve this, we now send a "ua" request
-        # and watch for "UA" responses since we never
-        # use the "UA" code.
-        #
+        # We send a "ua" command at the end of the
+        # sync to indicate the sync is done.
         self.add_handler("UA", self._sync_complete)
 
         for element in self.element_list:
@@ -105,12 +96,17 @@ class Elk:
                     timeout=30,
                 )
         except (ValueError, OSError, asyncio.TimeoutError) as err:
+            if self._disconnect_requested:
+                # disconnect called while trying to reconnect
+                return
             LOG.warning(
                 "Could not connect to ElkM1 (%s). Retrying in %d seconds",
                 err,
                 self._connection_retry_timer,
             )
-            self.loop.call_later(self._connection_retry_timer, self._reconnect)
+            self._connection_retry_task = self.loop.call_later(
+                self._connection_retry_timer, self.connect
+            )
             self._connection_retry_timer = (
                 2 * self._connection_retry_timer
                 if self._connection_retry_timer < 32
@@ -145,7 +141,9 @@ class Elk:
     def _disconnected(self):
         LOG.warning("ElkM1 at %s disconnected", self._config["url"])
         self._conn = None
-        self.loop.call_later(self._connection_retry_timer, self._reconnect)
+        self._connection_retry_task = self.loop.call_later(
+            self._connection_retry_timer, self.connect
+        )
         if self._heartbeat:
             self._heartbeat.cancel()
             self._heartbeat = None
@@ -163,22 +161,16 @@ class Elk:
                 or data.startswith("Username: ")
                 or data.startswith("Password: ")
             ):
-                # Login messages, not an error
-                # as they are not expected to be decoded.
                 return
             elif data.startswith("Username/Password not found"):
                 LOG.error("Invalid username or password.")
-                # Disconnect to avoid elk locking us out
                 self.disconnect()
-                # Set invalid_auth so callers can check
                 self._invalid_auth = True
-                # Unblock any waits on the sync
                 self._sync_event.set()
             elif "Login successful" in data:
                 LOG.info("Successful login.")
                 return
 
-            # Not login process, actual error
             LOG.debug(err)
 
     def _timeout(self, msg_code):
@@ -222,23 +214,9 @@ class Elk:
         """Status of connection to Elk."""
         return self._conn is not None
 
-    def _reconnect(self):
-        """A wrapper around connect that will not reconnect if disconnect has been called."""
-        if self._stopped:
-            return
-        if self._invalid_auth:
-            # If we know the credentials are invalid prevent connecting
-            # as this will trigger brute force protection on the ElkM1
-            # and lock them out for 15 minutes.
-            LOG.error(
-                "Connection request ignored due to invalid authentication credentials."
-            )
-            return
-        self.connect()
-
     def connect(self):
         """Connect to the panel"""
-        self._stopped = False
+        self._disconnect_requested = False
         asyncio.ensure_future(self._connect())
 
     def run(self):
@@ -262,11 +240,16 @@ class Elk:
 
     def disconnect(self):
         """Disconnect the connection from sending/receiving."""
-        self._stopped = True
+        self._disconnect_requested = True
         if self._conn:
             self._conn.stop()
             self._conn = None
+        if self._connection_retry_task:
+            self._connection_retry_task.cancel()
+            self._connection_retry_task = None
+        if self._transport:
             self._transport.close()
+            self._transport = None
         if self._heartbeat:
             self._heartbeat.cancel()
             self._heartbeat = None

@@ -133,6 +133,25 @@ class MessageDecode:
         """KC: Keypad key change."""
         return {"keypad": int(msg[4:6]) - 1, "key": int(msg[6:8])}
 
+    def _ld_decode(self, msg):
+        """LD: System Log Data Update"""
+        event = int(msg[4:8])
+        number = int(msg[8:11])
+        area = int(msg[11]) - 1
+        hour = int(msg[12:14])
+        minute = int(msg[14:16])
+        month = int(msg[16:18])
+        day = int(msg[18:20])
+        index = int(msg[20:23])
+        day_of_week = int(msg[23])
+        year = int(msg[24:26])
+        return {
+            "event": event, "number": number, "area": area,
+            "hour": hour, "minute": minute,
+            "month": month, "day": day, "index": index,
+            "day_of_week": day_of_week, "year": 2000+year,
+        }
+
     def _lw_decode(self, msg):
         """LW: temperatures from all keypads and zones 1-16."""
         keypad_temps = []

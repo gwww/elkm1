@@ -146,10 +146,16 @@ class MessageDecode:
         day_of_week = int(msg[23])
         year = int(msg[24:26])
         return {
-            "event": event, "number": number, "area": area,
-            "hour": hour, "minute": minute,
-            "month": month, "day": day, "index": index,
-            "day_of_week": day_of_week, "year": 2000+year,
+            "event": event,
+            "number": number,
+            "area": area,
+            "hour": hour,
+            "minute": minute,
+            "month": month,
+            "day": day,
+            "index": index,
+            "day_of_week": day_of_week,
+            "year": 2000 + year,
         }
 
     def _lw_decode(self, msg):

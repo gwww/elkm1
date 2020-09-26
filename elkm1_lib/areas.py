@@ -86,10 +86,9 @@ class Areas(Elements):
 
     # note the LD message are only output by the system when
     # the G29 "Special" global setting "Event log" checkbox is set
-    def _ld_handler(self, event, number, area,
-                    hour, minute,
-                    month, day, index,
-                    day_of_week, year):
+    def _ld_handler(
+        self, event, number, area, hour, minute, month, day, index, day_of_week, year
+    ):
         a = self.elements[area]
         a.setattr("log_event", event, False)
         a.setattr("log_number", number, False)

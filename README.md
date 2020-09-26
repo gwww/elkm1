@@ -6,7 +6,7 @@ https://github.com/gwww/elkm1
 
 ## Requirements
 
-- Python 3.5 (or higher)
+- Python 3.6 (or higher)
 
 ## Description
 
@@ -179,3 +179,25 @@ There is a `Makefile` in the root directory as well. The `make` command
 followed by one of the targets in the `Makefile` can be used. If you don't
 have or wish to use `make` the `Makefile` serves as examples of common
 commands that can be run.
+
+## Reporting a Bug
+
+No problem ;) — report the bugs! But, logs are most often required. If you
+are using Home Assistant, which is about the only use I'm aware of for
+this library, then add the following to your `configuration.yaml`:
+```
+logger:
+  default: info
+  logs:
+    custom_components.elkm1: debug
+    elkm1_lib: debug
+```
+
+Do everything in your power to trim to logs down to their smallest. One way is
+to reproduce your problem quickly so that few other logs are not generated in
+between.
+
+Sometime logs may have sensitive information in them. You may want to
+scan your logs for that info and "X" it out. In addition, you can send logs
+directly to me. Support email is in the `pyproject.toml` file. You may also
+send a link to somewhere you've stored/shared the file (DropBox for example).

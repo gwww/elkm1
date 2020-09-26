@@ -265,10 +265,10 @@ class Input(FocusMixin, urwid.Edit):
 
 class Commander(urwid.Frame):
     """Simple terminal UI with command input on bottom line and display
-       frame above similar to chat client etc. Initialize with your
-       Command instance to execute commands and the start main loop
-       Commander.loop(). You can also asynchronously output messages
-       with Commander.output('message') """
+    frame above similar to chat client etc. Initialize with your
+    Command instance to execute commands and the start main loop
+    Commander.loop(). You can also asynchronously output messages
+    with Commander.output('message')"""
 
     class Exit(object):
         pass

@@ -2,7 +2,9 @@
 All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](https://semver.org/).
 
-## [0.7.16] -- Pending
+## [0.8.0] -- Pending
+- Beefed up README with error reporting.
+- Improve LD handling by simplifying and adding feature to note last_user
 
 ## [0.7.15]
 - Switch to `poetry` from `pipenv` for dependency management; allowed

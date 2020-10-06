@@ -33,7 +33,7 @@ Basic connection to the Elk panel:
     # Print to STDOUT
     LOG = logging.getLogger(__name__)
     logging.basicConfig(level=logging.DEBUG, format='%(message)s')
-    
+
     # Connect to elk
     elk = Elk({'url': 'elk://192.168.1.100'})
     elk.connect()
@@ -41,7 +41,7 @@ Basic connection to the Elk panel:
 ```
 
 The above will connect to the Elk panel at IP address 192.168.1.100. the `elk://`
-prefix specifies that the connect is plaintext. Alternatively, `elks://` will 
+prefix specifies that the connect is plaintext. Alternatively, `elks://` will
 connect over TLS. In this case a userid and password must be specified
 and the call to `Elk` changes to:
 
@@ -64,7 +64,7 @@ refers to, for example, zones 1-208, the library references them
 as zones 0-207. All translation from base 0 to 1 and vice-versa is
 handled internally in the `elkm1_lib.message` module.
 
-After creating the `Elk` object and connecting to the panel the 
+After creating the `Elk` object and connecting to the panel the
 library code will synchronize all the elements to the data from the Elk panel.
 
 Many Elk messages are handled by the library, caching their contents. When a
@@ -83,13 +83,13 @@ of changing elements. The following user code shows registering a callback:
 The library encodes, decodes, and processes messages to/from the
 Elk panel. All the encoding and decoding is done in `elkm1_lib.message` module.
 
-Messages received are handled with callbacks. The library 
-internally registers callbacks so that decoded messages 
+Messages received are handled with callbacks. The library
+internally registers callbacks so that decoded messages
 can be used to update an `Element`. The user of the
 library may also register callbacks. Any particular message
 may have multiple callbacks.
 
-When the message is received it is decoded 
+When the message is received it is decoded
 and some validation is done. The message handler is called
 with the fields of from the decoded message. Each type of
 message has parameters that match the message type. All handler parameters
@@ -144,9 +144,9 @@ the command line and output windows. In the output window the arrow keys
 and scrollwheel scroll the contents of the window.
 
 In the command line when running `elk -i` there are a
-number of commands. Start with `help`. Then `help <command>` for 
+number of commands. Start with `help`. Then `help <command>` for
 details on each command. In general there are commands to dump the internal
-state of elements and to invoke any of the encoders to send a message 
+state of elements and to invoke any of the encoders to send a message
 to the Elk panel.
 
 For example, `light <4, 8, 12-14` would invoke the `__str__` method
@@ -195,7 +195,11 @@ logger:
 
 Do everything in your power to trim to logs down to their smallest. One way is
 to reproduce your problem quickly so that few other logs are not generated in
-between.
+between. Another recommendation is to use the simplest configuration that you
+can think of to reproduce the problem.
+
+Can you reproduce the problem in other ways? If this is a problem that is
+being experienced while using Home Assistant try using the `Services` in `Developer Tools`.
 
 Sometime logs may have sensitive information in them. You may want to
 scan your logs for that info and "X" it out. In addition, you can send logs

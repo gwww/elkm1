@@ -17,7 +17,9 @@ conversion is encapsulated in this module.
 
 
 from collections import namedtuple
+import datetime as dt
 import re
+import time
 
 from .const import Max
 
@@ -134,29 +136,25 @@ class MessageDecode:
         return {"keypad": int(msg[4:6]) - 1, "key": int(msg[6:8])}
 
     def _ld_decode(self, msg):
-        """LD: System Log Data Update"""
-        event = int(msg[4:8])
-        number = int(msg[8:11])
+        """LD: System Log Data Update."""
         area = int(msg[11]) - 1
         hour = int(msg[12:14])
         minute = int(msg[14:16])
         month = int(msg[16:18])
         day = int(msg[18:20])
-        index = int(msg[20:23])
-        day_of_week = int(msg[23])
-        year = int(msg[24:26])
-        return {
-            "event": event,
-            "number": number,
-            "area": area,
-            "hour": hour,
-            "minute": minute,
-            "month": month,
-            "day": day,
-            "index": index,
-            "day_of_week": day_of_week,
-            "year": 2000 + year,
-        }
+        year = int(msg[24:26]) + 2000
+        log_local_datetime = dt.datetime(year, month, day, hour, minute)
+        log_local_time = time.mktime(log_local_datetime.timetuple())
+        log_gm_timestruct = time.gmtime(log_local_time)
+
+        log = {}
+        log["event"] = int(msg[4:8])
+        log["number"] = int(msg[8:11])
+        log["index"] = int(msg[20:23])
+        log["timestamp"] = dt.datetime(
+            *log_gm_timestruct[:6], tzinfo=dt.timezone.utc).isoformat()
+
+        return { "area": area, "log": log }
 
     def _lw_decode(self, msg):
         """LW: temperatures from all keypads and zones 1-16."""

@@ -1,5 +1,4 @@
 """Definition of an ElkM1 Keypad."""
-import pytz
 import datetime as dt
 
 from .const import Max, TextDescriptions
@@ -14,7 +13,7 @@ class Keypad(Element):
         super().__init__(index, elk)
         self.area = -1
         self.temperature = -40
-        self.last_user_time = dt.datetime.now(pytz.UTC)
+        self.last_user_time = dt.datetime.now(dt.timezone.utc)
         self.last_user = -1
         self.code = ""
         self.last_keypress = None
@@ -41,7 +40,7 @@ class Keypads(Elements):
         keypad_ = self.elements[keypad]
 
         # By setting a time this will force the IC change to always be reported
-        keypad_.setattr("last_user_time", dt.datetime.now(pytz.UTC), False)
+        keypad_.setattr("last_user_time", dt.datetime.now(dt.timezone.utc), False)
 
         # If user is negative then invalid code entered
         keypad_.setattr("code", code if user < 0 else "****", False)

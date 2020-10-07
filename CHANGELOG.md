@@ -2,7 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](https://semver.org/).
 
-## [0.8.0] -- Pending
+## [0.8.1]
+- Duh, left breakpoint in code; removed
+- Update dependencies (pytz left in poetry.lock)
+
+## [0.8.0]
 - Beefed up README with error reporting.
 - Improve LD handling by simplifying and adding feature to note last_user
 

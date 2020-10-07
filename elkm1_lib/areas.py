@@ -79,5 +79,4 @@ class Areas(Elements):
         if log["event"] in [1173, 1174]:
             # arm/disarm log (YAGNI - decode number for more log types when needed)
             log["user_number"] = log["number"]
-        breakpoint();
         self.elements[area].setattr("last_log", log, True)

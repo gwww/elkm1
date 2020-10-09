@@ -7,7 +7,7 @@ from .const import (
     ZonePhysicalStatus,
 )
 from .elements import Element, Elements
-from .message import az_encode, zd_encode, zp_encode, zs_encode, zt_encode
+from .message import az_encode, zb_encode, zd_encode, zp_encode, zs_encode, zt_encode
 
 
 class Zone(Element):
@@ -17,7 +17,6 @@ class Zone(Element):
         super().__init__(index, elk)
         self.definition = 0
         self.area = -1
-        self.bypassed = False
         self.logical_status = 0
         self.physical_status = 0
         self.voltage = 0
@@ -40,7 +39,11 @@ class Zone(Element):
             phys=ZonePhysicalStatus(self.physical_status).name,
         )
 
-    def zone_trigger(self):
+    def bypass(self, code):
+        """(Helper) Bypass zone."""
+        self._elk.send(zb_encode(self._index, 0, code))
+
+    def trigger(self):
         """(Helper) Trigger zone."""
         self._elk.send(zt_encode(self._index))
 
@@ -84,7 +87,12 @@ class Zones(Elements):
             self.elements[device].setattr("temperature", temperature, True)
 
     def _zb_handler(self, zone_number, zone_bypassed):
-        self.elements[zone_number].setattr("bypassed", zone_bypassed, True)
+        # If specific zone number was specified, then a ZC (zone change)
+        # message will be received to update the bypass state.
+        # If zone was 000 or 999 then we don't know which area was bypassed or
+        # cleared and ther is no ZC. Retrieve the current zone statuses...
+        if zone_number < 0 or zone_number >= Max.ZONES.value:
+            self.elk.send(zs_encode())
 
     def _zc_handler(self, zone_number, zone_status):
         self.elements[zone_number].setattr("logical_status", zone_status[0], False)

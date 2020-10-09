@@ -2,7 +2,7 @@
 
 from .const import Max, TextDescriptions
 from .elements import Element, Elements
-from .message import as_encode, az_encode, al_encode, dm_encode
+from .message import as_encode, az_encode, al_encode, dm_encode, zb_encode
 
 
 class Area(Element):
@@ -28,8 +28,16 @@ class Area(Element):
         self.arm(0, code)
 
     def display_message(self, clear, beep, timeout, line1, line2):
-        """Display a message on all of the keypads in this area."""
+        """(Helper) Display a message on all of the keypads in this area."""
         self._elk.send(dm_encode(self._index, clear, beep, timeout, line1, line2))
+
+    def bypass(self, code):
+        """(Helper) Bypass area."""
+        self._elk.send(zb_encode(999, self._index, code))
+
+    def clear_bypass(self, code):
+        """(Helper) Clear bypass area."""
+        self._elk.send(zb_encode(-1, self._index, code))
 
 
 class Areas(Elements):

@@ -11,6 +11,10 @@ class Counter(Element):
         super().__init__(index, elk)
         self.value = None
 
+    def get(self):
+        """(Helper) Get counter"""
+        self._elk.send(cv_encode(self._index))
+
     def set(self, value):
         """(Helper) Set counter to value"""
         self._elk.send(cx_encode(self._index, value))

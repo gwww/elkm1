@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## [0.8.2]
+- Added zone bypass helper and area bypass helper
+- Zone bypass handler bug fix (did not handle bypass all)
+- Renamed zone_trigger to trigger (breaking change)
+- Fix comment typo
+
 ## [0.8.1]
 - Duh, left breakpoint in code; removed
 - Update dependencies (pytz left in poetry.lock)

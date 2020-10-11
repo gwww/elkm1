@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## [0.8.3]
+- Added rw (set time) support and RR (realtime clock) support
+- Added callbacks when get connected and disconnected from panel
+- KC now supports keycode 0
+
 ## [0.8.2]
 - Added zone bypass helper and area bypass helper
 - Zone bypass handler bug fix (did not handle bypass all)

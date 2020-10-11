@@ -52,8 +52,7 @@ class Keypads(Elements):
                 keypad.setattr("area", keypad_areas[keypad.index], True)
 
     def _kc_handler(self, keypad, key):
-        if key > 0:
-            self.elements[keypad].setattr("last_keypress", key, True)
+        self.elements[keypad].setattr("last_keypress", key, True)
 
     # pylint: disable=unused-argument
     def _lw_handler(self, keypad_temps, zone_temps):

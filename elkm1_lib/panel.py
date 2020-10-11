@@ -1,7 +1,10 @@
 """Definition of an ElkM1 Area"""
+import datetime as dt
+import time
+
 from .const import ElkRPStatus
 from .elements import Element
-from .message import vn_encode, lw_encode, sw_encode, sp_encode, ss_encode
+from .message import vn_encode, lw_encode, sw_encode, sp_encode, ss_encode, rw_encode
 
 
 class Panel(Element):
@@ -21,6 +24,7 @@ class Panel(Element):
         """Retrieve panel information from ElkM1"""
         self._elk.add_handler("VN", self._vn_handler)
         self._elk.add_handler("XK", self._xk_handler)
+        self._elk.add_handler("RR", self._xk_handler) # RR/XK use same handler
         self._elk.add_handler("RP", self._rp_handler)
         self._elk.add_handler("IE", self._elk.call_sync_handlers)
         self._elk.add_handler("SS", self._ss_handler)
@@ -37,6 +41,13 @@ class Panel(Element):
     def speak_phrase(self, phrase):
         """(Helper) Speak phrase."""
         self._elk.send(sp_encode(phrase))
+
+    def set_time(self, datetime=None):
+        """(Helper) Set the time given a datetime."""
+        if datetime is None:
+            structTime = time.localtime()
+            datetime = dt.datetime(*structTime[:6])
+        self._elk.send(rw_encode(datetime))
 
     def _vn_handler(self, elkm1_version, xep_version):
         self.setattr("elkm1_version", elkm1_version, False)

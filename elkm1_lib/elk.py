@@ -22,7 +22,8 @@ class Elk:
         self._config = config
         self._conn = None
         self._transport = None
-        self.connection_lost_callbk = None
+        self.connected_callbk = None
+        self.disconnected_callbk = None
         self._connection_retry_timer = 1
         self._message_decode = MessageDecode()
         self._sync_handlers = []
@@ -30,7 +31,7 @@ class Elk:
         self._sync_event = asyncio.Event()
         self._heartbeat = None
         self._invalid_auth = False
-        self._connection_retry_task = None
+        self._reconnect_task = None
         self._disconnect_requested = False
 
         self.add_handler("XK", self._xk_handler)
@@ -68,9 +69,8 @@ class Elk:
         class_ = getattr(module, element.capitalize())
         setattr(self, element, class_(self))
 
-    async def _connect(self, connection_lost_callbk=None):
+    async def _connect(self):
         """Asyncio connection to Elk."""
-        self.connection_lost_callbk = connection_lost_callbk
         self._invalid_auth = False
         url = self._config["url"]
         LOG.info("Connecting to ElkM1 at %s", url)
@@ -104,8 +104,8 @@ class Elk:
                 err,
                 self._connection_retry_timer,
             )
-            self._connection_retry_task = self.loop.call_later(
-                self._connection_retry_timer, self.connect
+            self._reconnect_task = self.loop.call_later(
+                self._connection_retry_timer, self._reconnect
             )
             self._connection_retry_timer = (
                 2 * self._connection_retry_timer
@@ -125,6 +125,8 @@ class Elk:
         self.call_sync_handlers()
         if not self._config["url"].startswith("serial://"):
             self._heartbeat = self.loop.call_later(120, self._reset_connection)
+        if self.connected_callbk:
+            self.connected_callbk(self)
 
     def _reset_connection(self):
         LOG.warning("ElkM1 connection heartbeat timed out, disconnecting")
@@ -138,15 +140,20 @@ class Elk:
         self._heartbeat.cancel()
         self._heartbeat = self.loop.call_later(120, self._reset_connection)
 
+    def _reconnect(self):
+        asyncio.ensure_future(self._connect())
+
     def _disconnected(self):
         LOG.warning("ElkM1 at %s disconnected", self._config["url"])
         self._conn = None
-        self._connection_retry_task = self.loop.call_later(
-            self._connection_retry_timer, self.connect
+        self._reconnect_task = self.loop.call_later(
+            self._connection_retry_timer, self._reconnect
         )
         if self._heartbeat:
             self._heartbeat.cancel()
             self._heartbeat = None
+        if self.disconnected_callbk:
+            self.disconnected_callbk(self)
 
     def add_handler(self, msg_type, handler):
         self._message_decode.add_handler(msg_type, handler)
@@ -214,9 +221,11 @@ class Elk:
         """Status of connection to Elk."""
         return self._conn is not None
 
-    def connect(self):
+    def connect(self, connected_callbk=None, disconnected_callbk=None):
         """Connect to the panel"""
         self._disconnect_requested = False
+        self.connected_callbk = connected_callbk
+        self.disconnected_callbk = disconnected_callbk
         asyncio.ensure_future(self._connect())
 
     def run(self):
@@ -244,9 +253,9 @@ class Elk:
         if self._conn:
             self._conn.stop()
             self._conn = None
-        if self._connection_retry_task:
-            self._connection_retry_task.cancel()
-            self._connection_retry_task = None
+        if self._reconnect_task:
+            self._reconnect_task.cancel()
+            self._reconnect_task = None
         if self._transport:
             self._transport.close()
             self._transport = None

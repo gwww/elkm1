@@ -185,6 +185,10 @@ class MessageDecode:
         """RP: Remote programming status."""
         return {"remote_programming_status": int(msg[4:6])}
 
+    def _rr_decode(self, msg):
+        """RR: Realtime clock."""
+        return {"real_time_clock": msg[4:20]}
+
     def _sd_decode(self, msg):
         """SD: Description text."""
         desc_ch1 = msg[9]
@@ -472,8 +476,15 @@ def ss_encode():
 
 
 def sw_encode(word):
-    """sp: Speak word."""
+    """sw: Speak word."""
     return MessageEncode("09sw{:03d}00".format(word), None)
+
+
+def rw_encode(time):
+    """rw: Write time given a datetime."""
+    elk_weekday = (time.weekday() + 1) % 7 + 1
+    time_str = time.strftime("%S%M%H.%d%m%y").replace(".", str(elk_weekday))
+    return MessageEncode(f"13rw{time_str}00", None)
 
 
 def tn_encode(task):

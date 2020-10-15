@@ -1,7 +1,7 @@
 """Definition of an ElkM1 Keypad."""
 import datetime as dt
 
-from .const import Max, TextDescriptions
+from .const import KeypadKeys, Max, TextDescriptions
 from .elements import Element, Elements
 from .message import ka_encode
 
@@ -53,7 +53,11 @@ class Keypads(Elements):
 
     def _kc_handler(self, keypad, key):
         self.elements[keypad].last_keypress = None # Force a change notification
-        self.elements[keypad].setattr("last_keypress", key, True)
+        try:
+            name = KeypadKeys(key).name
+        except ValueError:
+            name = ""
+        self.elements[keypad].setattr("last_keypress", (name, key), True)
 
     # pylint: disable=unused-argument
     def _lw_handler(self, keypad_temps, zone_temps):

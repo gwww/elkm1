@@ -2,6 +2,9 @@
 All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## [0.8.4]
+- Black formatting
+
 ## [0.8.3]
 - Added rw (set time) support and RR (realtime clock) support
 - Added callbacks when get connected and disconnected from panel

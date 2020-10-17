@@ -17,15 +17,16 @@ import cmdr
 
 LOG = logging.getLogger(__name__)
 
+
 class StdOutWrapper:
     def __init__(self, cmdr):
         sys.stdout = self
         sys.stderr = self
         self.cmdr = cmdr
         self.log = None
-        #self.log = open('elk.log','w')
+        # self.log = open('elk.log','w')
 
-    def write(self,txt):
+    def write(self, txt):
         txt = txt.rstrip()
         if len(txt) > 0:
             self.cmdr.output(txt)
@@ -35,63 +36,87 @@ class StdOutWrapper:
     def flush(self):
         pass
 
+
 def _unknown_handler(msg_code, data):
     LOG.debug("No decoder for message type: %s Contents: %s", msg_code, data)
+
 
 def _timeout_handler(msg_code):
     LOG.debug("Timeout waiting for '%s'", msg_code)
 
+
 class SmartFormatter(argparse.HelpFormatter):
     def _split_lines(self, text, width):
-        if text.startswith('R|'):
+        if text.startswith("R|"):
             return text[2:].splitlines()
         return argparse.HelpFormatter._split_lines(self, text, width)
+
 
 def parse_args():
     parser = argparse.ArgumentParser("elk", formatter_class=SmartFormatter)
 
-    parser.add_argument('-i', '--interactive', action='store_true', default=False,
-                        dest='interactive',
-                        help='Run in interactive mode (type help for more info)')
-    parser.add_argument('-u', '--url', action='store', dest='url',
-            help=("R|URL to connect to in one of the following formats:\n"
-                 "  elk://host[:port] -- connect to Elk over Ethernet\n"
-                 "  elks://host[:port] -- securely connect to Elk over Ethernet\n"
-                 "  serial://port[:baud] -- connect to Elk over serial port\n"))
-    parser.add_argument('--userid', action='store', dest='userid',
-                        help='Userid when using secure connection (elks://)')
-    parser.add_argument('--password', action='store', dest='password',
-                        help='Password when using secure connection (elks://)')
+    parser.add_argument(
+        "-i",
+        "--interactive",
+        action="store_true",
+        default=False,
+        dest="interactive",
+        help="Run in interactive mode (type help for more info)",
+    )
+    parser.add_argument(
+        "-u",
+        "--url",
+        action="store",
+        dest="url",
+        help=(
+            "R|URL to connect to in one of the following formats:\n"
+            "  elk://host[:port] -- connect to Elk over Ethernet\n"
+            "  elks://host[:port] -- securely connect to Elk over Ethernet\n"
+            "  serial://port[:baud] -- connect to Elk over serial port\n"
+        ),
+    )
+    parser.add_argument(
+        "--userid",
+        action="store",
+        dest="userid",
+        help="Userid when using secure connection (elks://)",
+    )
+    parser.add_argument(
+        "--password",
+        action="store",
+        dest="password",
+        help="Password when using secure connection (elks://)",
+    )
 
     results = parser.parse_args()
     return results
+
 
 def main():
     config = {}
 
     args = parse_args()
-    url = args.url if args.url else os.environ.get('ELKM1_URL')
+    url = args.url if args.url else os.environ.get("ELKM1_URL")
     if url:
-        config['url'] = url
+        config["url"] = url
 
-    config['userid'] = args.userid
-    config['password'] = args.password
+    config["userid"] = args.userid
+    config["password"] = args.password
 
     # config['element_list'] = ['panel']
 
     elk = Elk(config)
 
     if args.interactive:
-        c=cmdr.Commander('Elk console', cmd_cb=cmdr.Commands(elk))
+        c = cmdr.Commander("Elk console", cmd_cb=cmdr.Commands(elk))
         mystdout = StdOutWrapper(c)
-        logging.basicConfig(stream=mystdout,
-                            level=logging.DEBUG, format='%(message)s')
+        logging.basicConfig(stream=mystdout, level=logging.DEBUG, format="%(message)s")
     else:
-        logging.basicConfig(level=logging.DEBUG, format='%(message)s')
+        logging.basicConfig(level=logging.DEBUG, format="%(message)s")
 
     try:
-        elk.add_handler('unknown', _unknown_handler)
-        elk.add_handler('timeout', _timeout_handler)
+        elk.add_handler("unknown", _unknown_handler)
+        elk.add_handler("timeout", _timeout_handler)
         elk.connect()
         if args.interactive:
             c.loop()
@@ -100,5 +125,6 @@ def main():
     except KeyboardInterrupt:
         exit(0)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

@@ -6,25 +6,29 @@ import os
 
 LOG = logging.getLogger(__name__)
 
+
 def connected(elk):
     print("Connected!")
+
 
 def disconnected(elk):
     print("Disconnected!")
 
+
 def main():
-    logging.basicConfig(level=logging.DEBUG, format='%(message)s')
+    logging.basicConfig(level=logging.DEBUG, format="%(message)s")
     try:
-        url = os.environ.get('ELKM1_URL')
+        url = os.environ.get("ELKM1_URL")
         if not url:
             print("Specify url to connect to in ELKM1_URL environment variable")
             exit(0)
 
-        elk = Elk({'url': url})
+        elk = Elk({"url": url})
         elk.connect(connected, disconnected)
         elk.run()
     except KeyboardInterrupt:
         exit(0)
+
 
 if __name__ == "__main__":
     main()

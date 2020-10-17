@@ -24,7 +24,7 @@ class Panel(Element):
         """Retrieve panel information from ElkM1"""
         self._elk.add_handler("VN", self._vn_handler)
         self._elk.add_handler("XK", self._xk_handler)
-        self._elk.add_handler("RR", self._xk_handler) # RR/XK use same handler
+        self._elk.add_handler("RR", self._xk_handler)  # RR/XK use same handler
         self._elk.add_handler("RP", self._rp_handler)
         self._elk.add_handler("IE", self._elk.call_sync_handlers)
         self._elk.add_handler("SS", self._ss_handler)

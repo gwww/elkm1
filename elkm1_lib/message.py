@@ -152,9 +152,10 @@ class MessageDecode:
         log["number"] = int(msg[8:11])
         log["index"] = int(msg[20:23])
         log["timestamp"] = dt.datetime(
-            *log_gm_timestruct[:6], tzinfo=dt.timezone.utc).isoformat()
+            *log_gm_timestruct[:6], tzinfo=dt.timezone.utc
+        ).isoformat()
 
-        return { "area": area, "log": log }
+        return {"area": area, "log": log}
 
     def _lw_decode(self, msg):
         """LW: temperatures from all keypads and zones 1-16."""

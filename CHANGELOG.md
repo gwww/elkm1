@@ -4,6 +4,8 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ## [0.8.4]
 - Black formatting
+- configured flag for each element set based on whether element has
+  a description
 
 ## [0.8.3]
 - Added rw (set time) support and RR (realtime clock) support

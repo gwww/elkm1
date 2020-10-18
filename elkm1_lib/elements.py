@@ -2,6 +2,8 @@
   Base of all the elements found on the Elk panel... Zone, Keypad, etc.
 """
 
+import re
+
 from abc import abstractmethod
 from .message import sd_encode
 
@@ -38,7 +40,6 @@ class Element:
 
     def _call_callbacks(self):
         """Callbacks when attribute of element changes"""
-        self._configured = True
         for callback in self._callbacks:
             callback(self, self._changeset)
         self._changeset = {}
@@ -55,7 +56,7 @@ class Element:
 
     def default_name(self, separator="-"):
         """Return a default name for based on class and index of element"""
-        return self.__class__.__name__ + "{}{:03d}".format(separator, self._index + 1)
+        return f"{self.__class__.__name__}{separator}{self._index + 1:03}"
 
     def is_default_name(self):
         """Check if the name assigned is the default_name"""
@@ -93,11 +94,21 @@ class Elements:
         return self.elements[key]
 
     def _got_desc(self, descriptions):
+        from .users import Users
+
+        # Elk reports descriptions for all 199 users, irregardless of how many
+        # are configured. Don't set their name and configured flag.
+        user_re = re.compile(r"USER \d\d\d") if isinstance(self, Users) else None
+
         for element in self.elements:
             if element.index >= len(descriptions):
                 break
-            if descriptions[element.index] is not None:
-                element.setattr("name", descriptions[element.index], True)
+            name = descriptions[element.index]
+            if name is not None:
+                if user_re and user_re.match(name):
+                    continue
+                element.setattr("name", name, True)
+                element._configured = True
 
     def get_descriptions(self, description_type):
         """

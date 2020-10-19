@@ -45,7 +45,6 @@ class Thermostats(Elements):
         if group == 2:
             self.elements[device].setattr("current_temp", temperature, True)
 
-    # pylint: disable=too-many-arguments
     def _tr_handler(
         self,
         thermostat_index,
@@ -56,7 +55,7 @@ class Thermostats(Elements):
         heat_setpoint,
         cool_setpoint,
         humidity,
-    ):
+    ):  # pylint: disable=too-many-arguments
         thermostat = self.elements[thermostat_index]
         thermostat.setattr("mode", mode, False)
         thermostat.setattr("hold", hold, False)

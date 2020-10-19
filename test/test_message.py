@@ -1,13 +1,10 @@
-import pytest
 from unittest.mock import Mock
 
-from elkm1_lib.message import (
-    MessageDecode,
-    MessageEncode,
-    housecode_to_index,
-    index_to_housecode,
-    ps_encode,
-)
+import pytest
+
+from elkm1_lib.message import (MessageDecode, MessageEncode,
+                               housecode_to_index, index_to_housecode,
+                               ps_encode)
 
 
 def test_housecode_to_index_accepts_valid_codes():

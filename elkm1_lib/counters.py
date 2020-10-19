@@ -1,7 +1,7 @@
 """Definition of an ElkM1 Custom Value"""
 from .const import Max, TextDescriptions
 from .elements import Element, Elements
-from .message import cx_encode, cv_encode
+from .message import cv_encode, cx_encode
 
 
 class Counter(Element):
@@ -20,7 +20,6 @@ class Counter(Element):
         self._elk.send(cx_encode(self._index, value))
 
 
-# pylint: disable=R0903
 class Counters(Elements):
     """Handling for multiple counters"""
 

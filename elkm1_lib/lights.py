@@ -2,7 +2,7 @@
 
 from .const import Max, TextDescriptions
 from .elements import Element, Elements
-from .message import ps_encode, pc_encode, pf_encode, pn_encode, pt_encode
+from .message import pc_encode, pf_encode, pn_encode, ps_encode, pt_encode
 
 
 class Light(Element):
@@ -40,8 +40,9 @@ class Lights(Elements):
             self.elk.send(ps_encode(i))
         self.get_descriptions(TextDescriptions.LIGHT.value)
 
-    # pylint: disable=unused-argument
-    def _pc_handler(self, housecode, index, light_level):
+    def _pc_handler(
+        self, housecode, index, light_level
+    ):  # pylint: disable=unused-argument
         self.elements[index].setattr("status", light_level, True)
 
     def _ps_handler(self, bank, statuses):

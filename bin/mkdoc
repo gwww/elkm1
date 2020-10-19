@@ -3,8 +3,8 @@
 import inspect
 import re
 
-from elkm1_lib.const import MESSAGE_MAP
 import elkm1_lib.message
+from elkm1_lib.const import MESSAGE_MAP
 
 
 def main():

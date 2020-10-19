@@ -3,8 +3,8 @@
 """
 
 import re
-
 from abc import abstractmethod
+
 from .message import sd_encode
 
 
@@ -127,4 +127,4 @@ class Elements:
     @abstractmethod
     def sync(self):
         """Synchronize elements"""
-        pass
+        pass  # pylint: disable=unnecessary-pass

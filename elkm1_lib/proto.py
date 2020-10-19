@@ -109,7 +109,7 @@ class Connection(asyncio.Protocol):  # pylint: disable=too-many-instance-attribu
 
         if not raw:
             cksum = 256 - reduce(lambda x, y: x + y, map(ord, data)) % 256
-            data = data + "{:02X}".format(cksum)
+            data = f"{data}{cksum:02X}"
             if int(data[0:2], 16) != len(data) - 2:
                 LOG.debug("message length wrong: %s", data)
 

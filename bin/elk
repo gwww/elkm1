@@ -3,17 +3,17 @@
 import argparse
 import asyncio
 import io
-import os
 import logging
+import os
 import sys
 import textwrap
 import traceback
 
-from elkm1_lib import Elk
-from elkm1_lib.message import MessageEncode
-from elkm1_lib.const import Max
 import cmdr
 
+from elkm1_lib import Elk
+from elkm1_lib.const import Max
+from elkm1_lib.message import MessageEncode
 
 LOG = logging.getLogger(__name__)
 

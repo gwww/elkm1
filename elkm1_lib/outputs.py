@@ -1,7 +1,7 @@
 """Definition of an ElkM1 Output"""
 from .const import Max, TextDescriptions
 from .elements import Element, Elements
-from .message import cs_encode, cf_encode, cn_encode, ct_encode
+from .message import cf_encode, cn_encode, cs_encode, ct_encode
 
 
 class Output(Element):

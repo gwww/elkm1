@@ -1,5 +1,7 @@
-import pytest
 from unittest.mock import Mock, call
+
+import pytest
+
 from elkm1_lib.proto import Connection
 
 

@@ -1,19 +1,20 @@
 """Async IO."""
 
 import asyncio
-from functools import reduce
 import logging
+from functools import reduce
 
 from .message import get_elk_command
 
 LOG = logging.getLogger(__name__)
 
 
-class Connection(asyncio.Protocol):
+class Connection(asyncio.Protocol):  # pylint: disable=too-many-instance-attributes
     """asyncio Protocol with line parsing and queuing writes"""
 
-    # pylint: disable=too-many-instance-attributes
-    def __init__(self, loop, connected, disconnected, got_data, timeout):
+    def __init__(
+        self, loop, connected, disconnected, got_data, timeout
+    ):  # pylint: disable=too-many-arguments
         self.loop = loop
         self._connected_callback = connected
         self._disconnected_callback = disconnected

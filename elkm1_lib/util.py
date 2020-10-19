@@ -1,9 +1,6 @@
 """Utility functions"""
 
-import logging
 import ssl
-
-LOG = logging.getLogger(__name__)
 
 
 def url_scheme_is_secure(url):
@@ -41,7 +38,7 @@ def pretty_const(value):
 
 def username(elk, user_number):
     """Return name of user."""
-    if user_number >= 0 and user_number < elk.users.max_elements:
+    if 0 <= user_number < elk.users.max_elements:
         return elk.users[user_number].name
     if user_number == 201:
         return "*Program*"

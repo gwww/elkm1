@@ -4,7 +4,6 @@ import os
 import termios
 import tty
 
-
 responses = {}
 with open('test-serial.data') as fp:
     line1 = fp.readline()

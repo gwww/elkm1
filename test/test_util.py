@@ -1,8 +1,9 @@
-import pytest
 from unittest.mock import Mock
-from elkm1_lib.util import parse_url, pretty_const
+
+import pytest
 
 from elkm1_lib.const import TextDescriptions
+from elkm1_lib.util import parse_url, pretty_const
 
 
 def test_parse_url_valid_non_ssl_socket():

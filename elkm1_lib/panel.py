@@ -4,7 +4,8 @@ import time
 
 from .const import ElkRPStatus
 from .elements import Element
-from .message import vn_encode, lw_encode, sw_encode, sp_encode, ss_encode, rw_encode
+from .message import (lw_encode, rw_encode, sp_encode, ss_encode, sw_encode,
+                      vn_encode)
 
 
 class Panel(Element):
@@ -45,8 +46,8 @@ class Panel(Element):
     def set_time(self, datetime=None):
         """(Helper) Set the time given a datetime."""
         if datetime is None:
-            structTime = time.localtime()
-            datetime = dt.datetime(*structTime[:6])
+            struct_time = time.localtime()
+            datetime = dt.datetime(*struct_time[:6])
         self._elk.send(rw_encode(datetime))
 
     def _vn_handler(self, elkm1_version, xep_version):

@@ -1,9 +1,10 @@
 """Master class that combines all ElkM1 pieces together."""
 
 import asyncio
-from functools import partial
 import logging
+from functools import partial
 from importlib import import_module
+
 import serial_asyncio
 
 from .message import MessageDecode, sd_encode, ua_encode
@@ -13,7 +14,7 @@ from .util import parse_url, url_scheme_is_secure
 LOG = logging.getLogger(__name__)
 
 
-class Elk:
+class Elk:  # pylint: disable=too-many-instance-attributes
     """Represents all the components on an Elk panel."""
 
     def __init__(self, config, loop=None):
@@ -61,7 +62,7 @@ class Elk:
         for element in self.element_list:
             self._create_element(element)
 
-    def _sync_complete(self, **kwargs):
+    def _sync_complete(self, **kwargs):  # pylint: disable=unused-argument
         self._sync_event.set()
 
     def _create_element(self, element):
@@ -133,8 +134,7 @@ class Elk:
         self._transport.close()
         self._heartbeat = None
 
-    # pylint: disable=unused-argument
-    def _xk_handler(self, real_time_clock):
+    def _xk_handler(self, real_time_clock):  # pylint: disable=unused-argument
         if not self._heartbeat:
             return
         self._heartbeat.cancel()
@@ -156,6 +156,7 @@ class Elk:
             self.disconnected_callbk(self)
 
     def add_handler(self, msg_type, handler):
+        """Add handler for incoming message."""
         self._message_decode.add_handler(msg_type, handler)
 
     def _got_data(self, data):  # pylint: disable=no-self-use
@@ -164,12 +165,13 @@ class Elk:
             self._message_decode.decode(data)
         except (ValueError, AttributeError) as err:
             if (
-                not len(data)
+                not data
                 or data.startswith("Username: ")
                 or data.startswith("Password: ")
             ):
                 return
-            elif data.startswith("Username/Password not found"):
+
+            if data.startswith("Username/Password not found"):
                 LOG.error("Invalid username or password.")
                 self.disconnect()
                 self._invalid_auth = True
@@ -199,13 +201,15 @@ class Elk:
         self.send(ua_encode(0))
 
     async def sync_complete(self):
+        """Called when sync is complete with the panel."""
         return await self._sync_event.wait()
 
-    # pylint: disable=unused-argument
-    def _sd_handler(self, desc_type, unit, desc, show_on_keypad):
+    def _sd_handler(
+        self, desc_type, unit, desc, show_on_keypad
+    ):  # pylint: disable=unused-argument
         """Text description"""
         if desc_type not in self._descriptions_in_progress:
-            LOG.debug("Text description response ignored for " + str(desc_type))
+            LOG.debug("Text description response ignored for %s", str(desc_type))
             return
 
         (max_units, results, callback) = self._descriptions_in_progress[desc_type]

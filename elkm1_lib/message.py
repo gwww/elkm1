@@ -16,16 +16,17 @@ conversion is encapsulated in this module.
 """
 
 
-from collections import namedtuple
 import datetime as dt
 import re
 import time
+from collections import namedtuple
 
 from .const import Max
 
 MessageEncode = namedtuple("MessageEncode", ["message", "response_command"])
 
 
+# pylint: disable=no-self-use
 class MessageDecode:
     """Message decode and dispatcher."""
 
@@ -55,19 +56,19 @@ class MessageDecode:
 
     def _am_decode(self, msg):
         """AM: Alarm memory by area report."""
-        return {"alarm_memory": [x for x in msg[4 : 4 + Max.AREAS.value]]}
+        return {"alarm_memory": msg[4 : 4 + Max.AREAS.value]}
 
     def _as_decode(self, msg):
         """AS: Arming status report."""
         return {
-            "armed_statuses": [x for x in msg[4:12]],
-            "arm_up_states": [x for x in msg[12:20]],
-            "alarm_states": [x for x in msg[20:28]],
+            "armed_statuses": msg[4:12],
+            "arm_up_states": msg[12:20],
+            "alarm_states": msg[20:28],
         }
 
     def _az_decode(self, msg):
         """AZ: Alarm by zone report."""
-        return {"alarm_status": [x for x in msg[4 : 4 + Max.ZONES.value]]}
+        return {"alarm_status": msg[4 : 4 + Max.ZONES.value]}
 
     def _cr_one_custom_value_decode(self, index, part):
         value = int(part[0:5])
@@ -81,13 +82,13 @@ class MessageDecode:
         if int(msg[4:6]) > 0:
             index = int(msg[4:6]) - 1
             return {"values": [self._cr_one_custom_value_decode(index, msg[6:12])]}
-        else:
-            part = 6
-            ret = []
-            for i in range(Max.SETTINGS.value):
-                ret.append(self._cr_one_custom_value_decode(i, msg[part : part + 6]))
-                part += 6
-            return {"values": ret}
+
+        part = 6
+        ret = []
+        for i in range(Max.SETTINGS.value):
+            ret.append(self._cr_one_custom_value_decode(i, msg[part : part + 6]))
+            part += 6
+        return {"values": ret}
 
     def _cc_decode(self, msg):
         """CC: Output status for single output."""
@@ -234,7 +235,7 @@ class MessageDecode:
             "humidity": int(msg[15:17]),
         }
 
-    def _ua_decode(self, msg):
+    def _ua_decode(self, msg):  # pylint: disable=unused-argument
         """UA: Valid User Code Areas."""
         # UA is intentially not decoded
         # because it is used to tell when a sync
@@ -295,6 +296,9 @@ class MessageDecode:
             handler({"msg_code": msg_code})
 
 
+# pylint: enable=no-self-use
+
+
 def housecode_to_index(housecode):
     """Convert a X10 housecode to a zero-based index"""
     match = re.search(r"^([A-P])(\d{1,2})$", housecode.upper())
@@ -342,8 +346,8 @@ def _check_message_valid(msg):
         if int(msg[:2], 16) != (len(msg) - 2):
             raise ValueError("Elk message length incorrect")
         _check_checksum(msg)
-    except IndexError:
-        raise ValueError("Elk message length incorrect")
+    except IndexError as exc:
+        raise ValueError("Elk message length incorrect") from exc
 
 
 def al_encode(arm_mode, area, user_code):
@@ -373,9 +377,9 @@ def ct_encode(output):
     return MessageEncode("09ct{:03d}00".format(output + 1), None)
 
 
-def cn_encode(output, time):
+def cn_encode(output, seconds):
     """cn: Turn on output."""
-    return MessageEncode("0Ecn{:03d}{:05d}00".format(output + 1, time), None)
+    return MessageEncode("0Ecn{:03d}{:05d}00".format(output + 1, seconds), None)
 
 
 def cs_encode():
@@ -410,8 +414,9 @@ def cx_encode(counter, value):
     return MessageEncode("0Dcx{:02d}{:05d}00".format(counter + 1, value), "CV")
 
 
-# pylint: disable=too-many-arguments
-def dm_encode(keypad_area, clear, beep, timeout, line1, line2):
+def dm_encode(
+    keypad_area, clear, beep, timeout, line1, line2
+):  # pylint: disable=too-many-arguments
     """dm: Display message on keypad."""
     return MessageEncode(
         "2Edm{:1d}{:1d}{:1d}{:05d}{:^<16.16}{:^<16.16}00".format(
@@ -431,11 +436,14 @@ def lw_encode():
     return MessageEncode("06lw00", "LW")
 
 
-def pc_encode(index, function_code, extended_code, time):
+def pc_encode(index, function_code, extended_code, seconds):
     """pc: Control any PLC device."""
     return MessageEncode(
-        "11pc{hc}{fc:02d}{ec:02d}{time:04d}00".format(
-            hc=index_to_housecode(index), fc=function_code, ec=extended_code, time=time
+        "11pc{hc}{fc:02d}{ec:02d}{seconds:04d}00".format(
+            hc=index_to_housecode(index),
+            fc=function_code,
+            ec=extended_code,
+            seconds=seconds,
         ),
         None,
     )
@@ -481,10 +489,10 @@ def sw_encode(word):
     return MessageEncode("09sw{:03d}00".format(word), None)
 
 
-def rw_encode(time):
+def rw_encode(date_time):
     """rw: Write time given a datetime."""
-    elk_weekday = (time.weekday() + 1) % 7 + 1
-    time_str = time.strftime("%S%M%H.%d%m%y").replace(".", str(elk_weekday))
+    elk_weekday = (date_time.weekday() + 1) % 7 + 1
+    time_str = date_time.strftime("%S%M%H.%d%m%y").replace(".", str(elk_weekday))
     return MessageEncode(f"13rw{time_str}00", None)
 
 

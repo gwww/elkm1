@@ -2,6 +2,9 @@
 All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## [0.8.5]
+- Lint and isort cleanup
+
 ## [0.8.4]
 - Black formatting
 - configured flag for each element set based on whether element has

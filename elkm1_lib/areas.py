@@ -2,10 +2,10 @@
 
 from .const import Max, TextDescriptions
 from .elements import Element, Elements
-from .message import as_encode, az_encode, al_encode, dm_encode, zb_encode
+from .message import al_encode, as_encode, az_encode, dm_encode, zb_encode
 
 
-class Area(Element):
+class Area(Element):  # pylint: disable=too-many-instance-attributes
     """Class representing an Area"""
 
     def __init__(self, index, elk):
@@ -27,7 +27,9 @@ class Area(Element):
         """(Helper) Disarm system."""
         self.arm(0, code)
 
-    def display_message(self, clear, beep, timeout, line1, line2):
+    def display_message(
+        self, clear, beep, timeout, line1, line2
+    ):  # pylint: disable=too-many-arguments
         """(Helper) Display a message on all of the keypads in this area."""
         self._elk.send(dm_encode(self._index, clear, beep, timeout, line1, line2))
 
@@ -74,8 +76,9 @@ class Areas(Elements):
         if update_alarm_triggers:
             self.elk.send(az_encode())
 
-    # pylint: disable=too-many-arguments
-    def _ee_handler(self, area, is_exit, timer1, timer2, armed_status):
+    def _ee_handler(
+        self, area, is_exit, timer1, timer2, armed_status
+    ):  # pylint: disable=too-many-arguments
         area = self.elements[area]
         area.setattr("armed_status", armed_status, False)
         area.setattr("timer1", timer1, False)

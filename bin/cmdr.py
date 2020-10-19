@@ -4,14 +4,15 @@ From: https://github.com/izderadicka/xmpp-tester/blob/master/commander.py
 @author: ivan
 """
 
-from collections import deque
 import inspect
 import re
 import threading
 import traceback
-import urwid
+from collections import deque
 from importlib import import_module
+
 import attr
+import urwid
 
 import elkm1_lib.message
 

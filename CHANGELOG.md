@@ -4,6 +4,7 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ## [0.8.5]
 - Lint and isort cleanup
+- Move from .format to f-string for string formatting
 
 ## [0.8.4]
 - Black formatting

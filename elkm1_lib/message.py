@@ -46,7 +46,7 @@ class MessageDecode:
         """Decode an Elk message by passing to appropriate decoder"""
         _check_message_valid(msg)
         cmd = msg[2:4]
-        decoder = getattr(self, "_{}_decode".format(cmd.lower()), None)
+        decoder = getattr(self, f"_{cmd.lower()}_decode", None)
         if not decoder:
             cmd = "unknown"
             decoder = self._unknown_decode
@@ -246,11 +246,9 @@ class MessageDecode:
 
     def _vn_decode(self, msg):
         """VN: Version information."""
-        elkm1_version = "{}.{}.{}".format(
-            int(msg[4:6], 16), int(msg[6:8], 16), int(msg[8:10], 16)
-        )
-        xep_version = "{}.{}.{}".format(
-            int(msg[10:12], 16), int(msg[12:14], 16), int(msg[14:16], 16)
+        elkm1_version = f"{int(msg[4:6], 16)}.{int(msg[6:8], 16)}.{int(msg[8:10], 16)}"
+        xep_version = (
+            f"{int(msg[10:12], 16)}.{int(msg[12:14], 16)}.{int(msg[14:16], 16)}"
         )
         return {"elkm1_version": elkm1_version, "xep_version": xep_version}
 
@@ -314,7 +312,7 @@ def index_to_housecode(index):
     if index < 0 or index > 255:
         raise ValueError
     quotient, remainder = divmod(index, 16)
-    return chr(quotient + ord("A")) + "{:02d}".format(remainder + 1)
+    return f"{chr(ord('A') + quotient)}{remainder + 1:02}"
 
 
 def get_elk_command(line):
@@ -352,9 +350,7 @@ def _check_message_valid(msg):
 
 def al_encode(arm_mode, area, user_code):
     """al: Arm system. Note in 'al' the 'l' can vary"""
-    return MessageEncode(
-        "0Da{}{:1d}{:06d}00".format(arm_mode, area + 1, user_code), "AS"
-    )
+    return MessageEncode(f"0Da{arm_mode}{area + 1:1}{user_code:06}00", "AS")
 
 
 def as_encode():
@@ -369,17 +365,17 @@ def az_encode():
 
 def cf_encode(output):
     """cf: Turn off output."""
-    return MessageEncode("09cf{:03d}00".format(output + 1), None)
+    return MessageEncode(f"09cf{output + 1:03}00", None)
 
 
 def ct_encode(output):
     """ct: Toggle output."""
-    return MessageEncode("09ct{:03d}00".format(output + 1), None)
+    return MessageEncode(f"09ct{output + 1:03}00", None)
 
 
 def cn_encode(output, seconds):
     """cn: Turn on output."""
-    return MessageEncode("0Ecn{:03d}{:05d}00".format(output + 1, seconds), None)
+    return MessageEncode(f"0Ecn{output + 1:03}{seconds:05}00", None)
 
 
 def cs_encode():
@@ -394,24 +390,24 @@ def cp_encode():
 
 def cr_encode(index):
     """cr: Get a custom value."""
-    return MessageEncode("08cr{cv:02d}00".format(cv=index + 1), "CR")
+    return MessageEncode(f"08cr{index + 1:02}00", "CR")
 
 
 def cw_encode(index, value, value_format):
     """cw: Write a custom value."""
     if value_format == 2:
-        value = value[0] << 8 + value[1]
-    return MessageEncode("0Dcw{:02d}{:05d}00".format(index + 1, value), None)
+        value = value[0] * 256 + value[1]
+    return MessageEncode(f"0Dcw{index + 1:02}{value:05}00", None)
 
 
 def cv_encode(counter):
     """cv: Get counter."""
-    return MessageEncode("08cv{c:02d}00".format(c=counter + 1), "CV")
+    return MessageEncode(f"08cv{counter + 1:02}00", "CV")
 
 
 def cx_encode(counter, value):
     """cx: Change counter value."""
-    return MessageEncode("0Dcx{:02d}{:05d}00".format(counter + 1, value), "CV")
+    return MessageEncode(f"0Dcx{counter + 1:02}{value:05}00", "CV")
 
 
 def dm_encode(
@@ -419,9 +415,7 @@ def dm_encode(
 ):  # pylint: disable=too-many-arguments
     """dm: Display message on keypad."""
     return MessageEncode(
-        "2Edm{:1d}{:1d}{:1d}{:05d}{:^<16.16}{:^<16.16}00".format(
-            keypad_area + 1, clear, beep, timeout, line1, line2
-        ),
+        f"2Edm{keypad_area + 1:1}{clear:1}{beep:1}{timeout:05}{line1:^<16.16}{line2:^<16.16}00",
         None,
     )
 
@@ -439,44 +433,39 @@ def lw_encode():
 def pc_encode(index, function_code, extended_code, seconds):
     """pc: Control any PLC device."""
     return MessageEncode(
-        "11pc{hc}{fc:02d}{ec:02d}{seconds:04d}00".format(
-            hc=index_to_housecode(index),
-            fc=function_code,
-            ec=extended_code,
-            seconds=seconds,
-        ),
+        f"11pc{index_to_housecode(index)}{function_code:02}{extended_code:02}{seconds:04}00",
         None,
     )
 
 
 def pf_encode(index):
     """pf: Turn off light."""
-    return MessageEncode("09pf{}00".format(index_to_housecode(index)), None)
+    return MessageEncode(f"09pf{index_to_housecode(index)}00", None)
 
 
 def pn_encode(index):
     """pn: Turn on light."""
-    return MessageEncode("09pn{}00".format(index_to_housecode(index)), None)
+    return MessageEncode(f"09pn{index_to_housecode(index)}00", None)
 
 
 def ps_encode(bank):
     """ps: Get lighting status."""
-    return MessageEncode("07ps{:1d}00".format(bank), "PS")
+    return MessageEncode(f"07ps{bank:1}00", "PS")
 
 
 def pt_encode(index):
     """pt: Toggle light."""
-    return MessageEncode("09pt{}00".format(index_to_housecode(index)), None)
+    return MessageEncode(f"09pt{index_to_housecode(index)}00", None)
 
 
 def sd_encode(desc_type, unit):
     """sd: Get description."""
-    return MessageEncode("0Bsd{:02d}{:03d}00".format(desc_type, unit + 1), "SD")
+    return MessageEncode(f"0Bsd{desc_type:02}{unit + 1:03}00", "SD")
 
 
 def sp_encode(phrase):
     """sp: Speak phrase."""
-    return MessageEncode("09sp{:03d}00".format(phrase), None)
+    return MessageEncode(f"09sp{phrase:03}00", None)
 
 
 def ss_encode():
@@ -486,7 +475,7 @@ def ss_encode():
 
 def sw_encode(word):
     """sw: Speak word."""
-    return MessageEncode("09sw{:03d}00".format(word), None)
+    return MessageEncode(f"09sw{word:03}00", None)
 
 
 def rw_encode(date_time):
@@ -498,19 +487,17 @@ def rw_encode(date_time):
 
 def tn_encode(task):
     """tn: Activate task."""
-    return MessageEncode("09tn{:03d}00".format(task + 1), None)
+    return MessageEncode(f"09tn{task + 1:03}00", None)
 
 
 def tr_encode(thermostat):
     """tr: Request thermostat data."""
-    return MessageEncode("08tr{:02d}00".format(thermostat + 1), None)
+    return MessageEncode(f"08tr{thermostat + 1:02}00", None)
 
 
 def ts_encode(thermostat, value, element):
     """ts: Set thermostat data."""
-    return MessageEncode(
-        "0Bts{:02d}{:02d}{:1d}00".format(thermostat + 1, value, element), None
-    )
+    return MessageEncode(f"0Bts{thermostat + 1:02}{value:02}{element:1}00", None)
 
 
 def vn_encode():
@@ -527,9 +514,7 @@ def zb_encode(zone, area, user_code):
     else:
         zone += 1
     return MessageEncode(
-        "10zb{zone:03d}{area:1d}{code:06d}00".format(
-            zone=zone, area=area + 1, code=user_code
-        ),
+        f"10zb{zone:03}{area + 1:1}{user_code:06}00",
         "ZB",
     )
 
@@ -551,14 +536,14 @@ def zs_encode():
 
 def zt_encode(zone):
     """zt: Trigger zone."""
-    return MessageEncode("09zt{zone:03d}00".format(zone=zone + 1), None)
+    return MessageEncode(f"09zt{zone + 1:03}00", None)
 
 
 def zv_encode(zone):
     """zv: Get zone voltage"""
-    return MessageEncode("09zv{zone:03d}00".format(zone=zone + 1), "ZV")
+    return MessageEncode(f"09zv{zone + 1:03}00", "ZV")
 
 
-def ua_encode(code):
+def ua_encode(user_code):
     """ua: Requst valid user code areas"""
-    return MessageEncode("0Cua{code:06d}00".format(code=code), "UA")
+    return MessageEncode(f"0Cua{user_code:06}00", "UA")

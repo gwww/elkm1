@@ -69,7 +69,7 @@ class Element:
             if not k.startswith("_") and k != "name"
         }.items()
         varstr = " ".join("%s:%s" % item for item in varlist)
-        return "{} '{}' {}".format(self._index, self.name, varstr)
+        return f"{self._index} '{self.name}' {varstr}"
 
     def as_dict(self):
         """Package up the public attributes as a dict."""

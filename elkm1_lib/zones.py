@@ -1,9 +1,13 @@
 """Definition of an ElkM1 Zone"""
-from .const import (Max, TextDescriptions, ZoneLogicalStatus,
-                    ZonePhysicalStatus, ZoneType)
+from .const import (
+    Max,
+    TextDescriptions,
+    ZoneLogicalStatus,
+    ZonePhysicalStatus,
+    ZoneType,
+)
 from .elements import Element, Elements
-from .message import (az_encode, zb_encode, zd_encode, zp_encode, zs_encode,
-                      zt_encode)
+from .message import az_encode, zb_encode, zd_encode, zp_encode, zs_encode, zt_encode
 
 
 class Zone(Element):

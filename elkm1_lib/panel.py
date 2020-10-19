@@ -4,8 +4,7 @@ import time
 
 from .const import ElkRPStatus
 from .elements import Element
-from .message import (lw_encode, rw_encode, sp_encode, ss_encode, sw_encode,
-                      vn_encode)
+from .message import lw_encode, rw_encode, sp_encode, ss_encode, sw_encode, vn_encode
 
 
 class Panel(Element):
@@ -62,7 +61,7 @@ class Panel(Element):
             if system_trouble_status[index] != "0":
                 if zone_encoded:
                     zone = ord(system_trouble_status[index]) - 0x30
-                    statuses.append("{} zone {}".format(trouble, zone))
+                    statuses.append(f"{trouble} zone {zone}")
                 else:
                     statuses.append(trouble)
 

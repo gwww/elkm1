@@ -396,7 +396,7 @@ def cr_encode(index):
 def cw_encode(index, value, value_format):
     """cw: Write a custom value."""
     if value_format == 2:
-        value = int(f"{value[0]:x}{value[1]:x}", 16)
+        value = value[0] * 256 + value[1]
     return MessageEncode(f"0Dcw{index + 1:02}{value:05}00", None)
 
 

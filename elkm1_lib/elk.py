@@ -142,7 +142,7 @@ class Elk:  # pylint: disable=too-many-instance-attributes
         except (ValueError, AttributeError) as exc:
             if not data:
                 return
-            if data.startswith("Username: ") or data.startswith("Password: ")
+            if data.startswith("Username: ") or data.startswith("Password: "):
                 return
 
             if data.startswith("Username/Password not found"):

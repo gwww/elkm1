@@ -27,7 +27,6 @@ class Elk:  # pylint: disable=too-many-instance-attributes
         self.disconnected_callbk = None
         self._connection_retry_timer = 1
         self._message_decode = MessageDecode()
-        self._descriptions_in_progress = {}
         self._sync_event = asyncio.Event()
         self._heartbeat = None
         self._invalid_auth = False
@@ -52,7 +51,6 @@ class Elk:  # pylint: disable=too-many-instance-attributes
                 "users",
             ]
 
-        self.add_handler("SD", self._sd_handler)
         self.add_handler("UA", self._sync_complete)
         self.add_handler("XK", self._xk_handler)
 
@@ -192,23 +190,6 @@ class Elk:  # pylint: disable=too-many-instance-attributes
     async def sync_complete(self):
         """Called when sync is complete with the panel."""
         return await self._sync_event.wait()
-
-    def _sd_handler(
-        self, desc_type, unit, desc, show_on_keypad
-    ):  # pylint: disable=unused-argument
-        """Text description"""
-        if desc_type not in self._descriptions_in_progress:
-            LOG.debug("Text description response ignored for %s", str(desc_type))
-            return
-
-        (max_units, results, callback) = self._descriptions_in_progress[desc_type]
-        if unit < 0 or unit >= max_units:
-            callback(results)
-            del self._descriptions_in_progress[desc_type]
-            return
-
-        results[unit] = desc
-        self.send(sd_encode(desc_type=desc_type, unit=unit + 1))
 
     def is_connected(self):
         """Status of connection to Elk."""

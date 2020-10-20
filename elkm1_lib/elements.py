@@ -85,12 +85,31 @@ class Elements:
         self.max_elements = max_elements
         self.elements = [class_(i, elk) for i in range(max_elements)]
 
+        self._get_description_state = None
+        elk.add_handler("SD", self._sd_handler)
+
     def __iter__(self):
         for element in self.elements:
             yield element
 
     def __getitem__(self, key):
         return self.elements[key]
+
+    def _sd_handler(
+        self, desc_type, unit, desc, show_on_keypad
+    ):  # pylint: disable=unused-argument
+        if not self._get_description_state:
+            return
+        (_desc_type, count, results, callback) = self._get_description_state
+        if desc_type != _desc_type:
+            return
+
+        if unit < 0 or unit >= count:
+            callback(results)
+            self._get_description_state = None
+        else:
+            results[unit] = desc
+            self.elk.send(sd_encode(desc_type, unit + 1))
 
     def _got_desc(self, descriptions):
         from .users import Users
@@ -110,18 +129,11 @@ class Elements:
                 element._configured = True
 
     def get_descriptions(self, description_type):
-        """
-        Gets the descriptions for specified type.
-        When complete the callback is called with a list of descriptions
-        """
-        (desc_type, max_units) = description_type
-        results = [None] * max_units
-        self.elk._descriptions_in_progress[desc_type] = (
-            max_units,
-            results,
-            self._got_desc,
-        )
-        self.elk.send(sd_encode(desc_type=desc_type, unit=0))
+        """Gets the descriptions for specified type."""
+        (desc_type, count) = description_type
+        results = [None] * count
+        self._get_description_state = (desc_type, count, results, self._got_desc)
+        self.elk.send(sd_encode(desc_type, 0))
 
     @abstractmethod
     def sync(self):

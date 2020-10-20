@@ -13,9 +13,10 @@ class Connection(asyncio.Protocol):  # pylint: disable=too-many-instance-attribu
     """asyncio Protocol with line parsing and queuing writes"""
 
     def __init__(
-        self, loop, connected, disconnected, got_data, timeout
+        self, loop, heartbeat_time, connected, disconnected, got_data, timeout
     ):  # pylint: disable=too-many-arguments
         self.loop = loop
+        self._heartbeat_time = heartbeat_time
         self._connected_callback = connected
         self._disconnected_callback = disconnected
         self._got_data_callback = got_data
@@ -24,6 +25,7 @@ class Connection(asyncio.Protocol):  # pylint: disable=too-many-instance-attribu
         self._transport = None
         self._waiting_for_response = None
         self._write_timeout_task = None
+        self._heartbeat_timeout_task = None
         self._queued_writes = []
         self._buffer = ""
         self._paused = False
@@ -72,7 +74,20 @@ class Connection(asyncio.Protocol):  # pylint: disable=too-many-instance-attribu
             self._write_timeout_task.cancel()
             self._write_timeout_task = None
 
+    def _heartbeat_timeout(self):
+        LOG.warning("ElkM1 connection heartbeat timed out, disconnecting")
+        self._transport.close()
+
+    def _restart_heartbeat_timer(self):
+        if self._heartbeat_timeout_task:
+            self._heartbeat_timeout_task.cancel()
+        if self._heartbeat_time > 0:
+            self._heartbeat_timeout_task = self.loop.call_later(
+                self._heartbeat_time, self._heartbeat_timeout
+            )
+
     def data_received(self, data):
+        self._restart_heartbeat_timer()
         self._buffer += data.decode("ISO-8859-1")
         while "\r\n" in self._buffer:
             line, self._buffer = self._buffer.split("\r\n", 1)

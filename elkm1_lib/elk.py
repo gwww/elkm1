@@ -28,7 +28,6 @@ class Elk:  # pylint: disable=too-many-instance-attributes
         self._connection_retry_timer = 1
         self._message_decode = MessageDecode()
         self._sync_event = asyncio.Event()
-        self._heartbeat = None
         self._invalid_auth = False
         self._reconnect_task = None
         self._disconnect_requested = False
@@ -52,7 +51,6 @@ class Elk:  # pylint: disable=too-many-instance-attributes
             ]
 
         self.add_handler("UA", self._sync_complete)
-        self.add_handler("XK", self._xk_handler)
 
         for element in self.element_list:
             module = import_module("elkm1_lib." + element)
@@ -68,10 +66,12 @@ class Elk:  # pylint: disable=too-many-instance-attributes
         url = self._config["url"]
         LOG.info("Connecting to ElkM1 at %s", url)
         scheme, dest, param, ssl_context = parse_url(url)
+        heartbeat_time = 120 if not scheme == "serial" else -1
 
         conn = partial(
             Connection,
             self.loop,
+            heartbeat_time,
             self._connected,
             self._disconnected,
             self._got_data,
@@ -117,21 +117,8 @@ class Elk:  # pylint: disable=too-many-instance-attributes
             self._conn.write_data(self._config["userid"], raw=True)
             self._conn.write_data(self._config["password"], raw=True)
         self.call_sync_handlers()
-        if not self._config["url"].startswith("serial://"):
-            self._heartbeat = self.loop.call_later(120, self._reset_connection)
         if self.connected_callbk:
             self.connected_callbk(self)
-
-    def _reset_connection(self):
-        LOG.warning("ElkM1 connection heartbeat timed out, disconnecting")
-        self._transport.close()
-        self._heartbeat = None
-
-    def _xk_handler(self, real_time_clock):  # pylint: disable=unused-argument
-        if not self._heartbeat:
-            return
-        self._heartbeat.cancel()
-        self._heartbeat = self.loop.call_later(120, self._reset_connection)
 
     def _reconnect(self):
         asyncio.ensure_future(self._connect())
@@ -142,9 +129,6 @@ class Elk:  # pylint: disable=too-many-instance-attributes
         self._reconnect_task = self.loop.call_later(
             self._connection_retry_timer, self._reconnect
         )
-        if self._heartbeat:
-            self._heartbeat.cancel()
-            self._heartbeat = None
         if self.disconnected_callbk:
             self.disconnected_callbk(self)
 
@@ -233,9 +217,6 @@ class Elk:  # pylint: disable=too-many-instance-attributes
         if self._transport:
             self._transport.close()
             self._transport = None
-        if self._heartbeat:
-            self._heartbeat.cancel()
-            self._heartbeat = None
 
     @property
     def invalid_auth(self):

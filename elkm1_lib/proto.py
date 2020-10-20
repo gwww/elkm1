@@ -33,7 +33,7 @@ class Connection(asyncio.Protocol):  # pylint: disable=too-many-instance-attribu
     def connection_made(self, transport):
         LOG.debug("connected callback")
         self._transport = transport
-        self._connected_callback(transport, self)
+        self._connected_callback(self)
 
     def connection_lost(self, exc):
         LOG.debug("disconnected callback")
@@ -48,11 +48,12 @@ class Connection(asyncio.Protocol):  # pylint: disable=too-many-instance-attribu
         self._queued_writes = []
         self._buffer = ""
 
-    def stop(self):
+    def close(self):
         """Stop the connection from sending/receiving/reconnecting."""
-        self._transport = None
+        if self._transport:
+            self._transport.close()
+            self._transport = None
         self._cleanup()
-        self._disconnected_callback = None
 
     def pause(self):
         """Pause the connection from sending/receiving."""

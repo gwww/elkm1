@@ -84,7 +84,6 @@ class Elements:
         self.elk = elk
         self.max_elements = max_elements
         self.elements = [class_(i, elk) for i in range(max_elements)]
-        self.elk.add_sync_handler(self.sync)
 
     def __iter__(self):
         for element in self.elements:

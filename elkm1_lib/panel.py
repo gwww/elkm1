@@ -18,20 +18,18 @@ class Panel(Element):
         self.remote_programming_status = 0
         self.system_trouble_status = ""
         self.setattr("name", "ElkM1", True)
-        self._elk.add_sync_handler(self.sync)
 
-    def sync(self):
-        """Retrieve panel information from ElkM1"""
         self._elk.add_handler("VN", self._vn_handler)
         self._elk.add_handler("XK", self._xk_handler)
         self._elk.add_handler("RR", self._xk_handler)  # RR/XK use same handler
         self._elk.add_handler("RP", self._rp_handler)
         self._elk.add_handler("IE", self._elk.call_sync_handlers)
         self._elk.add_handler("SS", self._ss_handler)
+
+    def sync(self):
+        """Retrieve panel information from ElkM1"""
         self._elk.send(vn_encode())
         self._elk.send(lw_encode())
-        # We always send ss last so we know when
-        # the sync is completed
         self._elk.send(ss_encode())
 
     def speak_word(self, word):

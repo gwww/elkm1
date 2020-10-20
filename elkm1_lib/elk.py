@@ -27,16 +27,12 @@ class Elk:  # pylint: disable=too-many-instance-attributes
         self.disconnected_callbk = None
         self._connection_retry_timer = 1
         self._message_decode = MessageDecode()
-        self._sync_handlers = []
         self._descriptions_in_progress = {}
         self._sync_event = asyncio.Event()
         self._heartbeat = None
         self._invalid_auth = False
         self._reconnect_task = None
         self._disconnect_requested = False
-
-        self.add_handler("XK", self._xk_handler)
-        self.add_handler("SD", self._sd_handler)
 
         # Setup for all the types of elements tracked
         if "element_list" in config:
@@ -55,20 +51,18 @@ class Elk:  # pylint: disable=too-many-instance-attributes
                 "settings",
                 "users",
             ]
-        # We send a "ua" command at the end of the
-        # sync to indicate the sync is done.
+
+        self.add_handler("SD", self._sd_handler)
         self.add_handler("UA", self._sync_complete)
+        self.add_handler("XK", self._xk_handler)
 
         for element in self.element_list:
-            self._create_element(element)
+            module = import_module("elkm1_lib." + element)
+            class_ = getattr(module, element.capitalize())
+            setattr(self, element, class_(self))
 
     def _sync_complete(self, **kwargs):  # pylint: disable=unused-argument
         self._sync_event.set()
-
-    def _create_element(self, element):
-        module = import_module("elkm1_lib." + element)
-        class_ = getattr(module, element.capitalize())
-        setattr(self, element, class_(self))
 
     async def _connect(self):
         """Asyncio connection to Elk."""
@@ -76,6 +70,7 @@ class Elk:  # pylint: disable=too-many-instance-attributes
         url = self._config["url"]
         LOG.info("Connecting to ElkM1 at %s", url)
         scheme, dest, param, ssl_context = parse_url(url)
+
         conn = partial(
             Connection,
             self.loop,
@@ -185,20 +180,14 @@ class Elk:  # pylint: disable=too-many-instance-attributes
     def _timeout(self, msg_code):
         self._message_decode.timeout_handler(msg_code)
 
-    def add_sync_handler(self, sync_handler):
-        """Register a fn that synchronizes part of the panel."""
-        self._sync_handlers.append(sync_handler)
-
     def call_sync_handlers(self):
         """Invoke the synchronization handlers."""
         LOG.debug("Synchronizing panel...")
         self._sync_event.clear()
-        for sync_handler in self._sync_handlers:
-            sync_handler()
-        # We send an empty "ua" message at the end of the sync
-        # so we can watch for the "UA" response to come back
-        # and know that the sync has completed.
-        self.send(ua_encode(0))
+
+        for element in self.element_list:
+            getattr(self, element).sync()
+        self.send(ua_encode(0))  # Used to mark end of sync
 
     async def sync_complete(self):
         """Called when sync is complete with the panel."""

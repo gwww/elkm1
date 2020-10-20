@@ -19,11 +19,11 @@ class Connection(asyncio.Protocol):  # pylint: disable=too-many-instance-attribu
         self._connected_callback = connected
         self._disconnected_callback = disconnected
         self._got_data_callback = got_data
-        self._timeout = timeout
+        self._timeout_callback = timeout
 
         self._transport = None
         self._waiting_for_response = None
-        self._timeout_task = None
+        self._write_timeout_task = None
         self._queued_writes = []
         self._buffer = ""
         self._paused = False
@@ -41,7 +41,7 @@ class Connection(asyncio.Protocol):  # pylint: disable=too-many-instance-attribu
             self._disconnected_callback()
 
     def _cleanup(self):
-        self._cancel_timer()
+        self._cancel_write_timer()
         self._waiting_for_response = None
         self._queued_writes = []
         self._buffer = ""
@@ -62,15 +62,15 @@ class Connection(asyncio.Protocol):  # pylint: disable=too-many-instance-attribu
         self._paused = False
 
     def _response_required_timeout(self):
-        self._timeout(self._waiting_for_response)
-        self._timeout_task = None
+        self._timeout_callback(self._waiting_for_response)
+        self._write_timeout_task = None
         self._waiting_for_response = None
         self._process_write_queue()
 
-    def _cancel_timer(self):
-        if self._timeout_task:
-            self._timeout_task.cancel()
-            self._timeout_task = None
+    def _cancel_write_timer(self):
+        if self._write_timeout_task:
+            self._write_timeout_task.cancel()
+            self._write_timeout_task = None
 
     def data_received(self, data):
         self._buffer += data.decode("ISO-8859-1")
@@ -78,7 +78,7 @@ class Connection(asyncio.Protocol):  # pylint: disable=too-many-instance-attribu
             line, self._buffer = self._buffer.split("\r\n", 1)
             if get_elk_command(line) == self._waiting_for_response:
                 self._waiting_for_response = None
-                self._cancel_timer()
+                self._cancel_write_timer()
             self._got_data_callback(line)
         self._process_write_queue()
 
@@ -103,7 +103,7 @@ class Connection(asyncio.Protocol):  # pylint: disable=too-many-instance-attribu
         if response_required:
             self._waiting_for_response = response_required
             if timeout > 0:
-                self._timeout_task = self.loop.call_later(
+                self._write_timeout_task = self.loop.call_later(
                     timeout, self._response_required_timeout
                 )
 

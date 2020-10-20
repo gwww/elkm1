@@ -23,14 +23,15 @@ class Elk:  # pylint: disable=too-many-instance-attributes
         self._config = config
         self._conn = None
         self._transport = None
-        self.connected_callbk = None
-        self.disconnected_callbk = None
         self._connection_retry_timer = 1
         self._message_decode = MessageDecode()
         self._sync_event = asyncio.Event()
         self._invalid_auth = False
         self._reconnect_task = None
         self._disconnect_requested = False
+
+        self.connected_callback = None
+        self.disconnected_callback = None
 
         # Setup for all the types of elements tracked
         if "element_list" in config:
@@ -117,8 +118,8 @@ class Elk:  # pylint: disable=too-many-instance-attributes
             self._conn.write_data(self._config["userid"], raw=True)
             self._conn.write_data(self._config["password"], raw=True)
         self.call_sync_handlers()
-        if self.connected_callbk:
-            self.connected_callbk(self)
+        if self.connected_callback:
+            self.connected_callback(self)
 
     def _reconnect(self):
         asyncio.ensure_future(self._connect())
@@ -129,8 +130,8 @@ class Elk:  # pylint: disable=too-many-instance-attributes
         self._reconnect_task = self.loop.call_later(
             self._connection_retry_timer, self._reconnect
         )
-        if self.disconnected_callbk:
-            self.disconnected_callbk(self)
+        if self.disconnected_callback:
+            self.disconnected_callback(self)
 
     def add_handler(self, msg_type, handler):
         """Add handler for incoming message."""
@@ -179,11 +180,11 @@ class Elk:  # pylint: disable=too-many-instance-attributes
         """Status of connection to Elk."""
         return self._conn is not None
 
-    def connect(self, connected_callbk=None, disconnected_callbk=None):
+    def connect(self, connected_callback=None, disconnected_callback=None):
         """Connect to the panel"""
         self._disconnect_requested = False
-        self.connected_callbk = connected_callbk
-        self.disconnected_callbk = disconnected_callbk
+        self.connected_callback = connected_callback
+        self.disconnected_callback = disconnected_callback
         asyncio.ensure_future(self._connect())
 
     def run(self):

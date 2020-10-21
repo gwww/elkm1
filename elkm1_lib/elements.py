@@ -5,6 +5,7 @@
 import re
 from abc import abstractmethod
 
+from .const import TextDescriptions
 from .message import sd_encode
 
 
@@ -105,18 +106,19 @@ class Elements:
             return
 
         if unit < 0 or unit >= count:
-            callback(results)
+            callback(results, desc_type)
             self._get_description_state = None
         else:
             results[unit] = desc
             self.elk.send(sd_encode(desc_type, unit + 1))
 
-    def _got_desc(self, descriptions):
-        from .users import Users
-
+    def _got_desc(self, descriptions, desc_type):
         # Elk reports descriptions for all 199 users, irregardless of how many
-        # are configured. Don't set their name and configured flag.
-        user_re = re.compile(r"USER \d\d\d") if isinstance(self, Users) else None
+        # are configured. Only set configured for those that are really there.
+        if desc_type == TextDescriptions.USER.value[0]:
+            user_re = re.compile(r"USER \d\d\d")
+        else:
+            user_re = None
 
         for element in self.elements:
             if element.index >= len(descriptions):

@@ -31,8 +31,8 @@ class Counters(Elements):
         """Retrieve values from ElkM1 on demand"""
         self.get_descriptions(TextDescriptions.COUNTER.value)
 
-    def _got_desc(self, descriptions):
-        super()._got_desc(descriptions)
+    def _got_desc(self, descriptions, desc_type):
+        super()._got_desc(descriptions, desc_type)
         # Only poll counters that have a name defined
         for counter in self.elements:
             if not counter.is_default_name():

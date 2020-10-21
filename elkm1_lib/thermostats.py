@@ -34,8 +34,8 @@ class Thermostats(Elements):
         """Retrieve areas from ElkM1"""
         self.get_descriptions(TextDescriptions.THERMOSTAT.value)
 
-    def _got_desc(self, descriptions):
-        super()._got_desc(descriptions)
+    def _got_desc(self, descriptions, desc_type):
+        super()._got_desc(descriptions, desc_type)
         # Only poll thermostats that have a name defined
         for thermostat in self.elements:
             if not thermostat.is_default_name():

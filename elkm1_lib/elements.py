@@ -126,7 +126,7 @@ class Elements:
                 if user_re and user_re.match(name):
                     continue
                 element.setattr("name", name, True)
-                element._configured = True
+                element._configured = True  # pylint: disable=protected-access
 
     def get_descriptions(self, description_type):
         """Gets the descriptions for specified type."""

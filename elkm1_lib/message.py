@@ -44,13 +44,29 @@ class MessageDecode:
 
     def decode(self, msg):
         """Decode an Elk message by passing to appropriate decoder"""
-        _check_message_valid(msg)
-        cmd = msg[2:4]
-        decoder = getattr(self, f"_{cmd.lower()}_decode", None)
-        if not decoder:
-            cmd = "unknown"
-            decoder = self._unknown_decode
-        decoded_msg = decoder(msg)
+        invalid = _is_message_valid(msg)
+        if invalid:
+            if msg.startswith("Username: ") or msg.startswith("Password: "):
+                return
+            if msg.startswith("Username/Password not found"):
+                cmd = "login_failed"
+                decoded_msg = {}
+            elif "Login successful" in msg:
+                cmd = "login_success"
+                decoded_msg = {}
+            else:
+                raise ValueError(invalid)
+        else:
+            cmd = msg[2:4]
+            decoder = getattr(self, f"_{cmd.lower()}_decode", None)
+            if not decoder:
+                cmd = "unknown"
+                decoder = self._unknown_decode
+            try:
+                decoded_msg = decoder(msg)
+            except (IndexError, ValueError) as exc:
+                raise ValueError("Cannot decode message") from exc
+
         for handler in self._handlers.get(cmd, []):
             handler(**decoded_msg)
 
@@ -329,23 +345,21 @@ def _status_decode(status):
     return (logical_status, physical_status)
 
 
-def _check_checksum(msg):
-    """Ensure checksum in message is good."""
-    checksum = int(msg[-2:], 16)
-    for char in msg[:-2]:
-        checksum += ord(char)
-    if (checksum % 256) != 0:
-        raise ValueError("Elk message checksum invalid")
-
-
-def _check_message_valid(msg):
+def _is_message_valid(msg):
     """Check packet length valid and that checksum is good."""
     try:
         if int(msg[:2], 16) != (len(msg) - 2):
-            raise ValueError("Elk message length incorrect")
-        _check_checksum(msg)
-    except IndexError as exc:
-        raise ValueError("Elk message length incorrect") from exc
+            return "Incorrect message length"
+
+        checksum = int(msg[-2:], 16)
+        for char in msg[:-2]:
+            checksum += ord(char)
+        if (checksum % 256) != 0:
+            return "Bad checksum"
+    except ValueError:
+        return "Message invalid"
+
+    return None
 
 
 def al_encode(arm_mode, area, user_code):

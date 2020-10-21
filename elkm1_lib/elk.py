@@ -7,7 +7,7 @@ from importlib import import_module
 
 import serial_asyncio
 
-from .message import MessageDecode, sd_encode, ua_encode
+from .message import MessageDecode, ua_encode
 from .proto import Connection
 from .util import parse_url, url_scheme_is_secure
 
@@ -50,6 +50,8 @@ class Elk:  # pylint: disable=too-many-instance-attributes
             ]
 
         self.add_handler("UA", self._sync_complete)
+        self.add_handler("login_success", self._login_success)
+        self.add_handler("login_failed", self._login_failed)
 
         for element in self.element_list:
             module = import_module("elkm1_lib." + element)
@@ -135,25 +137,21 @@ class Elk:  # pylint: disable=too-many-instance-attributes
         """Add handler for incoming message."""
         self._message_decode.add_handler(msg_type, handler)
 
-    def _got_data(self, data):  # pylint: disable=no-self-use
+    def _got_data(self, data):
         LOG.debug("got_data '%s'", data)
         try:
             self._message_decode.decode(data)
         except (ValueError, AttributeError) as exc:
-            if not data:
-                return
-            if data.startswith("Username: ") or data.startswith("Password: "):
-                return
+            LOG.error("Invalid message '%s'", data, exc_info=exc)
 
-            if data.startswith("Username/Password not found"):
-                LOG.error("Invalid username or password.")
-                self.disconnect()
-                self._invalid_auth = True
-                self._sync_event.set()
-            elif "Login successful" in data:
-                LOG.info("Successful login.")
-            else:
-                LOG.exception("Invalid message '%s'", data, exc)
+    def _login_success(self):  # pylint: disable=no-self-use
+        LOG.info("Successful login.")
+
+    def _login_failed(self):
+        self.disconnect()
+        self._invalid_auth = True
+        self._sync_event.set()
+        LOG.error("Invalid username or password.")
 
     def _timeout(self, msg_code):
         self._message_decode.timeout_handler(msg_code)
@@ -202,7 +200,7 @@ class Elk:  # pylint: disable=too-many-instance-attributes
 
     def disconnect(self):
         """Disconnect the connection from sending/receiving."""
-        self._connection_retry_time = -1
+        self._connection_retry_time = -1  # Stop future timeout reconnects
         if self._connection:
             self._connection.close()
             self._connection = None

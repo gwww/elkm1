@@ -44,7 +44,7 @@ class MessageDecode:
 
     def decode(self, msg):
         """Decode an Elk message by passing to appropriate decoder"""
-        invalid = _is_message_valid(msg)
+        invalid = _is_valid_length_and_checksum(msg)
         if invalid:
             if msg.startswith("Username: ") or msg.startswith("Password: "):
                 return
@@ -345,7 +345,7 @@ def _status_decode(status):
     return (logical_status, physical_status)
 
 
-def _is_message_valid(msg):
+def _is_valid_length_and_checksum(msg):
     """Check packet length valid and that checksum is good."""
     try:
         if int(msg[:2], 16) != (len(msg) - 2):

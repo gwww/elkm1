@@ -44,6 +44,7 @@ class Connection(asyncio.Protocol):  # pylint: disable=too-many-instance-attribu
 
     def _cleanup(self):
         self._cancel_write_timer()
+        self._cancel_heartbeat_timer()
         self._waiting_for_response = None
         self._queued_writes = []
         self._buffer = ""
@@ -75,13 +76,16 @@ class Connection(asyncio.Protocol):  # pylint: disable=too-many-instance-attribu
             self._write_timeout_task.cancel()
             self._write_timeout_task = None
 
+    def _cancel_heartbeat_timer(self):
+        if self._heartbeat_timeout_task:
+            self._heartbeat_timeout_task.cancel()
+
     def _heartbeat_timeout(self):
         LOG.warning("ElkM1 connection heartbeat timed out, disconnecting")
         self._transport.close()
 
     def _restart_heartbeat_timer(self):
-        if self._heartbeat_timeout_task:
-            self._heartbeat_timeout_task.cancel()
+        self._cancel_heartbeat_timer()
         if self._heartbeat_time > 0:
             self._heartbeat_timeout_task = self.loop.call_later(
                 self._heartbeat_time, self._heartbeat_timeout

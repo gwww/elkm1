@@ -7,7 +7,7 @@ from importlib import import_module
 
 import serial_asyncio
 
-from .message import MessageDecode, sd_encode, ua_encode
+from .message import MessageDecode, ua_encode
 from .proto import Connection
 from .util import parse_url, url_scheme_is_secure
 
@@ -21,22 +21,15 @@ class Elk:  # pylint: disable=too-many-instance-attributes
         """Initialize a new Elk instance."""
         self.loop = loop if loop else asyncio.get_event_loop()
         self._config = config
-        self._conn = None
-        self._transport = None
-        self.connected_callbk = None
-        self.disconnected_callbk = None
-        self._connection_retry_timer = 1
+        self._connection = None
+        self._connection_retry_time = 1
         self._message_decode = MessageDecode()
-        self._sync_handlers = []
-        self._descriptions_in_progress = {}
         self._sync_event = asyncio.Event()
-        self._heartbeat = None
         self._invalid_auth = False
         self._reconnect_task = None
-        self._disconnect_requested = False
 
-        self.add_handler("XK", self._xk_handler)
-        self.add_handler("SD", self._sd_handler)
+        self.connected_callback = None
+        self.disconnected_callback = None
 
         # Setup for all the types of elements tracked
         if "element_list" in config:
@@ -55,20 +48,18 @@ class Elk:  # pylint: disable=too-many-instance-attributes
                 "settings",
                 "users",
             ]
-        # We send a "ua" command at the end of the
-        # sync to indicate the sync is done.
+
         self.add_handler("UA", self._sync_complete)
+        self.add_handler("login_success", self._login_success)
+        self.add_handler("login_failed", self._login_failed)
 
         for element in self.element_list:
-            self._create_element(element)
+            module = import_module("elkm1_lib." + element)
+            class_ = getattr(module, element.capitalize())
+            setattr(self, element, class_(self))
 
     def _sync_complete(self, **kwargs):  # pylint: disable=unused-argument
         self._sync_event.set()
-
-    def _create_element(self, element):
-        module = import_module("elkm1_lib." + element)
-        class_ = getattr(module, element.capitalize())
-        setattr(self, element, class_(self))
 
     async def _connect(self):
         """Asyncio connection to Elk."""
@@ -76,9 +67,12 @@ class Elk:  # pylint: disable=too-many-instance-attributes
         url = self._config["url"]
         LOG.info("Connecting to ElkM1 at %s", url)
         scheme, dest, param, ssl_context = parse_url(url)
-        conn = partial(
+        heartbeat_time = 120 if not scheme == "serial" else -1
+
+        connection = partial(
             Connection,
             self.loop,
+            heartbeat_time,
             self._connected,
             self._disconnected,
             self._got_data,
@@ -87,149 +81,102 @@ class Elk:  # pylint: disable=too-many-instance-attributes
         try:
             if scheme == "serial":
                 await serial_asyncio.create_serial_connection(
-                    self.loop, conn, dest, baudrate=param
+                    self.loop, connection, dest, baudrate=param
                 )
             else:
                 await asyncio.wait_for(
                     self.loop.create_connection(
-                        conn, host=dest, port=param, ssl=ssl_context
+                        connection, host=dest, port=param, ssl=ssl_context
                     ),
                     timeout=30,
                 )
         except (ValueError, OSError, asyncio.TimeoutError) as err:
-            if self._disconnect_requested:
-                # disconnect called while trying to reconnect
+            if self._connection_retry_time <= 0:
                 return
+
             LOG.warning(
                 "Could not connect to ElkM1 (%s). Retrying in %d seconds",
                 err,
-                self._connection_retry_timer,
+                self._connection_retry_time,
             )
-            self._reconnect_task = self.loop.call_later(
-                self._connection_retry_timer, self._reconnect
-            )
-            self._connection_retry_timer = (
-                2 * self._connection_retry_timer
-                if self._connection_retry_timer < 32
-                else 60
-            )
+            self._start_connection_retry_timer()
 
-    def _connected(self, transport, conn):
+    def _start_connection_retry_timer(self):
+        if self._connection_retry_time > 0:
+            self._reconnect_task = self.loop.call_later(
+                self._connection_retry_time, self._reconnect
+            )
+            if self._connection_retry_time < 32:
+                self._connection_retry_time *= 2
+            else:
+                self._connection_retry_time = 60
+
+    def _connected(self, connection):
         """Login and sync the ElkM1 panel to memory."""
         LOG.info("Connected to ElkM1")
-        self._conn = conn
-        self._transport = transport
-        self._connection_retry_timer = 1
+        self._connection = connection
+        self._connection_retry_time = 1
         if url_scheme_is_secure(self._config["url"]):
-            self._conn.write_data(self._config["userid"], raw=True)
-            self._conn.write_data(self._config["password"], raw=True)
+            self._connection.write_data(self._config["userid"], raw=True)
+            self._connection.write_data(self._config["password"], raw=True)
         self.call_sync_handlers()
-        if not self._config["url"].startswith("serial://"):
-            self._heartbeat = self.loop.call_later(120, self._reset_connection)
-        if self.connected_callbk:
-            self.connected_callbk(self)
-
-    def _reset_connection(self):
-        LOG.warning("ElkM1 connection heartbeat timed out, disconnecting")
-        self._transport.close()
-        self._heartbeat = None
-
-    def _xk_handler(self, real_time_clock):  # pylint: disable=unused-argument
-        if not self._heartbeat:
-            return
-        self._heartbeat.cancel()
-        self._heartbeat = self.loop.call_later(120, self._reset_connection)
+        if self.connected_callback:
+            self.connected_callback(self)
 
     def _reconnect(self):
         asyncio.ensure_future(self._connect())
 
     def _disconnected(self):
         LOG.warning("ElkM1 at %s disconnected", self._config["url"])
-        self._conn = None
-        self._reconnect_task = self.loop.call_later(
-            self._connection_retry_timer, self._reconnect
-        )
-        if self._heartbeat:
-            self._heartbeat.cancel()
-            self._heartbeat = None
-        if self.disconnected_callbk:
-            self.disconnected_callbk(self)
+        self._connection = None
+        self._start_connection_retry_timer()
+        if self.disconnected_callback:
+            self.disconnected_callback(self)
 
     def add_handler(self, msg_type, handler):
         """Add handler for incoming message."""
         self._message_decode.add_handler(msg_type, handler)
 
-    def _got_data(self, data):  # pylint: disable=no-self-use
+    def _got_data(self, data):
         LOG.debug("got_data '%s'", data)
         try:
             self._message_decode.decode(data)
-        except (ValueError, AttributeError) as err:
-            if (
-                not data
-                or data.startswith("Username: ")
-                or data.startswith("Password: ")
-            ):
-                return
+        except (ValueError, AttributeError) as exc:
+            LOG.error("Invalid message '%s'", data, exc_info=exc)
 
-            if data.startswith("Username/Password not found"):
-                LOG.error("Invalid username or password.")
-                self.disconnect()
-                self._invalid_auth = True
-                self._sync_event.set()
-            elif "Login successful" in data:
-                LOG.info("Successful login.")
-                return
+    def _login_success(self):  # pylint: disable=no-self-use
+        LOG.info("Successful login.")
 
-            LOG.debug(err)
+    def _login_failed(self):
+        self.disconnect()
+        self._invalid_auth = True
+        self._sync_event.set()
+        LOG.error("Invalid username or password.")
 
     def _timeout(self, msg_code):
         self._message_decode.timeout_handler(msg_code)
-
-    def add_sync_handler(self, sync_handler):
-        """Register a fn that synchronizes part of the panel."""
-        self._sync_handlers.append(sync_handler)
 
     def call_sync_handlers(self):
         """Invoke the synchronization handlers."""
         LOG.debug("Synchronizing panel...")
         self._sync_event.clear()
-        for sync_handler in self._sync_handlers:
-            sync_handler()
-        # We send an empty "ua" message at the end of the sync
-        # so we can watch for the "UA" response to come back
-        # and know that the sync has completed.
-        self.send(ua_encode(0))
+
+        for element in self.element_list:
+            getattr(self, element).sync()
+        self.send(ua_encode(0))  # Used to mark end of sync
 
     async def sync_complete(self):
         """Called when sync is complete with the panel."""
         return await self._sync_event.wait()
 
-    def _sd_handler(
-        self, desc_type, unit, desc, show_on_keypad
-    ):  # pylint: disable=unused-argument
-        """Text description"""
-        if desc_type not in self._descriptions_in_progress:
-            LOG.debug("Text description response ignored for %s", str(desc_type))
-            return
-
-        (max_units, results, callback) = self._descriptions_in_progress[desc_type]
-        if unit < 0 or unit >= max_units:
-            callback(results)
-            del self._descriptions_in_progress[desc_type]
-            return
-
-        results[unit] = desc
-        self.send(sd_encode(desc_type=desc_type, unit=unit + 1))
-
     def is_connected(self):
         """Status of connection to Elk."""
-        return self._conn is not None
+        return self._connection is not None
 
-    def connect(self, connected_callbk=None, disconnected_callbk=None):
+    def connect(self, connected_callback=None, disconnected_callback=None):
         """Connect to the panel"""
-        self._disconnect_requested = False
-        self.connected_callbk = connected_callbk
-        self.disconnected_callbk = disconnected_callbk
+        self.connected_callback = connected_callback
+        self.disconnected_callback = disconnected_callback
         asyncio.ensure_future(self._connect())
 
     def run(self):
@@ -238,34 +185,28 @@ class Elk:  # pylint: disable=too-many-instance-attributes
 
     def send(self, msg):
         """Send a message to Elk panel."""
-        if self._conn:
-            self._conn.write_data(msg.message, msg.response_command)
+        if self._connection:
+            self._connection.write_data(msg.message, msg.response_command)
 
     def pause(self):
         """Pause the connection from sending/receiving."""
-        if self._conn:
-            self._conn.pause()
+        if self._connection:
+            self._connection.pause()
 
     def resume(self):
         """Restart the connection from sending/receiving."""
-        if self._conn:
-            self._conn.resume()
+        if self._connection:
+            self._connection.resume()
 
     def disconnect(self):
         """Disconnect the connection from sending/receiving."""
-        self._disconnect_requested = True
-        if self._conn:
-            self._conn.stop()
-            self._conn = None
+        self._connection_retry_time = -1  # Stop future timeout reconnects
+        if self._connection:
+            self._connection.close()
+            self._connection = None
         if self._reconnect_task:
             self._reconnect_task.cancel()
             self._reconnect_task = None
-        if self._transport:
-            self._transport.close()
-            self._transport = None
-        if self._heartbeat:
-            self._heartbeat.cancel()
-            self._heartbeat = None
 
     @property
     def invalid_auth(self):

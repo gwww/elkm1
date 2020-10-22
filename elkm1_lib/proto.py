@@ -13,17 +13,19 @@ class Connection(asyncio.Protocol):  # pylint: disable=too-many-instance-attribu
     """asyncio Protocol with line parsing and queuing writes"""
 
     def __init__(
-        self, loop, connected, disconnected, got_data, timeout
+        self, loop, heartbeat_time, connected, disconnected, got_data, timeout
     ):  # pylint: disable=too-many-arguments
         self.loop = loop
+        self._heartbeat_time = heartbeat_time
         self._connected_callback = connected
         self._disconnected_callback = disconnected
         self._got_data_callback = got_data
-        self._timeout = timeout
+        self._timeout_callback = timeout
 
         self._transport = None
         self._waiting_for_response = None
-        self._timeout_task = None
+        self._write_timeout_task = None
+        self._heartbeat_timeout_task = None
         self._queued_writes = []
         self._buffer = ""
         self._paused = False
@@ -31,7 +33,7 @@ class Connection(asyncio.Protocol):  # pylint: disable=too-many-instance-attribu
     def connection_made(self, transport):
         LOG.debug("connected callback")
         self._transport = transport
-        self._connected_callback(transport, self)
+        self._connected_callback(self)
 
     def connection_lost(self, exc):
         LOG.debug("disconnected callback")
@@ -41,16 +43,18 @@ class Connection(asyncio.Protocol):  # pylint: disable=too-many-instance-attribu
             self._disconnected_callback()
 
     def _cleanup(self):
-        self._cancel_timer()
+        self._cancel_write_timer()
+        self._cancel_heartbeat_timer()
         self._waiting_for_response = None
         self._queued_writes = []
         self._buffer = ""
 
-    def stop(self):
+    def close(self):
         """Stop the connection from sending/receiving/reconnecting."""
-        self._transport = None
+        if self._transport:
+            self._transport.close()
+            self._transport = None
         self._cleanup()
-        self._disconnected_callback = None
 
     def pause(self):
         """Pause the connection from sending/receiving."""
@@ -62,23 +66,39 @@ class Connection(asyncio.Protocol):  # pylint: disable=too-many-instance-attribu
         self._paused = False
 
     def _response_required_timeout(self):
-        self._timeout(self._waiting_for_response)
-        self._timeout_task = None
+        self._timeout_callback(self._waiting_for_response)
+        self._write_timeout_task = None
         self._waiting_for_response = None
         self._process_write_queue()
 
-    def _cancel_timer(self):
-        if self._timeout_task:
-            self._timeout_task.cancel()
-            self._timeout_task = None
+    def _cancel_write_timer(self):
+        if self._write_timeout_task:
+            self._write_timeout_task.cancel()
+            self._write_timeout_task = None
+
+    def _cancel_heartbeat_timer(self):
+        if self._heartbeat_timeout_task:
+            self._heartbeat_timeout_task.cancel()
+
+    def _heartbeat_timeout(self):
+        LOG.warning("ElkM1 connection heartbeat timed out, disconnecting")
+        self._transport.close()
+
+    def _restart_heartbeat_timer(self):
+        self._cancel_heartbeat_timer()
+        if self._heartbeat_time > 0:
+            self._heartbeat_timeout_task = self.loop.call_later(
+                self._heartbeat_time, self._heartbeat_timeout
+            )
 
     def data_received(self, data):
+        self._restart_heartbeat_timer()
         self._buffer += data.decode("ISO-8859-1")
         while "\r\n" in self._buffer:
             line, self._buffer = self._buffer.split("\r\n", 1)
             if get_elk_command(line) == self._waiting_for_response:
                 self._waiting_for_response = None
-                self._cancel_timer()
+                self._cancel_write_timer()
             self._got_data_callback(line)
         self._process_write_queue()
 
@@ -103,7 +123,7 @@ class Connection(asyncio.Protocol):  # pylint: disable=too-many-instance-attribu
         if response_required:
             self._waiting_for_response = response_required
             if timeout > 0:
-                self._timeout_task = self.loop.call_later(
+                self._write_timeout_task = self.loop.call_later(
                     timeout, self._response_required_timeout
                 )
 

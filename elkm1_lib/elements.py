@@ -5,6 +5,7 @@
 import re
 from abc import abstractmethod
 
+from .const import TextDescriptions
 from .message import sd_encode
 
 
@@ -84,7 +85,9 @@ class Elements:
         self.elk = elk
         self.max_elements = max_elements
         self.elements = [class_(i, elk) for i in range(max_elements)]
-        self.elk.add_sync_handler(self.sync)
+
+        self._get_description_state = None
+        elk.add_handler("SD", self._sd_handler)
 
     def __iter__(self):
         for element in self.elements:
@@ -93,12 +96,29 @@ class Elements:
     def __getitem__(self, key):
         return self.elements[key]
 
-    def _got_desc(self, descriptions):
-        from .users import Users
+    def _sd_handler(
+        self, desc_type, unit, desc, show_on_keypad
+    ):  # pylint: disable=unused-argument
+        if not self._get_description_state:
+            return
+        (_desc_type, count, results, callback) = self._get_description_state
+        if desc_type != _desc_type:
+            return
 
+        if unit < 0 or unit >= count:
+            callback(results, desc_type)
+            self._get_description_state = None
+        else:
+            results[unit] = desc
+            self.elk.send(sd_encode(desc_type, unit + 1))
+
+    def _got_desc(self, descriptions, desc_type):
         # Elk reports descriptions for all 199 users, irregardless of how many
-        # are configured. Don't set their name and configured flag.
-        user_re = re.compile(r"USER \d\d\d") if isinstance(self, Users) else None
+        # are configured. Only set configured for those that are really there.
+        if desc_type == TextDescriptions.USER.value[0]:
+            user_re = re.compile(r"USER \d\d\d")
+        else:
+            user_re = None
 
         for element in self.elements:
             if element.index >= len(descriptions):
@@ -108,21 +128,14 @@ class Elements:
                 if user_re and user_re.match(name):
                     continue
                 element.setattr("name", name, True)
-                element._configured = True
+                element._configured = True  # pylint: disable=protected-access
 
     def get_descriptions(self, description_type):
-        """
-        Gets the descriptions for specified type.
-        When complete the callback is called with a list of descriptions
-        """
-        (desc_type, max_units) = description_type
-        results = [None] * max_units
-        self.elk._descriptions_in_progress[desc_type] = (
-            max_units,
-            results,
-            self._got_desc,
-        )
-        self.elk.send(sd_encode(desc_type=desc_type, unit=0))
+        """Gets the descriptions for specified type."""
+        (desc_type, count) = description_type
+        results = [None] * count
+        self._get_description_state = (desc_type, count, results, self._got_desc)
+        self.elk.send(sd_encode(desc_type, 0))
 
     @abstractmethod
     def sync(self):

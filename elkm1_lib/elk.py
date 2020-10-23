@@ -28,9 +28,6 @@ class Elk:  # pylint: disable=too-many-instance-attributes
         self._invalid_auth = False
         self._reconnect_task = None
 
-        self.connected_callback = None
-        self.disconnected_callback = None
-
         # Setup for all the types of elements tracked
         if "element_list" in config:
             self.element_list = config["element_list"]
@@ -50,8 +47,7 @@ class Elk:  # pylint: disable=too-many-instance-attributes
             ]
 
         self.add_handler("UA", self._sync_complete)
-        self.add_handler("login_success", self._login_success)
-        self.add_handler("login_failed", self._login_failed)
+        self.add_handler("login", self._login_status)
 
         for element in self.element_list:
             module = import_module("elkm1_lib." + element)
@@ -60,6 +56,7 @@ class Elk:  # pylint: disable=too-many-instance-attributes
 
     def _sync_complete(self, **kwargs):  # pylint: disable=unused-argument
         self._sync_event.set()
+        self._message_decode.call_handlers("sync_complete", {})
 
     async def _connect(self):
         """Asyncio connection to Elk."""
@@ -119,9 +116,8 @@ class Elk:  # pylint: disable=too-many-instance-attributes
         if url_scheme_is_secure(self._config["url"]):
             self._connection.write_data(self._config["userid"], raw=True)
             self._connection.write_data(self._config["password"], raw=True)
+        self._message_decode.call_handlers("connected", {})
         self.call_sync_handlers()
-        if self.connected_callback:
-            self.connected_callback(self)
 
     def _reconnect(self):
         asyncio.ensure_future(self._connect())
@@ -130,12 +126,15 @@ class Elk:  # pylint: disable=too-many-instance-attributes
         LOG.warning("ElkM1 at %s disconnected", self._config["url"])
         self._connection = None
         self._start_connection_retry_timer()
-        if self.disconnected_callback:
-            self.disconnected_callback(self)
+        self._message_decode.call_handlers("disconnected", {})
 
     def add_handler(self, msg_type, handler):
-        """Add handler for incoming message."""
+        """Add handler."""
         self._message_decode.add_handler(msg_type, handler)
+
+    def remove_handler(self, msg_type, handler):
+        """Remove handler."""
+        self._message_decode.remove_handler(msg_type, handler)
 
     def _got_data(self, data):
         LOG.debug("got_data '%s'", data)
@@ -144,17 +143,17 @@ class Elk:  # pylint: disable=too-many-instance-attributes
         except (ValueError, AttributeError) as exc:
             LOG.error("Invalid message '%s'", data, exc_info=exc)
 
-    def _login_success(self):  # pylint: disable=no-self-use
-        LOG.info("Successful login.")
-
-    def _login_failed(self):
-        self.disconnect()
-        self._invalid_auth = True
-        self._sync_event.set()
-        LOG.error("Invalid username or password.")
+    def _login_status(self, succeeded):
+        if succeeded:
+            LOG.info("Successful login.")
+        else:
+            self.disconnect()
+            self._invalid_auth = True
+            self._sync_event.set()
+            LOG.error("Invalid username or password.")
 
     def _timeout(self, msg_code):
-        self._message_decode.timeout_handler(msg_code)
+        self._message_decode.call_handlers("timeout", {"msg_code": msg_code})
 
     def call_sync_handlers(self):
         """Invoke the synchronization handlers."""
@@ -173,10 +172,8 @@ class Elk:  # pylint: disable=too-many-instance-attributes
         """Status of connection to Elk."""
         return self._connection is not None
 
-    def connect(self, connected_callback=None, disconnected_callback=None):
+    def connect(self):
         """Connect to the panel"""
-        self.connected_callback = connected_callback
-        self.disconnected_callback = disconnected_callback
         asyncio.ensure_future(self._connect())
 
     def run(self):

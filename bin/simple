@@ -8,15 +8,25 @@ from elkm1_lib import Elk
 LOG = logging.getLogger(__name__)
 
 
-def connected(elk):
-    print("Connected!")
-
-
-def disconnected(elk):
-    print("Disconnected!")
-
-
 def main():
+    def connected():
+        print("Connected!!!")
+
+    def disconnected():
+        print("Disconnected!!!")
+
+    def login(succeeded):
+        print(f"Login {"succeeded" if succeeded else "failed"}!!!")
+
+    def sync_complete():
+        print("Sync of panel is complete!!!")
+
+    def timeout(msg_code):
+        print(f"Timeout sending message {msg_code}!!!")
+
+    def unknown(msg_code, data):
+        print(f"Unknown message {msg_code}: {data}!!!")
+
     logging.basicConfig(level=logging.DEBUG, format="%(message)s")
     try:
         url = os.environ.get("ELKM1_URL")
@@ -25,7 +35,13 @@ def main():
             exit(0)
 
         elk = Elk({"url": url})
-        elk.connect(connected, disconnected)
+        elk.add_handler("connected", connected)
+        elk.add_handler("disconnected", disconnected)
+        elk.add_handler("login", login)
+        elk.add_handler("sync_complete", sync_complete)
+        elk.add_handler("timeout", timeout)
+        elk.add_handler("unknown", unknown)
+        elk.connect()
         elk.run()
     except KeyboardInterrupt:
         exit(0)

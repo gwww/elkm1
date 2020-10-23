@@ -35,40 +35,47 @@ class MessageDecode:
         self._handlers = {}
 
     def add_handler(self, message_type, handler):
-        """Manage callbacks for message handlers."""
+        """Add callback for handlers."""
         if message_type not in self._handlers:
             self._handlers[message_type] = []
 
         if handler not in self._handlers[message_type]:
             self._handlers[message_type].append(handler)
 
+    def remove_handler(self, message_type, handler):
+        """Remove callback for handlers."""
+        if message_type not in self._handlers:
+            return
+        if handler in self._handlers[message_type]:
+            self._handlers[message_type].remove(handler)
+
+    def call_handlers(self, cmd, decoded_msg):
+        for handler in self._handlers.get(cmd, []):
+            handler(**decoded_msg)
+
     def decode(self, msg):
         """Decode an Elk message by passing to appropriate decoder"""
-        invalid = _is_valid_length_and_checksum(msg)
-        if invalid:
-            if not msg or msg.startswith("Username: ") or msg.startswith("Password: "):
-                return
-            if msg.startswith("Username/Password not found"):
-                cmd = "login_failed"
-                decoded_msg = {}
-            elif "Login successful" in msg:
-                cmd = "login_success"
-                decoded_msg = {}
-            else:
-                raise ValueError(invalid)
-        else:
+        valid, error_msg = _is_valid_length_and_checksum(msg)
+        if valid:
             cmd = msg[2:4]
             decoder = getattr(self, f"_{cmd.lower()}_decode", None)
             if not decoder:
                 cmd = "unknown"
                 decoder = self._unknown_decode
             try:
-                decoded_msg = decoder(msg)
+                self.call_handlers(cmd, decoder(msg))
             except (IndexError, ValueError) as exc:
                 raise ValueError("Cannot decode message") from exc
+            return
 
-        for handler in self._handlers.get(cmd, []):
-            handler(**decoded_msg)
+        if not msg or msg.startswith("Username: ") or msg.startswith("Password: "):
+            return
+        if msg.startswith("Username/Password not found"):
+            self.call_handlers("login", {"succeeded": False})
+        elif "Login successful" in msg:
+            self.call_handlers("login", {"succeeded": True})
+        else:
+            raise ValueError(error_msg)
 
     def _am_decode(self, msg):
         """AM: Alarm memory by area report."""
@@ -304,11 +311,6 @@ class MessageDecode:
         """Generic handler called when no specific handler exists"""
         return {"msg_code": msg[2:4], "data": msg[4:-2]}
 
-    def timeout_handler(self, msg_code):
-        """Called directly when a timeout happens when response not received"""
-        for handler in self._handlers.get("timeout", []):
-            handler({"msg_code": msg_code})
-
 
 # pylint: enable=no-self-use
 
@@ -349,17 +351,17 @@ def _is_valid_length_and_checksum(msg):
     """Check packet length valid and that checksum is good."""
     try:
         if int(msg[:2], 16) != (len(msg) - 2):
-            return "Incorrect message length"
+            return False, "Incorrect message length"
 
         checksum = int(msg[-2:], 16)
         for char in msg[:-2]:
             checksum += ord(char)
         if (checksum % 256) != 0:
-            return "Bad checksum"
+            return False, "Bad checksum"
     except ValueError:
-        return "Message invalid"
+        return False, "Message invalid"
 
-    return None
+    return True, ""
 
 
 def al_encode(arm_mode, area, user_code):

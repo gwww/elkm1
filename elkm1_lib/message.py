@@ -46,7 +46,7 @@ class MessageDecode:
         """Decode an Elk message by passing to appropriate decoder"""
         invalid = _is_valid_length_and_checksum(msg)
         if invalid:
-            if msg.startswith("Username: ") or msg.startswith("Password: "):
+            if not msg or msg.startswith("Username: ") or msg.startswith("Password: "):
                 return
             if msg.startswith("Username/Password not found"):
                 cmd = "login_failed"

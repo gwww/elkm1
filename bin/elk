@@ -112,8 +112,7 @@ def main():
         mystdout = StdOutWrapper(c)
         logging.basicConfig(stream=mystdout, level=logging.DEBUG, format="%(message)s")
     else:
-        logging.basicConfig(level=logging.DEBUG, format="%(message)s")
-
+        logging.basicConfig(level=logging.DEBUG, format="%(asctime)s.%(msecs)03d %(message)s", datefmt='%H:%M:%S')
     try:
         elk.add_handler("unknown", _unknown_handler)
         elk.add_handler("timeout", _timeout_handler)

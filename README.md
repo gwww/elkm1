@@ -108,6 +108,19 @@ The above code registers a callback for 'ZC' (Elk zone status change)
 messages. When a ZC message is received the handler functions are called
 with the zone_number and zone_status.
 
+There are a number of pseudo-handlers that act like the handlers. These are
+called when events happen. The pseudo-handlers are:
+
+- `connect`: When a successful connection to the ElkM1 is completed.
+- `disconnect`: When a connection to a panel is disconnected.
+- `login`: When a login is made to the panel (using `elks://` connection mode.
+  A single boolean parameter is passed `succeeded`.
+- `sync_complete`: When the panel has completed synchonizing all its elements.
+- `timeout`: When a send of a message to the ElkM1 times out (fails to send).
+- `unknown`: When a message from the ElkM1 is received and the library does
+  not have a method to decode the message. The message is passed to this handler
+  and can be decoded outside of the library.
+
 ## Utilities
 
 The `bin` directory of the library has one utility program and

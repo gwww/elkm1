@@ -24,7 +24,6 @@ class Elk:  # pylint: disable=too-many-instance-attributes
         self._connection = None
         self._connection_retry_time = 1
         self._message_decode = MessageDecode()
-        self._sync_event = asyncio.Event()
         self._invalid_auth = False
         self._reconnect_task = None
 
@@ -55,7 +54,6 @@ class Elk:  # pylint: disable=too-many-instance-attributes
             setattr(self, element, class_(self))
 
     def _sync_complete(self, **kwargs):  # pylint: disable=unused-argument
-        self._sync_event.set()
         self._message_decode.call_handlers("sync_complete", {})
 
     async def _connect(self):
@@ -145,7 +143,6 @@ class Elk:  # pylint: disable=too-many-instance-attributes
         else:
             self.disconnect()
             self._invalid_auth = True
-            self._sync_event.set()
             LOG.error("Invalid username or password.")
 
     def _timeout(self, msg_code):
@@ -154,15 +151,10 @@ class Elk:  # pylint: disable=too-many-instance-attributes
     def call_sync_handlers(self):
         """Invoke the synchronization handlers."""
         LOG.debug("Synchronizing panel...")
-        self._sync_event.clear()
 
         for element in self.element_list:
             getattr(self, element).sync()
         self.send(ua_encode(0))  # Used to mark end of sync
-
-    async def sync_complete(self):
-        """Called when sync is complete with the panel."""
-        return await self._sync_event.wait()
 
     def is_connected(self):
         """Status of connection to Elk."""

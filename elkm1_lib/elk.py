@@ -99,14 +99,10 @@ class Elk:  # pylint: disable=too-many-instance-attributes
             self._start_connection_retry_timer()
 
     def _start_connection_retry_timer(self):
-        if self._connection_retry_time > 0:
-            self._reconnect_task = self.loop.call_later(
-                self._connection_retry_time, self._reconnect
-            )
-            if self._connection_retry_time < 32:
-                self._connection_retry_time *= 2
-            else:
-                self._connection_retry_time = 60
+        timeout = self._connection_retry_time
+        if timeout > 0:
+            self._reconnect_task = self.loop.call_later(timeout, self._reconnect)
+            self._connection_retry_time = min(60, timeout * 2)
 
     def _connected(self, connection):
         """Login and sync the ElkM1 panel to memory."""

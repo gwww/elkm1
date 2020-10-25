@@ -24,7 +24,6 @@ class Elk:  # pylint: disable=too-many-instance-attributes
         self._connection = None
         self._connection_retry_time = 1
         self._message_decode = MessageDecode()
-        self._invalid_auth = False
         self._reconnect_task = None
 
         # Setup for all the types of elements tracked
@@ -56,9 +55,13 @@ class Elk:  # pylint: disable=too-many-instance-attributes
     def _sync_complete(self, **kwargs):  # pylint: disable=unused-argument
         self._message_decode.call_handlers("sync_complete", {})
 
+    def _login_status(self, succeeded):
+        if not succeeded:
+            self.disconnect()
+            LOG.error("Invalid username or password.")
+
     async def _connect(self):
         """Asyncio connection to Elk."""
-        self._invalid_auth = False
         url = self._config["url"]
         LOG.info("Connecting to ElkM1 at %s", url)
         scheme, dest, param, ssl_context = parse_url(url)
@@ -137,14 +140,6 @@ class Elk:  # pylint: disable=too-many-instance-attributes
         except (ValueError, AttributeError) as exc:
             LOG.error("Invalid message '%s'", data, exc_info=exc)
 
-    def _login_status(self, succeeded):
-        if succeeded:
-            LOG.info("Successful login.")
-        else:
-            self.disconnect()
-            self._invalid_auth = True
-            LOG.error("Invalid username or password.")
-
     def _timeout(self, msg_code):
         self._message_decode.call_handlers("timeout", {"msg_code": msg_code})
 
@@ -192,8 +187,3 @@ class Elk:  # pylint: disable=too-many-instance-attributes
         if self._reconnect_task:
             self._reconnect_task.cancel()
             self._reconnect_task = None
-
-    @property
-    def invalid_auth(self):
-        """Last session was disconnected due to invalid auth details."""
-        return self._invalid_auth

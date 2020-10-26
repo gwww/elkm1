@@ -21,7 +21,7 @@ upload: build
 	poetry publish
 
 isort:
-	sh -c "isort --skip-glob=.tox --recursive . "
+	sh -c "isort --skip-glob=.tox ."
 
 lint:
 	pylint --msg-template='{msg_id}({symbol}):{line:3d},{column}: {obj}: {msg}' elkm1_lib

@@ -24,8 +24,6 @@ class Elk:  # pylint: disable=too-many-instance-attributes
         self._connection = None
         self._connection_retry_time = 1
         self._message_decode = MessageDecode()
-        self._sync_event = asyncio.Event()
-        self._invalid_auth = False
         self._reconnect_task = None
 
         # Setup for all the types of elements tracked
@@ -55,12 +53,15 @@ class Elk:  # pylint: disable=too-many-instance-attributes
             setattr(self, element, class_(self))
 
     def _sync_complete(self, **kwargs):  # pylint: disable=unused-argument
-        self._sync_event.set()
         self._message_decode.call_handlers("sync_complete", {})
+
+    def _login_status(self, succeeded):
+        if not succeeded:
+            self.disconnect()
+            LOG.error("Invalid username or password.")
 
     async def _connect(self):
         """Asyncio connection to Elk."""
-        self._invalid_auth = False
         url = self._config["url"]
         LOG.info("Connecting to ElkM1 at %s", url)
         scheme, dest, param, ssl_context = parse_url(url)
@@ -99,14 +100,10 @@ class Elk:  # pylint: disable=too-many-instance-attributes
             self._start_connection_retry_timer()
 
     def _start_connection_retry_timer(self):
-        if self._connection_retry_time > 0:
-            self._reconnect_task = self.loop.call_later(
-                self._connection_retry_time, self._reconnect
-            )
-            if self._connection_retry_time < 32:
-                self._connection_retry_time *= 2
-            else:
-                self._connection_retry_time = 60
+        timeout = self._connection_retry_time
+        if timeout > 0:
+            self._reconnect_task = self.loop.call_later(timeout, self._reconnect)
+            self._connection_retry_time = min(60, timeout * 2)
 
     def _connected(self, connection):
         """Login and sync the ElkM1 panel to memory."""
@@ -143,30 +140,16 @@ class Elk:  # pylint: disable=too-many-instance-attributes
         except (ValueError, AttributeError) as exc:
             LOG.error("Invalid message '%s'", data, exc_info=exc)
 
-    def _login_status(self, succeeded):
-        if succeeded:
-            LOG.info("Successful login.")
-        else:
-            self.disconnect()
-            self._invalid_auth = True
-            self._sync_event.set()
-            LOG.error("Invalid username or password.")
-
     def _timeout(self, msg_code):
         self._message_decode.call_handlers("timeout", {"msg_code": msg_code})
 
     def call_sync_handlers(self):
         """Invoke the synchronization handlers."""
         LOG.debug("Synchronizing panel...")
-        self._sync_event.clear()
 
         for element in self.element_list:
             getattr(self, element).sync()
         self.send(ua_encode(0))  # Used to mark end of sync
-
-    async def sync_complete(self):
-        """Called when sync is complete with the panel."""
-        return await self._sync_event.wait()
 
     def is_connected(self):
         """Status of connection to Elk."""
@@ -204,8 +187,3 @@ class Elk:  # pylint: disable=too-many-instance-attributes
         if self._reconnect_task:
             self._reconnect_task.cancel()
             self._reconnect_task = None
-
-    @property
-    def invalid_auth(self):
-        """Last session was disconnected due to invalid auth details."""
-        return self._invalid_auth

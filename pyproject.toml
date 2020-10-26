@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "elkm1-lib"
-version = "0.8.5"
+version = "0.8.6"
 description = "Library for interacting with ElkM1 alarm/automation panel."
 homepage = "https://github.com/gwww/elkm1"
 authors = ["Glenn Waters <gwwaters+elkm1@gmail.com>"]
@@ -20,7 +20,7 @@ pyserial-asyncio = "^0.4.0"
 [tool.poetry.dev-dependencies]
 pytest = "^6"
 urwid = "^2.0"
-attrs = "^20"
+attrs = "^19"
 colorlog = "^4.0"
 black = "^20.8b1"
 

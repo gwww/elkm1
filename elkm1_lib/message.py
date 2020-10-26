@@ -50,6 +50,7 @@ class MessageDecode:
             self._handlers[message_type].remove(handler)
 
     def call_handlers(self, cmd, decoded_msg):
+        """Call the message handlers."""
         for handler in self._handlers.get(cmd, []):
             handler(**decoded_msg)
 
@@ -70,10 +71,10 @@ class MessageDecode:
 
         if not msg or msg.startswith("Username: ") or msg.startswith("Password: "):
             return
-        if msg.startswith("Username/Password not found"):
-            self.call_handlers("login", {"succeeded": False})
-        elif "Login successful" in msg:
+        if "Login successful" in msg:
             self.call_handlers("login", {"succeeded": True})
+        elif msg.startswith("Username/Password not found") or msg == "Disabled":
+            self.call_handlers("login", {"succeeded": False})
         else:
             raise ValueError(error_msg)
 

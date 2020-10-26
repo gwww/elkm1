@@ -1,6 +1,8 @@
-from unittest.mock import Mock
 import datetime as dt
+from unittest.mock import Mock
+
 import pytest
+
 import elkm1_lib.message as m
 
 

@@ -1,6 +1,6 @@
 """Definition of an ElkM1 Area"""
 
-from .const import Max, TextDescriptions
+from .const import ArmedStatus, Max, TextDescriptions
 from .elements import Element, Elements
 from .message import al_encode, as_encode, az_encode, dm_encode, zb_encode
 
@@ -19,13 +19,18 @@ class Area(Element):  # pylint: disable=too-many-instance-attributes
         self.timer2 = 0
         self.last_log = None
 
+    def is_armed(self):
+        return self.armed_status != ArmedStatus.DISARMED.value
+
     def arm(self, level, code):
         """(Helper) Arm system at specified level (away, vacation, etc)"""
+        if self.is_armed() and level > "0":
+            return
         self._elk.send(al_encode(level, self._index, code))
 
     def disarm(self, code):
         """(Helper) Disarm system."""
-        self.arm(0, code)
+        self.arm("0", code)
 
     def display_message(
         self, clear, beep, timeout, line1, line2

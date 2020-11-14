@@ -17,6 +17,7 @@ class Panel(Element):
         self.xep_version = None
         self.remote_programming_status = 0
         self.system_trouble_status = ""
+        self._configured = True
         self.setattr("name", "ElkM1", True)
 
         self._elk.add_handler("VN", self._vn_handler)

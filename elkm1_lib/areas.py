@@ -20,6 +20,7 @@ class Area(Element):  # pylint: disable=too-many-instance-attributes
         self.last_log = None
 
     def is_armed(self):
+        """Return if the area is armed."""
         return self.armed_status != ArmedStatus.DISARMED.value
 
     def arm(self, level, code):

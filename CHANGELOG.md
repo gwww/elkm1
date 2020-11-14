@@ -2,6 +2,15 @@
 All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## [0.8.8]
+- Fix panel not recognized when using auto-configure.
+
+## [0.8.7]
+- Fix https://github.com/home-assistant/core/issues/20630
+
+## [0.8.6]
+- Many small non-functional code cleanups.
+
 ## [0.8.5]
 - Lint and isort cleanup
 - Move from .format to f-string for string formatting

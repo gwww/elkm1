@@ -75,24 +75,24 @@ def test_decode_raises_value_error_on_bad_checksum():
 def test_decode_raises_value_error_on_short_message():
     decoder = m.MessageDecode()
     with pytest.raises(ValueError) as excinfo:
-        decoder.decode("")
+        decoder.decode("X")
     assert str(excinfo.value) == "Message invalid"
 
 
 def test_decode_login_success():
     mock_login_success_handler = Mock()
     decoder = m.MessageDecode()
-    decoder.add_handler("login_success", mock_login_success_handler)
+    decoder.add_handler("login", mock_login_success_handler)
     decoder.decode("Login successful")
-    mock_login_success_handler.assert_called_once_with()
+    mock_login_success_handler.assert_called_once_with(succeeded=True)
 
 
 def test_decode_login_failed():
     mock_login_failed_handler = Mock()
     decoder = m.MessageDecode()
-    decoder.add_handler("login_failed", mock_login_failed_handler)
+    decoder.add_handler("login", mock_login_failed_handler)
     decoder.decode("Username/Password not found")
-    mock_login_failed_handler.assert_called_once_with()
+    mock_login_failed_handler.assert_called_once_with(succeeded=False)
 
 
 def test_encode_message_with_a_variable():

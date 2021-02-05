@@ -2,6 +2,9 @@
 All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## [0.8.11]
+- Add get_voltage on zone.
+
 ## [0.8.8]
 - Fix panel not recognized when using auto-configure.
 

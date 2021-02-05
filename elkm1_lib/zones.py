@@ -7,7 +7,15 @@ from .const import (
     ZoneType,
 )
 from .elements import Element, Elements
-from .message import az_encode, zb_encode, zd_encode, zp_encode, zs_encode, zt_encode
+from .message import (
+    az_encode,
+    zb_encode,
+    zd_encode,
+    zp_encode,
+    zs_encode,
+    zt_encode,
+    zv_encode,
+)
 
 
 class Zone(Element):
@@ -46,6 +54,10 @@ class Zone(Element):
     def trigger(self):
         """(Helper) Trigger zone."""
         self._elk.send(zt_encode(self._index))
+
+    def get_voltage(self):
+        """(Helper) Get zone voltage."""
+        self._elk.send(zv_encode(self._index))
 
 
 class Zones(Elements):

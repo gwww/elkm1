@@ -51,6 +51,16 @@ and the call to `Elk` changes to:
     )
 ```
 
+The following ElkM1 connection protocols are supported:
+- serial:// - Serial port;
+- elk:// - Elk M1XEP Ethernet, non-secure
+- elks:// - Elk M1XEP Ethernet, secure, TLS 1.0
+- elksv1_0:// - Elk M1XEP Ethernet, secure, TLS 1.0, supported on M1XEP version < 2.0.46
+- elksv1_2:// - Elk M1XEP Ethernet, secure, TLS 1.2, supported on M1XEP version = 2.0.46
+- elksv1_3:// - Elk M1XEP Ethernet, secure, TLS 1.2, not yet supported on M1XEP, reserved for future
+
+A username and password are required for any of the secure modes.
+
 To see working example code take a look at the script `bin/simple`.
 
 The `Elk` object supports the concept of `Elements`. An `Element`

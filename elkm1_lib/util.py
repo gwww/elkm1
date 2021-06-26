@@ -2,11 +2,23 @@
 
 import ssl
 
+TLS_VERSIONS = {
+        # Unfortunately M1XEP does not support auto-negotiation for TLS
+        # protocol; the user code must figure out the version to use. The
+        # simplest way is to configure using the connection URL (smarter would
+        # be to try to connect using each of the version, except SSL lib does
+        # not report TLS error, it just closes the connection, so no easy way to
+        # know a different protocol version should be tried)
+        "elks": ssl.TLSVersion.TLSv1,
+        "elksv1_0": ssl.TLSVersion.TLSv1,
+        "elksv1_2": ssl.TLSVersion.TLSv1_2,
+        "elksv1_3": ssl.TLSVersion.TLSv1_3,
+    }
 
 def url_scheme_is_secure(url):
     """Check if the URL is one that requires SSL/TLS."""
     scheme, _dest = url.split("://")
-    return scheme == "elks"
+    return scheme.startswith("elks")
 
 
 def parse_url(url):
@@ -16,10 +28,13 @@ def parse_url(url):
     ssl_context = None
     if scheme == "elk":
         host, port = dest.split(":") if ":" in dest else (dest, 2101)
-    elif scheme == "elks":
+    elif TLS_VERSIONS.get(scheme):
         host, port = dest.split(":") if ":" in dest else (dest, 2601)
-        ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
+        ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS)
+        ssl_context.minimum_version = TLS_VERSIONS.get(scheme)
+        ssl_context.maximum_version = TLS_VERSIONS.get(scheme)
         ssl_context.verify_mode = ssl.CERT_NONE
+        scheme = "elks"
     elif scheme == "serial":
         host, port = dest.split(":") if ":" in dest else (dest, 115200)
     else:

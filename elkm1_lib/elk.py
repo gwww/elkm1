@@ -58,7 +58,7 @@ class Elk:  # pylint: disable=too-many-instance-attributes
         return self._temperature_units
 
     def _sync_complete(self, **kwargs):
-        self.temperature_units = kwargs["temperature_units"]
+        self._temperature_units = kwargs["temperature_units"]
         self._message_decode.call_handlers("sync_complete", {})
 
     def _login_status(self, succeeded):

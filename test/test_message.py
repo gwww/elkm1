@@ -210,3 +210,44 @@ def test_zv_encode():
 
 def test_ua_encode():
     assert m.ua_encode(654321) == ("0Cua65432100", "UA")
+
+
+def test_UA_decode():
+    mock_ua_handler = Mock()
+    decoder = m.MessageDecode()
+    decoder.add_handler("UA", mock_ua_handler)
+    decoder.decode("19UA00000000303334A261F00D0")
+    mock_ua_handler.assert_called_once_with(
+        **{
+            "area_mask": 0,
+            "code_length": 6,
+            "code_type": 1,
+            "diagnostic_data": "303334A2",
+            "temperature_units": "F",
+            "user_code": 0,
+        }
+    )
+    mock_ua_handler.reset_mock()
+    decoder.decode("19UA123456C30000000041F00CA")
+    mock_ua_handler.assert_called_once_with(
+        **{
+            "area_mask": 195,
+            "code_length": 4,
+            "code_type": 1,
+            "diagnostic_data": "00000000",
+            "temperature_units": "F",
+            "user_code": 123456,
+        }
+    )
+    mock_ua_handler.reset_mock()
+    decoder.decode("19UA123456C30000000041C00CA")
+    mock_ua_handler.assert_called_once_with(
+        **{
+            "area_mask": 195,
+            "code_length": 4,
+            "code_type": 1,
+            "diagnostic_data": "00000000",
+            "temperature_units": "C",
+            "user_code": 123456,
+        }
+    )

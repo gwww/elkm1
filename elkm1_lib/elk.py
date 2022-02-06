@@ -25,6 +25,7 @@ class Elk:  # pylint: disable=too-many-instance-attributes
         self._connection_retry_time = 1
         self._message_decode = MessageDecode()
         self._reconnect_task = None
+        self._temperature_units = None
 
         # Setup for all the types of elements tracked
         if "element_list" in config:
@@ -52,7 +53,12 @@ class Elk:  # pylint: disable=too-many-instance-attributes
             class_ = getattr(module, element.capitalize())
             setattr(self, element, class_(self))
 
-    def _sync_complete(self, **kwargs):  # pylint: disable=unused-argument
+    @property
+    def temperature_units(self):
+        return self._temperature_units
+
+    def _sync_complete(self, **kwargs):
+        self.temperature_units = kwargs["temperature_units"]
         self._message_decode.call_handlers("sync_complete", {})
 
     def _login_status(self, succeeded):
@@ -149,7 +155,9 @@ class Elk:  # pylint: disable=too-many-instance-attributes
 
         for element in self.element_list:
             getattr(self, element).sync()
-        self.send(ua_encode(0))  # Used to mark end of sync
+        self.send(
+            ua_encode(0)
+        )  # Used to mark end of sync and get the temperature units
 
     def is_connected(self):
         """Status of connection to Elk."""

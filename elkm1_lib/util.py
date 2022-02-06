@@ -3,17 +3,18 @@
 import ssl
 
 TLS_VERSIONS = {
-        # Unfortunately M1XEP does not support auto-negotiation for TLS
-        # protocol; the user code must figure out the version to use. The
-        # simplest way is to configure using the connection URL (smarter would
-        # be to try to connect using each of the version, except SSL lib does
-        # not report TLS error, it just closes the connection, so no easy way to
-        # know a different protocol version should be tried)
-        "elks": ssl.TLSVersion.TLSv1,
-        "elksv1_0": ssl.TLSVersion.TLSv1,
-        "elksv1_2": ssl.TLSVersion.TLSv1_2,
-        "elksv1_3": ssl.TLSVersion.TLSv1_3,
-    }
+    # Unfortunately M1XEP does not support auto-negotiation for TLS
+    # protocol; the user code must figure out the version to use. The
+    # simplest way is to configure using the connection URL (smarter would
+    # be to try to connect using each of the version, except SSL lib does
+    # not report TLS error, it just closes the connection, so no easy way to
+    # know a different protocol version should be tried)
+    "elks": ssl.TLSVersion.TLSv1,
+    "elksv1_0": ssl.TLSVersion.TLSv1,
+    "elksv1_2": ssl.TLSVersion.TLSv1_2,
+    "elksv1_3": ssl.TLSVersion.TLSv1_3,
+}
+
 
 def url_scheme_is_secure(url):
     """Check if the URL is one that requires SSL/TLS."""
@@ -22,7 +23,7 @@ def url_scheme_is_secure(url):
 
 
 def parse_url(url):
-    """Parse a Elk connection string """
+    """Parse a Elk connection string"""
     scheme, dest = url.split("://")
     host = None
     ssl_context = None

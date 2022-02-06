@@ -32,8 +32,6 @@ def main():
         "rr",
         "RR",
         "rs",
-        "ua",
-        "UA",
         "XB",
         "xk",
     }

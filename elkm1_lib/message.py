@@ -259,14 +259,19 @@ class MessageDecode:
             "humidity": int(msg[15:17]),
         }
 
-    def _ua_decode(self, msg):  # pylint: disable=unused-argument
-        """UA: Valid User Code Areas."""
-        # UA is intentially not decoded
-        # because it is used to tell when a sync
-        # is completed.  If you need to add UA
-        # support, switch _sync_complete to another
-        # unused command in elk.py
-        return {}
+    def _ua_decode(self, msg):
+        """UA: Valid User Code Areas.
+
+        Example: '19UA00000000303334A261F00D0' and '19UA123456C30000000041F00CA'
+        """
+        return {
+            "user_code": int(msg[4:10]),
+            "area_mask": int(msg[10:12], 16),
+            "diagnostic_data": msg[12:20],
+            "code_length": int(msg[20:21]),
+            "code_type": int(msg[21:22]),
+            "temperature_units": msg[22:23],
+        }
 
     def _vn_decode(self, msg):
         """VN: Version information."""

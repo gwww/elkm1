@@ -8,7 +8,7 @@ from .message import lw_encode, rw_encode, sp_encode, ss_encode, sw_encode, vn_e
 
 
 class Panel(Element):
-    """Class representing an Area"""
+    """Class representing the overall Elk panel"""
 
     def __init__(self, elk):
         super().__init__(0, elk)
@@ -17,6 +17,8 @@ class Panel(Element):
         self.xep_version = None
         self.remote_programming_status = 0
         self.system_trouble_status = ""
+        self.temperature_units = None
+        self.user_code_length = None
         self._configured = True
         self.setattr("name", "ElkM1", True)
 
@@ -26,12 +28,14 @@ class Panel(Element):
         self._elk.add_handler("RP", self._rp_handler)
         self._elk.add_handler("IE", self._elk.call_sync_handlers)
         self._elk.add_handler("SS", self._ss_handler)
+        self._elk.add_handler("UA", self._ua_handler)
 
     def sync(self):
         """Retrieve panel information from ElkM1"""
         self._elk.send(vn_encode())
         self._elk.send(lw_encode())
         self._elk.send(ss_encode())
+        # Don't sync UA from here as it is used as a "sync complete" marker
 
     def speak_word(self, word):
         """(Helper) Speak word."""
@@ -96,3 +100,7 @@ class Panel(Element):
         else:
             self._elk.pause()
         self.setattr("remote_programming_status", remote_programming_status, True)
+
+    def _ua_handler(self, **kwargs):
+        self.setattr("user_code_length", kwargs["user_code_length"], False)
+        self.setattr("temperature_units", kwargs["temperature_units"], True)

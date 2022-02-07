@@ -16,7 +16,7 @@ def main():
         print("Disconnected!!!")
 
     def login(succeeded):
-        print(f"Login {"succeeded" if succeeded else "failed"}!!!")
+        print(f"Login {'succeeded' if succeeded else 'failed'}!!!")
 
     def sync_complete():
         print("Sync of panel is complete!!!")

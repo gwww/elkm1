@@ -266,7 +266,14 @@ class MessageDecode:
         # is completed.  If you need to add UA
         # support, switch _sync_complete to another
         # unused command in elk.py
-        return {}
+        return {
+            "user_code": int(msg[4:10]),
+            "valid_areas": int(msg[10:12]),
+            "diagnostic": msg[12:20],
+            "user_code_length": int(msg[20]),
+            "user_code_type": int(msg[21]),
+            "temperature_units": msg[22],
+        }
 
     def _vn_decode(self, msg):
         """VN: Version information."""
@@ -517,6 +524,11 @@ def ts_encode(thermostat, value, element):
     return MessageEncode(f"0Bts{thermostat + 1:02}{value:02}{element:1}00", None)
 
 
+def ua_encode(user_code):
+    """ua: Requst valid user code areas"""
+    return MessageEncode(f"0Cua{user_code:06}00", "UA")
+
+
 def vn_encode():
     """zd: Get panel software version information."""
     return MessageEncode("06vn00", "VN")
@@ -559,8 +571,3 @@ def zt_encode(zone):
 def zv_encode(zone):
     """zv: Get zone voltage"""
     return MessageEncode(f"09zv{zone + 1:03}00", "ZV")
-
-
-def ua_encode(user_code):
-    """ua: Requst valid user code areas"""
-    return MessageEncode(f"0Cua{user_code:06}00", "UA")

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "elkm1-lib"
-version = "1.2.0"
+version = "1.2.1"
 description = "Library for interacting with ElkM1 alarm/automation panel."
 homepage = "https://github.com/gwww/elkm1"
 authors = ["Glenn Waters <gwwaters+elkm1@gmail.com>"]

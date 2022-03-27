@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## [1.2.1]
+- Bug in decode of UA message; did not handle hex for areas
+- Cleanup after sync_complete to remove handler; allows for apps
+  to send there own UA messages
+
 ## [1.0.0]
 - Time to take this out of beta! The code has been stable for well over a year.
 - Added support for TLS 1.2 secure connection mode. This is required for M1XEP

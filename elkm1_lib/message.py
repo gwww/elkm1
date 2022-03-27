@@ -263,7 +263,7 @@ class MessageDecode:
         """UA: Valid User Code Areas."""
         return {
             "user_code": int(msg[4:10]),
-            "valid_areas": int(msg[10:12]),
+            "valid_areas": int(msg[10:12], 16),
             "diagnostic": msg[12:20],
             "user_code_length": int(msg[20]),
             "user_code_type": int(msg[21]),

@@ -55,6 +55,9 @@ class Elk:  # pylint: disable=too-many-instance-attributes
     def _sync_complete(self, **kwargs):  # pylint: disable=unused-argument
         self._message_decode.call_handlers("sync_complete", {})
 
+        # So that other apps can send UA and not trigger sync_complete
+        self.remove_handler("UA", self._sync_complete)
+
     def _login_status(self, succeeded):
         if not succeeded:
             self.disconnect()

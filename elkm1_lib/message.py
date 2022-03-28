@@ -51,7 +51,11 @@ class MessageDecode:
 
     def call_handlers(self, cmd, decoded_msg):
         """Call the message handlers."""
-        for handler in self._handlers.get(cmd, []):
+        # Copy the handlers list as add/remove could be
+        # called when invoking the handlers
+        handlers = list(self._handlers.get(cmd, []))
+
+        for handler in handlers:
             handler(**decoded_msg)
 
     def decode(self, msg):

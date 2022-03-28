@@ -51,6 +51,7 @@ class MyApp:
         self.elk.send(ua_encode(self.user_code))
 
     def ua_response(self, **kwargs):
+        """Got a response to our UA message!"""
         print(kwargs)
 
         # Got the UA response! Add your own app code here.

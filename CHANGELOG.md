@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## [1.2.2]
+- On a non-secure connection still generate a login event on got_connection 
+  (it will always be successful)
+
 ## [1.2.1]
 - Bug in decode of UA message; did not handle hex for areas
 - Cleanup after sync_complete to remove handler; allows for apps

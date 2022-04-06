@@ -113,10 +113,13 @@ class Elk:  # pylint: disable=too-many-instance-attributes
         LOG.info("Connected to ElkM1")
         self._connection = connection
         self._connection_retry_time = 1
+        self._message_decode.call_handlers("connected", {})
         if url_scheme_is_secure(self._config["url"]):
             self._connection.write_data(self._config["userid"], raw=True)
             self._connection.write_data(self._config["password"], raw=True)
-        self._message_decode.call_handlers("connected", {})
+        else:
+            self._message_decode.call_handlers("login", {"succeeded": True})
+
         self.call_sync_handlers()
 
     def _reconnect(self):

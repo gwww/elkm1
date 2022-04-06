@@ -11,7 +11,7 @@ from .message import al_encode, as_encode, az_encode, dm_encode, zb_encode
 class Area(Element):  # pylint: disable=too-many-instance-attributes
     """Class representing an Area"""
 
-    def __init__(self, index: int, elk: Elk):
+    def __init__(self, index: int, elk: Elk) -> None:
         super().__init__(index, elk)
         self.armed_status: str | None = None
         self.arm_up_state: str | None = None
@@ -54,7 +54,7 @@ class Area(Element):  # pylint: disable=too-many-instance-attributes
 class Areas(Elements):
     """Handling for multiple areas"""
 
-    def __init__(self, elk: Elk):
+    def __init__(self, elk: Elk) -> None:
         super().__init__(elk, Area, Max.AREAS.value)
         elk.add_handler("AM", self._am_handler)
         elk.add_handler("AS", self._as_handler)
@@ -97,7 +97,7 @@ class Areas(Elements):
         area.setattr("is_exit", is_exit, True)
 
     # ElkM1 global setting G35 must be set for LD messages to be sent
-    def _ld_handler(self, area: int, log: dict[str, Any]):
+    def _ld_handler(self, area: int, log: dict[str, Any]) -> None:
         if log["event"] in [1173, 1174]:
             # arm/disarm log (YAGNI - decode number for more log types when needed)
             log["user_number"] = log["number"]

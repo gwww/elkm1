@@ -11,7 +11,7 @@ from .message import al_encode, as_encode, az_encode, dm_encode, zb_encode
 class Area(Element):  # pylint: disable=too-many-instance-attributes
     """Class representing an Area"""
 
-    def __init__(self, index, elk):
+    def __init__(self, index: int, elk: Elk):
         super().__init__(index, elk)
         self.armed_status: str | None = None
         self.arm_up_state: str | None = None

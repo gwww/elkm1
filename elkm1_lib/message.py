@@ -158,7 +158,7 @@ class MessageDecode:
             "keypad": int(msg[19:21]) - 1,
         }
 
-    def _ie_decode(self, _msg: str) -> dict[str, str]:
+    def _ie_decode(self, msg: str) -> dict[str, str]:
         """IE: Installer mode exited."""
         return {}
 

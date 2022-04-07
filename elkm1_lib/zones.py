@@ -77,7 +77,7 @@ class Zones(Elements):
             zone.setattr("triggered_alarm", alarm_status[zone.index] != "0", True)
 
     def _lw_handler(
-        self, _keypad_temps: list[int], zone_temps: list[int]
+        self, keypad_temps: list[int], zone_temps: list[int]
     ) -> None:  # pylint: disable=unused-argument
         for i in range(16):
             zone = self.elements[i]
@@ -89,7 +89,7 @@ class Zones(Elements):
             self.elements[device].setattr("temperature", temperature, True)
 
     def _zb_handler(
-        self, zone_number: int, _zone_bypassed: bool
+        self, zone_number: int, zone_bypassed: bool
     ) -> None:  # pylint: disable=unused-argument
         # If specific zone number was specified, then a ZC (zone change)
         # message will be received to update the bypass state.

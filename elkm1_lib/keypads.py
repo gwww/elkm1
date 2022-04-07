@@ -61,7 +61,7 @@ class Keypads(Elements):
             name = ""
         self.elements[keypad].setattr("last_keypress", (name, key), True)
 
-    def _lw_handler(self, keypad_temps: list[int], _zone_temps: list[int]) -> None:  # pylint: disable=unused-argument
+    def _lw_handler(self, keypad_temps: list[int], zone_temps: list[int]) -> None:  # pylint: disable=unused-argument
         for keypad in self.elements:
             if keypad_temps[keypad.index] > -40:
                 keypad.setattr("temperature", keypad_temps[keypad.index], True)

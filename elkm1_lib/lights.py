@@ -42,7 +42,7 @@ class Lights(Elements):
         self.get_descriptions(TextDescriptions.LIGHT.value)
 
     def _pc_handler(
-        self, _housecode: str, index: int, light_level: int
+        self, housecode: str, index: int, light_level: int
     ) -> None:  # pylint: disable=unused-argument
         self.elements[index].setattr("status", light_level, True)
 

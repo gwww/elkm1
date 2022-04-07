@@ -1,6 +1,12 @@
 """Utility functions"""
 
+from __future__ import annotations
+
 import ssl
+from typing import Tuple
+
+from .elk import Elk
+from .users import Users
 
 TLS_VERSIONS = {
     # Unfortunately M1XEP does not support auto-negotiation for TLS
@@ -16,34 +22,36 @@ TLS_VERSIONS = {
 }
 
 
-def url_scheme_is_secure(url):
+def url_scheme_is_secure(url: str) -> bool:
     """Check if the URL is one that requires SSL/TLS."""
     scheme, _dest = url.split("://")
     return scheme.startswith("elks")
 
 
-def parse_url(url):
-    """Parse a Elk connection string """
+def parse_url(url: str) -> Tuple[str, str, int, ssl.SSLContext | None]:
+    """Parse a Elk connection string"""
     scheme, dest = url.split("://")
     host = None
     ssl_context = None
     if scheme == "elk":
-        host, port = dest.split(":") if ":" in dest else (dest, 2101)
+        host, port = dest.split(":") if ":" in dest else (dest, "2101")
     elif TLS_VERSIONS.get(scheme):
-        host, port = dest.split(":") if ":" in dest else (dest, 2601)
+        host, port = dest.split(":") if ":" in dest else (dest, "2601")
         ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS)
-        ssl_context.minimum_version = TLS_VERSIONS.get(scheme)
-        ssl_context.maximum_version = TLS_VERSIONS.get(scheme)
+        if tls := TLS_VERSIONS.get(scheme):
+            ssl_context.minimum_version = tls
+            ssl_context.maximum_version = tls
+
         ssl_context.verify_mode = ssl.CERT_NONE
         scheme = "elks"
     elif scheme == "serial":
-        host, port = dest.split(":") if ":" in dest else (dest, 115200)
+        host, port = dest.split(":") if ":" in dest else (dest, "115200")
     else:
         raise ValueError("Invalid scheme '%s'" % scheme)
     return (scheme, host, int(port), ssl_context)
 
 
-def pretty_const(value):
+def pretty_const(value: str) -> str:
     """Make a constant pretty for printing in GUI"""
     words = value.split("_")
     pretty = words[0].capitalize()
@@ -52,10 +60,12 @@ def pretty_const(value):
     return pretty
 
 
-def username(elk, user_number):
+def username(elk: Elk, user_number: int) -> str:
     """Return name of user."""
-    if 0 <= user_number < elk.users.max_elements:
-        return elk.users[user_number].name
+    users: Users = getattr(elk, "users")
+    if 0 <= user_number < users.max_elements:
+        return users[user_number].name
+
     if user_number == 201:
         return "*Program*"
     if user_number == 202:

@@ -6,7 +6,8 @@ from __future__ import annotations
 
 import re
 from abc import abstractmethod
-from typing import Any, Callable, Dict, Iterable, List, Type
+from collections.abc import Callable, Iterable
+from typing import Any, Dict, List, Type
 
 from .const import TextDescriptions
 from .elk import Elk

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import ssl
-from typing import Tuple
 
 from .elk import Elk
 from .users import Users
@@ -28,7 +27,7 @@ def url_scheme_is_secure(url: str) -> bool:
     return scheme.startswith("elks")
 
 
-def parse_url(url: str) -> Tuple[str, str, int, ssl.SSLContext | None]:
+def parse_url(url: str) -> tuple[str, str, int, ssl.SSLContext | None]:
     """Parse a Elk connection string"""
     scheme, dest = url.split("://")
     host = None

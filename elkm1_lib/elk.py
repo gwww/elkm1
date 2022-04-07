@@ -33,7 +33,7 @@ class Elk:  # pylint: disable=too-many-instance-attributes
         self._connection: Optional[Connection] = None
         self._connection_retry_time = 1
         self._message_decode = MessageDecode()
-        self._reconnect_task = None
+        self._reconnect_task: Optional[asyncio.TimerHandle] = None
 
         # Setup for all the types of elements tracked
         if "element_list" in config:

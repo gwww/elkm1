@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, cast
+from typing import Any, cast
 
 from .const import ArmedStatus, Max, TextDescriptions
 from .elements import Element, Elements
@@ -100,7 +100,7 @@ class Areas(Elements):
         area.setattr("is_exit", is_exit, True)
 
     # ElkM1 global setting G35 must be set for LD messages to be sent
-    def _ld_handler(self, area: int, log: Dict[str, Any]) -> None:
+    def _ld_handler(self, area: int, log: dict[str, Any]) -> None:
         if log["event"] in [1173, 1174]:
             # arm/disarm log (YAGNI - decode number for more log types when needed)
             log["user_number"] = log["number"]

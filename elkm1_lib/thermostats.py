@@ -1,13 +1,17 @@
 """Definition of an ElkM1 Thermostat"""
+
+from __future__ import annotations
+
 from .const import Max, TextDescriptions
 from .elements import Element, Elements
+from .elk import Elk
 from .message import tr_encode, ts_encode
 
 
 class Thermostat(Element):
     """Class representing an Thermostat"""
 
-    def __init__(self, index, elk):  # pylint: disable=useless-super-delegation
+    def __init__(self, index: int, elk: Elk) -> None:  # pylint: disable=useless-super-delegation
         super().__init__(index, elk)
         self.mode = 0
         self.hold = False
@@ -17,7 +21,7 @@ class Thermostat(Element):
         self.cool_setpoint = 0
         self.humidity = 0
 
-    def set(self, element_to_set, value):
+    def set(self, element_to_set: int, value: int) -> None:
         """(Helper) Set thermostat"""
         self._elk.send(ts_encode(self.index, value, element_to_set))
 
@@ -25,37 +29,37 @@ class Thermostat(Element):
 class Thermostats(Elements):
     """Handling for multiple areas"""
 
-    def __init__(self, elk):
+    def __init__(self, elk: Elk) -> None:
         super().__init__(elk, Thermostat, Max.THERMOSTATS.value)
         elk.add_handler("ST", self._st_handler)
         elk.add_handler("TR", self._tr_handler)
 
-    def sync(self):
+    def sync(self) -> None:
         """Retrieve areas from ElkM1"""
         self.get_descriptions(TextDescriptions.THERMOSTAT.value)
 
-    def _got_desc(self, descriptions, desc_type):
+    def _got_desc(self, descriptions: list[str | None], desc_type: int) -> None:
         super()._got_desc(descriptions, desc_type)
         # Only poll thermostats that have a name defined
         for thermostat in self.elements:
             if not thermostat.is_default_name():
                 self.elk.send(tr_encode(thermostat.index))
 
-    def _st_handler(self, group, device, temperature):
+    def _st_handler(self, group: int, device: int, temperature: int) -> None:
         if group == 2:
             self.elements[device].setattr("current_temp", temperature, True)
 
     def _tr_handler(
         self,
-        thermostat_index,
-        mode,
-        hold,
-        fan,
-        current_temp,
-        heat_setpoint,
-        cool_setpoint,
-        humidity,
-    ):  # pylint: disable=too-many-arguments
+        thermostat_index: int,
+        mode: int,
+        hold: bool,
+        fan: int,
+        current_temp: int,
+        heat_setpoint: int,
+        cool_setpoint: int,
+        humidity: int,
+    ) -> None:  # pylint: disable=too-many-arguments
         thermostat = self.elements[thermostat_index]
         thermostat.setattr("mode", mode, False)
         thermostat.setattr("hold", hold, False)

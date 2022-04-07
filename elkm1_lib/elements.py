@@ -2,6 +2,8 @@
   Base of all the elements found on the Elk panel... Zone, Keypad, etc.
 """
 
+from __future__ import annotations
+
 import re
 from abc import abstractmethod
 from typing import Any, Callable, Dict, Iterable, List, Type
@@ -36,7 +38,9 @@ class Element:
         """Callbacks when attribute of element changes"""
         self._callbacks.append(callback)
 
-    def remove_callback(self, callback: Callable[[Element, Dict[str, Any]], None]) -> None:
+    def remove_callback(
+        self, callback: Callable[[Element, Dict[str, Any]], None]
+    ) -> None:
         """Callbacks when attribute of element changes"""
         if callback in self._callbacks:
             self._callbacks.remove(callback)
@@ -47,7 +51,9 @@ class Element:
             callback(self, self._changeset)
         self._changeset = {}
 
-    def setattr(self, attr: str, new_value: Any, close_the_changeset: bool = True) -> None:
+    def setattr(
+        self, attr: str, new_value: Any, close_the_changeset: bool = True
+    ) -> None:
         """If attribute value has changed then set it and call the callbacks"""
         existing_value: Any = getattr(self, attr, None)
         if existing_value != new_value:
@@ -88,7 +94,9 @@ class Elements:
         self.max_elements = max_elements
         self.elements = [class_(i, elk) for i in range(max_elements)]
 
-        self._get_description_state: tuple[int, int, List[str | None], Callable[[List[str | None], int], None]] | None = None
+        self._get_description_state: tuple[
+            int, int, List[str | None], Callable[[List[str | None], int], None]
+        ] | None = None
         # self._get_description_state = (desc_type, count, results, self._got_desc)
         elk.add_handler("SD", self._sd_handler)
 
@@ -100,7 +108,7 @@ class Elements:
         return self.elements[key]
 
     def _sd_handler(
-            self, desc_type: int, unit: int, desc: str, show_on_keypad: bool
+        self, desc_type: int, unit: int, desc: str, show_on_keypad: bool
     ) -> None:  # pylint: disable=unused-argument
         if not self._get_description_state:
             return

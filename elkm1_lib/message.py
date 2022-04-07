@@ -242,7 +242,7 @@ class MessageDecode:
         """SS: System status."""
         return {"system_trouble_status": msg[4:-2]}
 
-    def _st_decode(self, msg: str) -> dict[str, Any]:
+    def _st_decode(self, msg: str) -> dict[str, int]:
         """ST: Temperature update."""
         group = int(msg[4:5])
         temperature = int(msg[7:10])

@@ -1,6 +1,6 @@
 """Definition of an ElkM1 Area"""
 
-from typing import Any
+from typing import Any, Dict
 
 from .const import ArmedStatus, Max, TextDescriptions
 from .elements import Element, Elements
@@ -17,9 +17,9 @@ class Area(Element):  # pylint: disable=too-many-instance-attributes
         self.arm_up_state: str | None = None
         self.alarm_state: str | None = None
         self.alarm_memory: str | None = None
-        self.is_exit: bool = False
-        self.timer1: int = 0
-        self.timer2: int = 0
+        self.is_exit = False
+        self.timer1 = 0
+        self.timer2 = 0
         self.last_log: str | None = None
 
     def is_armed(self) -> bool:
@@ -97,7 +97,7 @@ class Areas(Elements):
         area.setattr("is_exit", is_exit, True)
 
     # ElkM1 global setting G35 must be set for LD messages to be sent
-    def _ld_handler(self, area: int, log: dict[str, Any]) -> None:
+    def _ld_handler(self, area: int, log: Dict[str, Any]) -> None:
         if log["event"] in [1173, 1174]:
             # arm/disarm log (YAGNI - decode number for more log types when needed)
             log["user_number"] = log["number"]

@@ -7,7 +7,7 @@ from __future__ import annotations
 import re
 from abc import abstractmethod
 from collections.abc import Callable, Iterable
-from typing import Any, Dict, List, Type
+from typing import Any, Type
 
 from .const import TextDescriptions
 from .elk import Elk
@@ -20,9 +20,9 @@ class Element:
     def __init__(self, index: int, elk: Elk) -> None:
         self._index = index
         self._elk = elk
-        self._callbacks: List[Callable[[Element, Dict[str, Any]], None]] = []
+        self._callbacks: list[Callable[[Element, dict[str, Any]], None]] = []
         self.name: str = self.default_name()
-        self._changeset: Dict[str, Any] = {}
+        self._changeset: dict[str, Any] = {}
         self._configured: bool = False
 
     @property
@@ -35,12 +35,12 @@ class Element:
         """If a callback has ever been triggered this will be true."""
         return self._configured
 
-    def add_callback(self, callback: Callable[[Element, Dict[str, Any]], None]) -> None:
+    def add_callback(self, callback: Callable[[Element, dict[str, Any]], None]) -> None:
         """Callbacks when attribute of element changes"""
         self._callbacks.append(callback)
 
     def remove_callback(
-        self, callback: Callable[[Element, Dict[str, Any]], None]
+        self, callback: Callable[[Element, dict[str, Any]], None]
     ) -> None:
         """Callbacks when attribute of element changes"""
         if callback in self._callbacks:
@@ -81,7 +81,7 @@ class Element:
         varstr = " ".join("%s:%s" % item for item in varlist)
         return f"{self._index} '{self.name}' {varstr}"
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> dict[str, Any]:
         """Package up the public attributes as a dict."""
         attrs = vars(self)
         return {key: attrs[key] for key in attrs if not key.startswith("_")}
@@ -96,7 +96,7 @@ class Elements:
         self.elements = [class_(i, elk) for i in range(max_elements)]
 
         self._get_description_state: tuple[
-            int, int, List[str | None], Callable[[List[str | None], int], None]
+            int, int, list[str | None], Callable[[list[str | None], int], None]
         ] | None = None
         # self._get_description_state = (desc_type, count, results, self._got_desc)
         elk.add_handler("SD", self._sd_handler)
@@ -124,7 +124,7 @@ class Elements:
             results[unit] = desc
             self.elk.send(sd_encode(desc_type, unit + 1))
 
-    def _got_desc(self, descriptions: List[str | None], desc_type: int) -> None:
+    def _got_desc(self, descriptions: list[str | None], desc_type: int) -> None:
         # Elk reports descriptions for all 199 users, irregardless of how many
         # are configured. Only set configured for those that are really there.
         if desc_type == TextDescriptions.USER.value[0]:
@@ -145,7 +145,7 @@ class Elements:
     def get_descriptions(self, description_type: tuple[int, int]) -> None:
         """Gets the descriptions for specified type."""
         (desc_type, count) = description_type
-        results: List[str | None] = [None] * count
+        results: list[str | None] = [None] * count
         self._get_description_state = (desc_type, count, results, self._got_desc)
         self.elk.send(sd_encode(desc_type, 0))
 

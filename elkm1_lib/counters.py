@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import List
-
 from .const import Max, TextDescriptions
 from .elements import Element, Elements
 from .message import cv_encode, cx_encode
@@ -37,7 +35,7 @@ class Counters(Elements):
         """Retrieve values from ElkM1 on demand"""
         self.get_descriptions(TextDescriptions.COUNTER.value)
 
-    def _got_desc(self, descriptions: List[str | None], desc_type: int) -> None:
+    def _got_desc(self, descriptions: list[str | None], desc_type: int) -> None:
         super()._got_desc(descriptions, desc_type)
         # Only poll counters that have a name defined
         for counter in self.elements:

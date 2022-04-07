@@ -1,6 +1,8 @@
 """Definition of an ElkM1 Area"""
 
-from typing import Any, Dict
+from __future__ import annotations
+
+from typing import Any, Dict, cast
 
 from .const import ArmedStatus, Max, TextDescriptions
 from .elements import Element, Elements
@@ -75,6 +77,7 @@ class Areas(Elements):
     ) -> None:
         update_alarm_triggers = False
         for area in self.elements:
+            area = cast(Area, area)
             area.setattr("armed_status", armed_statuses[area.index], False)
             area.setattr("arm_up_state", arm_up_states[area.index], False)
             if (
@@ -90,7 +93,7 @@ class Areas(Elements):
     def _ee_handler(
         self, msg_area: int, is_exit: bool, timer1: int, timer2: int, armed_status: str
     ) -> None:  # pylint: disable=too-many-arguments
-        area: Area = self.elements[msg_area]
+        area: Area = cast(Area, self.elements[msg_area])
         area.setattr("armed_status", armed_status, False)
         area.setattr("timer1", timer1, False)
         area.setattr("timer2", timer2, False)

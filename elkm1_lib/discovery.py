@@ -4,7 +4,8 @@ import socket
 import time
 from dataclasses import dataclass
 from struct import unpack
-from typing import Callable, Dict, List, Optional, Tuple
+from typing import Optional, cast
+from collections.abc import Callable
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -30,14 +31,14 @@ def create_udp_socket(discovery_port: int) -> socket.socket:
 class ELKDiscovery(asyncio.DatagramProtocol):
     def __init__(
         self,
-        destination: Tuple[str, int],
-        on_response: Callable[[bytes, Tuple[str, int]], None],
+        destination: tuple[str, int],
+        on_response: Callable[[bytes, tuple[str, int]], None],
     ) -> None:
         self.transport = None
         self.destination = destination
         self.on_response = on_response
 
-    def datagram_received(self, data: bytes, addr: Tuple[str, int]) -> None:
+    def datagram_received(self, data: bytes, addr: tuple[str, int]) -> None:
         """Trigger on_response."""
         self.on_response(data, addr)
 
@@ -49,7 +50,7 @@ class ELKDiscovery(asyncio.DatagramProtocol):
         """Do nothing on connection lost."""
 
 
-def _decode_data(raw_response):
+def _decode_data(raw_response: bytes) -> ElkSystem:
     """Decode an ELK discovery response packet."""
     remain = raw_response[5:]
     data = remain[:14]
@@ -87,9 +88,9 @@ class AIOELKDiscovery:
     BROADCAST_ADDRESS = "<broadcast>"
 
     def __init__(self) -> None:
-        self.found_devices: List[ElkSystem] = []
+        self.found_devices: list[ElkSystem] = []
 
-    def _destination_from_address(self, address: Optional[str]) -> Tuple[str, int]:
+    def _destination_from_address(self, address: Optional[str]) -> tuple[str, int]:
         if address is None:
             address = self.BROADCAST_ADDRESS
         return (address, self.DISCOVERY_PORT)
@@ -97,9 +98,9 @@ class AIOELKDiscovery:
     def _process_response(
         self,
         data: Optional[bytes],
-        from_address: Tuple[str, int],
+        from_address: tuple[str, int],
         address: Optional[str],
-        response_list: Dict[str, ELKDiscovery],
+        response_list: dict[tuple[str, int], ElkSystem],
     ) -> bool:
         """Process a response.
 
@@ -110,7 +111,7 @@ class AIOELKDiscovery:
             or data == self.DISCOVER_MESSAGE
             or not data.startswith(b"M1XEP")
         ):
-            return
+            return False
         try:
             response_list[from_address] = _decode_data(data)
         except Exception as ex:  # pylint: disable=broad-except
@@ -121,7 +122,7 @@ class AIOELKDiscovery:
     async def _async_run_scan(
         self,
         transport: asyncio.DatagramTransport,
-        destination: Tuple[str, int],
+        destination: tuple[str, int],
         timeout: int,
         found_all_future: "asyncio.Future[bool]",
     ) -> None:
@@ -129,7 +130,7 @@ class AIOELKDiscovery:
         _LOGGER.debug("discover: %s => %s", destination, self.DISCOVER_MESSAGE)
         transport.sendto(self.DISCOVER_MESSAGE, destination)
         quit_time = time.monotonic() + timeout
-        remain_time = timeout
+        remain_time = float(timeout)
         while True:
             time_out = min(remain_time, timeout / self.BROADCAST_FREQUENCY)
             if time_out <= 0:
@@ -150,14 +151,14 @@ class AIOELKDiscovery:
 
     async def async_scan(
         self, timeout: int = 10, address: Optional[str] = None
-    ) -> List[ELKDiscovery]:
+    ) -> list[ElkSystem]:
         """Discover ELK devices."""
         sock = create_udp_socket(self.DISCOVERY_PORT)
         destination = self._destination_from_address(address)
-        found_all_future = asyncio.Future()
-        response_list = {}
+        found_all_future: asyncio.Future = asyncio.Future()
+        response_list: dict[tuple[str, int], ElkSystem] = {}
 
-        def _on_response(data: bytes, addr: Tuple[str, int]) -> None:
+        def _on_response(data: bytes, addr: tuple[str, int]) -> None:
             _LOGGER.debug("discover: %s <= %s", addr, data)
             if self._process_response(data, addr, address, response_list):
                 found_all_future.set_result(True)
@@ -171,7 +172,7 @@ class AIOELKDiscovery:
         )
         try:
             await self._async_run_scan(
-                transport, destination, timeout, found_all_future
+                cast(asyncio.DatagramTransport, transport), destination, timeout, found_all_future
             )
         finally:
             transport.close()

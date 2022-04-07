@@ -16,16 +16,19 @@ conversion is encapsulated in this module.
 """
 
 from __future__ import annotations
+
 import datetime as dt
 import re
 import time
 from collections import namedtuple
-from typing import Any, Callable, Dict, List, Tuple, cast
+from collections.abc import Callable
+from typing import Any, cast
 
 from .const import Max
 
 MessageEncode = namedtuple("MessageEncode", ["message", "response_command"])
-MsgHandler = Callable[[Dict[str, Any]], None]
+# MsgHandler = Callable[[dict[str, Any]], None] # Gives type error
+MsgHandler = Callable[..., None]
 
 # pylint: disable=no-self-use
 class MessageDecode:
@@ -33,7 +36,7 @@ class MessageDecode:
 
     def __init__(self) -> None:
         """Initialize a new Message instance."""
-        self._handlers: Dict[str, List[MsgHandler]] = {}
+        self._handlers: dict[str, list[MsgHandler]] = {}
 
     def add_handler(self, message_type: str, handler: MsgHandler) -> None:
         """Add callback for handlers."""
@@ -50,7 +53,7 @@ class MessageDecode:
         if handler in self._handlers[message_type]:
             self._handlers[message_type].remove(handler)
 
-    def call_handlers(self, cmd: str, decoded_msg: Dict[str, Any]) -> None:
+    def call_handlers(self, cmd: str, decoded_msg: dict[str, Any]) -> None:
         """Call the message handlers."""
         # Copy the handlers list as add/remove could be
         # called when invoking the handlers
@@ -83,11 +86,11 @@ class MessageDecode:
         else:
             raise ValueError(error_msg)
 
-    def _am_decode(self, msg: str) -> Dict[str, str]:
+    def _am_decode(self, msg: str) -> dict[str, str]:
         """AM: Alarm memory by area report."""
         return {"alarm_memory": msg[4 : 4 + Max.AREAS.value]}
 
-    def _as_decode(self, msg: str) -> Dict[str, str]:
+    def _as_decode(self, msg: str) -> dict[str, str]:
         """AS: Arming status report."""
         return {
             "armed_statuses": msg[4:12],
@@ -95,20 +98,20 @@ class MessageDecode:
             "alarm_states": msg[20:28],
         }
 
-    def _az_decode(self, msg: str) -> Dict[str, str]:
+    def _az_decode(self, msg: str) -> dict[str, str]:
         """AZ: Alarm by zone report."""
         return {"alarm_status": msg[4 : 4 + Max.ZONES.value]}
 
-    def _cr_one_custom_value_decode(self, index: int, part: str) -> Dict[str, Any]:
+    def _cr_one_custom_value_decode(self, index: int, part: str) -> dict[str, Any]:
         value = int(part[0:5])
         value_format = int(part[5])
         if value_format == 2:
-            ret: int | Tuple[int, int] = ((value >> 8) & 0xFF, value & 0xFF)
+            ret: int | tuple[int, int] = ((value >> 8) & 0xFF, value & 0xFF)
         else:
             ret = value
         return {"index": index, "value": ret, "value_format": value_format}
 
-    def _cr_decode(self, msg: str) -> Dict[str, Any]:
+    def _cr_decode(self, msg: str) -> dict[str, Any]:
         """CR: Custom values"""
         if int(msg[4:6]) > 0:
             index = int(msg[4:6]) - 1
@@ -121,20 +124,20 @@ class MessageDecode:
             part += 6
         return {"values": ret}
 
-    def _cc_decode(self, msg: str) -> Dict[str, Any]:
+    def _cc_decode(self, msg: str) -> dict[str, Any]:
         """CC: Output status for single output."""
         return {"output": int(msg[4:7]) - 1, "output_status": msg[7] == "1"}
 
-    def _cs_decode(self, msg: str) -> Dict[str, Any]:
+    def _cs_decode(self, msg: str) -> dict[str, Any]:
         """CS: Output status for all outputs."""
         output_status = [x == "1" for x in msg[4 : 4 + Max.OUTPUTS.value]]
         return {"output_status": output_status}
 
-    def _cv_decode(self, msg: str) -> Dict[str, Any]:
+    def _cv_decode(self, msg: str) -> dict[str, Any]:
         """CV: Counter value."""
         return {"counter": int(msg[4:6]) - 1, "value": int(msg[6:11])}
 
-    def _ee_decode(self, msg: str) -> Dict[str, Any]:
+    def _ee_decode(self, msg: str) -> dict[str, Any]:
         """EE: Entry/exit timer report."""
         return {
             "area": int(msg[4:5]) - 1,
@@ -144,7 +147,7 @@ class MessageDecode:
             "armed_status": msg[12:13],
         }
 
-    def _ic_decode(self, msg: str) -> Dict[str, Any]:
+    def _ic_decode(self, msg: str) -> dict[str, Any]:
         """IC: Send Valid Or Invalid User Code Format."""
         code = msg[4:16]
         if re.match(r"(0\d){6}", code):
@@ -155,19 +158,19 @@ class MessageDecode:
             "keypad": int(msg[19:21]) - 1,
         }
 
-    def _ie_decode(self, _msg: str) -> Dict[str, str]:
+    def _ie_decode(self, _msg: str) -> dict[str, str]:
         """IE: Installer mode exited."""
         return {}
 
-    def _ka_decode(self, msg: str) -> Dict[str, Any]:
+    def _ka_decode(self, msg: str) -> dict[str, Any]:
         """KA: Keypad areas for all keypads."""
         return {"keypad_areas": [ord(x) - 0x31 for x in msg[4 : 4 + Max.KEYPADS.value]]}
 
-    def _kc_decode(self, msg: str) -> Dict[str, Any]:
+    def _kc_decode(self, msg: str) -> dict[str, Any]:
         """KC: Keypad key change."""
         return {"keypad": int(msg[4:6]) - 1, "key": int(msg[6:8])}
 
-    def _ld_decode(self, msg: str) -> Dict[str, Any]:
+    def _ld_decode(self, msg: str) -> dict[str, Any]:
         """LD: System Log Data Update."""
         area = int(msg[11]) - 1
         hour = int(msg[12:14])
@@ -179,7 +182,7 @@ class MessageDecode:
         log_local_time = time.mktime(log_local_datetime.timetuple())
         log_gm_timestruct = time.gmtime(log_local_time)
 
-        log: Dict[str, Any] = {}
+        log: dict[str, Any] = {}
         log["event"] = int(msg[4:8])
         log["number"] = int(msg[8:11])
         log["index"] = int(msg[20:23])
@@ -189,7 +192,7 @@ class MessageDecode:
 
         return {"area": area, "log": log}
 
-    def _lw_decode(self, msg: str) -> Dict[str, Any]:
+    def _lw_decode(self, msg: str) -> dict[str, Any]:
         """LW: temperatures from all keypads and zones 1-16."""
         keypad_temps = []
         zone_temps = []
@@ -198,7 +201,7 @@ class MessageDecode:
             zone_temps.append(int(msg[52 + 3 * i : 55 + 3 * i]) - 60)
         return {"keypad_temps": keypad_temps, "zone_temps": zone_temps}
 
-    def _pc_decode(self, msg: str) -> Dict[str, Any]:
+    def _pc_decode(self, msg: str) -> dict[str, Any]:
         """PC: PLC (lighting) change."""
         housecode = msg[4:7]
         return {
@@ -207,22 +210,22 @@ class MessageDecode:
             "light_level": int(msg[7:9]),
         }
 
-    def _ps_decode(self, msg: str) -> Dict[str, Any]:
+    def _ps_decode(self, msg: str) -> dict[str, Any]:
         """PS: PLC (lighting) status."""
         return {
             "bank": ord(msg[4]) - 0x30,
             "statuses": [ord(x) - 0x30 for x in msg[5:69]],
         }
 
-    def _rp_decode(self, msg: str) -> Dict[str, int]:
+    def _rp_decode(self, msg: str) -> dict[str, int]:
         """RP: Remote programming status."""
         return {"remote_programming_status": int(msg[4:6])}
 
-    def _rr_decode(self, msg: str) -> Dict[str, str]:
+    def _rr_decode(self, msg: str) -> dict[str, str]:
         """RR: Realtime clock."""
         return {"real_time_clock": msg[4:20]}
 
-    def _sd_decode(self, msg: str) -> Dict[str, Any]:
+    def _sd_decode(self, msg: str) -> dict[str, Any]:
         """SD: Description text."""
         desc_ch1 = msg[9]
         show_on_keypad = ord(desc_ch1) >= 0x80
@@ -235,11 +238,11 @@ class MessageDecode:
             "show_on_keypad": show_on_keypad,
         }
 
-    def _ss_decode(self, msg: str) -> Dict[str, str]:
+    def _ss_decode(self, msg: str) -> dict[str, str]:
         """SS: System status."""
         return {"system_trouble_status": msg[4:-2]}
 
-    def _st_decode(self, msg: str) -> Dict[str, Any]:
+    def _st_decode(self, msg: str) -> dict[str, Any]:
         """ST: Temperature update."""
         group = int(msg[4:5])
         temperature = int(msg[7:10])
@@ -249,11 +252,11 @@ class MessageDecode:
             temperature -= 40
         return {"group": group, "device": int(msg[5:7]) - 1, "temperature": temperature}
 
-    def _tc_decode(self, msg: str) -> Dict[str, int]:
+    def _tc_decode(self, msg: str) -> dict[str, int]:
         """TC: Task change."""
         return {"task": int(msg[4:7]) - 1}
 
-    def _tr_decode(self, msg: str) -> Dict[str, Any]:
+    def _tr_decode(self, msg: str) -> dict[str, Any]:
         """TR: Thermostat data response."""
         return {
             "thermostat_index": int(msg[4:6]) - 1,
@@ -266,7 +269,7 @@ class MessageDecode:
             "humidity": int(msg[15:17]),
         }
 
-    def _ua_decode(self, msg: str) -> Dict[str, Any]:
+    def _ua_decode(self, msg: str) -> dict[str, Any]:
         """UA: Valid User Code Areas."""
         return {
             "user_code": int(msg[4:10]),
@@ -277,7 +280,7 @@ class MessageDecode:
             "temperature_units": msg[22],
         }
 
-    def _vn_decode(self, msg: str) -> Dict[str, str]:
+    def _vn_decode(self, msg: str) -> dict[str, str]:
         """VN: Version information."""
         elkm1_version = f"{int(msg[4:6], 16)}.{int(msg[6:8], 16)}.{int(msg[8:10], 16)}"
         xep_version = (
@@ -285,39 +288,39 @@ class MessageDecode:
         )
         return {"elkm1_version": elkm1_version, "xep_version": xep_version}
 
-    def _xk_decode(self, msg: str) -> Dict[str, str]:
+    def _xk_decode(self, msg: str) -> dict[str, str]:
         """XK: Ethernet Test."""
         return {"real_time_clock": msg[4:20]}
 
-    def _zb_decode(self, msg: str) -> Dict[str, Any]:
+    def _zb_decode(self, msg: str) -> dict[str, Any]:
         """ZB: Zone bypass report."""
         return {"zone_number": int(msg[4:7]) - 1, "zone_bypassed": msg[7] == "1"}
 
-    def _zc_decode(self, msg: str) -> Dict[str, Any]:
+    def _zc_decode(self, msg: str) -> dict[str, Any]:
         """ZC: Zone Change."""
         status = _status_decode(int(msg[7:8], 16))
         return {"zone_number": int(msg[4:7]) - 1, "zone_status": status}
 
-    def _zd_decode(self, msg: str) -> Dict[str, List[int]]:
+    def _zd_decode(self, msg: str) -> dict[str, list[int]]:
         """ZD: Zone definitions."""
         zone_definitions = [ord(x) - 0x30 for x in msg[4 : 4 + Max.ZONES.value]]
         return {"zone_definitions": zone_definitions}
 
-    def _zp_decode(self, msg: str) -> Dict[str, List[int]]:
+    def _zp_decode(self, msg: str) -> dict[str, list[int]]:
         """ZP: Zone partitions."""
         zone_partitions = [ord(x) - 0x31 for x in msg[4 : 4 + Max.ZONES.value]]
         return {"zone_partitions": zone_partitions}
 
-    def _zs_decode(self, msg: str) -> Dict[str, List[Tuple[int, int]]]:
+    def _zs_decode(self, msg: str) -> dict[str, list[tuple[int, int]]]:
         """ZS: Zone statuses."""
         status = [_status_decode(int(x, 16)) for x in msg[4 : 4 + Max.ZONES.value]]
         return {"zone_statuses": status}
 
-    def _zv_decode(self, msg: str) -> Dict[str, Any]:
+    def _zv_decode(self, msg: str) -> dict[str, Any]:
         """ZV: Zone voltage."""
         return {"zone_number": int(msg[4:7]) - 1, "zone_voltage": int(msg[7:10]) / 10}
 
-    def _unknown_decode(self, msg: str) -> Dict[str, str]:
+    def _unknown_decode(self, msg: str) -> dict[str, str]:
         """Generic handler called when no specific handler exists"""
         return {"msg_code": msg[2:4], "data": msg[4:-2]}
 
@@ -350,14 +353,14 @@ def get_elk_command(line: str) -> str:
     return line[2:4]
 
 
-def _status_decode(status: int) -> Tuple[int, int]:
+def _status_decode(status: int) -> tuple[int, int]:
     """Decode a 1 byte status into logical and physical statuses."""
     logical_status = (status & 0b00001100) >> 2
     physical_status = status & 0b00000011
     return (logical_status, physical_status)
 
 
-def _is_valid_length_and_checksum(msg: str) -> Tuple[bool, str]:
+def _is_valid_length_and_checksum(msg: str) -> tuple[bool, str]:
     """Check packet length valid and that checksum is good."""
     try:
         if int(msg[:2], 16) != (len(msg) - 2):
@@ -419,10 +422,12 @@ def cr_encode(index: int) -> MessageEncode:
     return MessageEncode(f"08cr{index + 1:02}00", "CR")
 
 
-def cw_encode(index: int, value: int | Tuple[int, int], value_format: int) -> MessageEncode:
+def cw_encode(
+    index: int, value: int | tuple[int, int], value_format: int
+) -> MessageEncode:
     """cw: Write a custom value."""
     if value_format == 2:
-        x = cast(Tuple[int,int], value)
+        x = cast(tuple[int, int], value)
         enc = x[0] * 256 + x[1]
     else:
         enc = cast(int, value)
@@ -440,7 +445,7 @@ def cx_encode(counter: int, value: int) -> MessageEncode:
 
 
 def dm_encode(
-        keypad_area: int, clear: int, beep: bool, timeout: int, line1: str, line2: str
+    keypad_area: int, clear: int, beep: bool, timeout: int, line1: str, line2: str
 ) -> MessageEncode:  # pylint: disable=too-many-arguments
     """dm: Display message on keypad."""
     return MessageEncode(
@@ -459,7 +464,9 @@ def lw_encode() -> MessageEncode:
     return MessageEncode("06lw00", "LW")
 
 
-def pc_encode(index: int, function_code:int , extended_code: int, seconds: int) -> MessageEncode:
+def pc_encode(
+    index: int, function_code: int, extended_code: int, seconds: int
+) -> MessageEncode:
     """pc: Control any PLC device."""
     return MessageEncode(
         f"11pc{index_to_housecode(index)}{function_code:02}{extended_code:02}{seconds:04}00",

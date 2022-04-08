@@ -1,5 +1,10 @@
 # Python ElkM1 library
 
+[![PyPI version](https://badge.fury.io/py/elkm1_lib.svg)](https://badge.fury.io/py/elkm1_lib)
+[![CI](https://github.com/gwww/elkm1/actions/workflows/code-quality.yml/badge.svg)](https://github.com/gwww/elkm1/actions/workflows/code-quality.yml)
+[![Downloads](https://pepy.tech/badge/elkm1-lib)](https://pepy.tech/project/elkm1-lib)
+[![License](https://img.shields.io/github/license/mashape/apistatus.svg)](https://pypi.org/project/elkm1_lib/)
+
 Library for interacting with ElkM1 alarm/automation panel.
 
 https://github.com/gwww/elkm1

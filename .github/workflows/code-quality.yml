@@ -18,13 +18,15 @@ jobs:
         uses: abatilo/actions-poetry@v2.0.0
         with:
           poetry-version: ${{ matrix.poetry-version }}
-      - name: View poetry --help
-        run: poetry --help
       - name: Run poetry install
         run: poetry install
-      - name: Check poetry install
+      - name: Check poetry version
         run: poetry --version
+      - name: Check pytest version
         run: pytest --version
+      - name: Check pylint version
         run: pylint --version
+      - name: Check black version
         run: black --version
+      - name: Check mypy version
         run: mypy --version

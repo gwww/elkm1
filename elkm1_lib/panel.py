@@ -47,7 +47,7 @@ class Panel(Element):
         """(Helper) Speak phrase."""
         self._elk.send(sp_encode(phrase))
 
-    def set_time(self, datetime: Optional[dt.datetime]=None) -> None:
+    def set_time(self, datetime: Optional[dt.datetime] = None) -> None:
         """(Helper) Set the time given a datetime."""
         if datetime is None:
             struct_time = time.localtime()

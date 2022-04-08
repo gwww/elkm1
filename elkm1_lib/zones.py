@@ -1,10 +1,22 @@
 """Definition of an ElkM1 Zone"""
-from .const import (Max, TextDescriptions, ZoneLogicalStatus,
-                    ZonePhysicalStatus, ZoneType)
+from .const import (
+    Max,
+    TextDescriptions,
+    ZoneLogicalStatus,
+    ZonePhysicalStatus,
+    ZoneType,
+)
 from .elements import Element, Elements
 from .elk import Elk
-from .message import (az_encode, zb_encode, zd_encode, zp_encode, zs_encode,
-                      zt_encode, zv_encode)
+from .message import (
+    az_encode,
+    zb_encode,
+    zd_encode,
+    zp_encode,
+    zs_encode,
+    zt_encode,
+    zv_encode,
+)
 
 
 class Zone(Element):
@@ -69,9 +81,7 @@ class Zones(Elements):
         for zone in self.elements:
             zone.setattr("triggered_alarm", alarm_status[zone.index] != "0", True)
 
-    def _lw_handler(
-        self, keypad_temps: list[int], zone_temps: list[int]
-    ) -> None:
+    def _lw_handler(self, keypad_temps: list[int], zone_temps: list[int]) -> None:
         for i in range(16):
             zone = self.elements[i]
             if zone_temps[zone.index] > -60:
@@ -81,9 +91,7 @@ class Zones(Elements):
         if group == 0:
             self.elements[device].setattr("temperature", temperature, True)
 
-    def _zb_handler(
-        self, zone_number: int, zone_bypassed: bool
-    ) -> None:
+    def _zb_handler(self, zone_number: int, zone_bypassed: bool) -> None:
         # If specific zone number was specified, then a ZC (zone change)
         # message will be received to update the bypass state.
         # If zone was 000 or 999 then we don't know which area was bypassed or

@@ -78,7 +78,9 @@ class Element:
             for (k, v) in vars(self).items()
             if not k.startswith("_") and k != "name"
         }.items()
-        varstr = " ".join("%s:%s" % item for item in varlist) # pylint: disable=consider-using-f-string
+        varstr = " ".join(
+            "%s:%s" % item for item in varlist
+        )  # pylint: disable=consider-using-f-string
         return f"{self._index} '{self.name}' {varstr}"
 
     def as_dict(self) -> dict[str, Any]:

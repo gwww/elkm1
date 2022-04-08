@@ -41,9 +41,7 @@ class Lights(Elements):
             self.elk.send(ps_encode(i))
         self.get_descriptions(TextDescriptions.LIGHT.value)
 
-    def _pc_handler(
-        self, housecode: str, index: int, light_level: int
-    ) -> None:
+    def _pc_handler(self, housecode: str, index: int, light_level: int) -> None:
         self.elements[index].setattr("status", light_level, True)
 
     def _ps_handler(self, bank: int, statuses: list[int]) -> None:

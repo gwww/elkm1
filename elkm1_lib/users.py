@@ -8,7 +8,9 @@ from .elk import Elk
 class User(Element):
     """Class representing an User"""
 
-    def __init__(self, index: int, elk: Elk) -> None:  # pylint: disable=useless-super-delegation
+    def __init__(
+        self, index: int, elk: Elk
+    ) -> None:  # pylint: disable=useless-super-delegation
         super().__init__(index, elk)
 
 

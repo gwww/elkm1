@@ -29,7 +29,7 @@ class MyApp:
     def disconnected(self):
         """The ElkM1 panel has disconnect."""
         print("Disconnected!!!")
-        exit(0) # Just exit since this is a demo, might want to try and reconnect.
+        exit(0)  # Just exit since this is a demo, might want to try and reconnect.
 
     def connected(self):
         """The ElkM1 is connected - we can communicate with the panel now!"""

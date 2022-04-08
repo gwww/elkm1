@@ -178,7 +178,10 @@ class AIOELKDiscovery:
         )
         try:
             await self._async_run_scan(
-                cast(asyncio.DatagramTransport, transport), destination, timeout, found_all_future
+                cast(asyncio.DatagramTransport, transport),
+                destination,
+                timeout,
+                found_all_future,
             )
         finally:
             transport.close()

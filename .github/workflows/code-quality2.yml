@@ -49,22 +49,22 @@ jobs:
           source .venv/bin/activate
           poetry --version
 
-      - name: Check pylint version
+      - name: Run pylint
         run: |
           source .venv/bin/activate
           pylint elkm1_lib
 
-      - name: Check black version
+      - name: Run black
         run: |
           source .venv/bin/activate
           black --check .
 
-      - name: Check mypy version
+      - name: Run mypy
         run: |
           source .venv/bin/activate
           mypy elkm1_lib
 
-      - name: Check pytest version
+      - name: Run pytest
         run: |
           source .venv/bin/activate
           pytest

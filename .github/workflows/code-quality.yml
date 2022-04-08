@@ -20,13 +20,4 @@ jobs:
           poetry-version: ${{ matrix.poetry-version }}
       - name: Run poetry install
         run: poetry install
-      - name: Check poetry version
-        run: poetry --version
-      - name: Check pytest version
-        run: pytest --version
-      - name: Check pylint version
-        run: pylint --version
-      - name: Check black version
-        run: black --version
-      - name: Check mypy version
-        run: mypy --version
+

@@ -14,7 +14,7 @@ include = ["CHANGELOG.md", "bin/**/*"]
 exclude = ["test"]
 
 [tool.poetry.dependencies]
-python = ">= 3.6"
+python = ">= 3.9"
 pyserial-asyncio = ">= 0.5"
 
 [tool.poetry.dev-dependencies]

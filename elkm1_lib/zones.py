@@ -22,18 +22,11 @@ class Zone(Element):
 
     def __str__(self) -> str:
         return (
-            "{indx:d} '{name}' type:{typ} status:{logl}/{phys}"
-            " area:{area:d} trig:{trig} v:{volt} temp:{temp}"
-        ).format(
-            name=self.name,
-            indx=self._index,
-            typ=ZoneType(self.definition).name,
-            logl=ZoneLogicalStatus(self.logical_status).name,
-            trig=self.triggered_alarm,
-            volt=self.voltage,
-            area=self.area,
-            temp=self.temperature,
-            phys=ZonePhysicalStatus(self.physical_status).name,
+            f"{self._index} '{self.name}' type:{ZoneType(self.definition).name} status:"
+            f"{ZoneLogicalStatus(self.logical_status).name}/"
+            f"{ZonePhysicalStatus(self.physical_status).name} "
+            f"area:{self.area} trig:{self.triggered_alarm} "
+            f"volt:{self.voltage} temp:{self.temperature}"
         )
 
     def bypass(self, code: int) -> None:

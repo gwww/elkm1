@@ -1,3 +1,5 @@
+"""Discovery of Elk panels."""
+
 import asyncio
 import logging
 import socket
@@ -29,6 +31,8 @@ def create_udp_socket(discovery_port: int) -> socket.socket:
 
 
 class ELKDiscovery(asyncio.DatagramProtocol):
+    """Discovery main class."""
+
     def __init__(
         self,
         destination: tuple[str, int],
@@ -42,11 +46,11 @@ class ELKDiscovery(asyncio.DatagramProtocol):
         """Trigger on_response."""
         self.on_response(data, addr)
 
-    def error_received(self, ex: Optional[Exception]) -> None:
+    def error_received(self, exc: Optional[Exception]) -> None:
         """Handle error."""
-        _LOGGER.error("ELKDiscovery error: %s", ex)
+        _LOGGER.error("ELKDiscovery error: %s", exc)
 
-    def connection_lost(self, ex: Optional[Exception]) -> None:
+    def connection_lost(self, exc: Optional[Exception]) -> None:
         """Do nothing on connection lost."""
 
 

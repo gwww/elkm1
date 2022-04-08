@@ -335,7 +335,7 @@ def housecode_to_index(housecode: str) -> int:
         house_index = int(match.group(2))
         if 1 <= house_index <= 16:
             return (ord(match.group(1)) - ord("A")) * 16 + house_index - 1
-    raise ValueError("Invalid X10 housecode: %s" % housecode)
+    raise ValueError(f"Invalid X10 housecode: {housecode}")
 
 
 def index_to_housecode(index: int) -> str:
@@ -427,8 +427,8 @@ def cw_encode(
 ) -> MessageEncode:
     """cw: Write a custom value."""
     if value_format == 2:
-        x = cast(tuple[int, int], value)
-        enc = x[0] * 256 + x[1]
+        val = cast(tuple[int, int], value)
+        enc = val[0] * 256 + val[1]
     else:
         enc = cast(int, value)
     return MessageEncode(f"0Dcw{index + 1:02}{enc:05}00", None)

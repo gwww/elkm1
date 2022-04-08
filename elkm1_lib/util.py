@@ -4,9 +4,6 @@ from __future__ import annotations
 
 import ssl
 
-from .elk import Elk
-from .users import Users
-
 TLS_VERSIONS = {
     # Unfortunately M1XEP does not support auto-negotiation for TLS
     # protocol; the user code must figure out the version to use. The
@@ -46,7 +43,7 @@ def parse_url(url: str) -> tuple[str, str, int, ssl.SSLContext | None]:
     elif scheme == "serial":
         host, port = dest.split(":") if ":" in dest else (dest, "115200")
     else:
-        raise ValueError("Invalid scheme '%s'" % scheme)
+        raise ValueError(f"Invalid scheme '{scheme}'")
     return (scheme, host, int(port), ssl_context)
 
 
@@ -57,18 +54,3 @@ def pretty_const(value: str) -> str:
     for word in words[1:]:
         pretty += " " + word.lower()
     return pretty
-
-
-def username(elk: Elk, user_number: int) -> str:
-    """Return name of user."""
-    users: Users = getattr(elk, "users")
-    if 0 <= user_number < users.max_elements:
-        return users[user_number].name
-
-    if user_number == 201:
-        return "*Program*"
-    if user_number == 202:
-        return "*Elk RP*"
-    if user_number == 203:
-        return "*Quick arm*"
-    return ""

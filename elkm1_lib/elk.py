@@ -77,7 +77,7 @@ class Elk:  # pylint: disable=too-many-instance-attributes
         url = self._config["url"]
         LOG.info("Connecting to ElkM1 at %s", url)
         scheme, dest, param, ssl_context = parse_url(url)
-        heartbeat_time = 120 if not scheme == "serial" else -1
+        heartbeat_time = 120 if scheme != "serial" else -1
 
         connection = partial(
             Connection,

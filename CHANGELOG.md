@@ -2,6 +2,9 @@
 All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## [1.3.0]
+- Add typing
+
 ## [1.2.2]
 - On a non-secure connection still generate a login event on got_connection 
   (it will always be successful)

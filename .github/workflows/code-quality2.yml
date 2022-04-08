@@ -40,8 +40,6 @@ jobs:
         run: poetry install
       - name: Check poetry version
         run: poetry --version
-      - name: Check pytest version
-        run: pytest --version
       - name: Check pylint version
         run: pylint --version
       - name: Check black version

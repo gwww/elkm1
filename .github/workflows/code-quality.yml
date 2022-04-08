@@ -1,0 +1,30 @@
+name: CI
+on: pull_request
+
+jobs:
+  ci:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [3.9]
+        poetry-version: [1.1.13]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Run image
+        uses: abatilo/actions-poetry@v2.0.0
+        with:
+          poetry-version: ${{ matrix.poetry-version }}
+      - name: View poetry --help
+        run: poetry --help
+      - name: Run poetry install
+        run: poetry install
+      - name: Check poetry install
+        run: poetry --version
+        run: pytest --version
+        run: pylint --version
+        run: black --version
+        run: mypy --version

@@ -67,7 +67,7 @@ jobs:
       - name: Run isort check
         run: |
           source .venv/bin/activate
-          isort --check-only
+          isort --check-only --profile black .
 
       # - name: Run pytest
       #   run: |

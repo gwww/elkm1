@@ -37,9 +37,13 @@ jobs:
           echo test, and deploy your project.
 
       - name: Run poetry install
-        run: poetry install
+        run: |
+          poetry install
+          poetry shell
       - name: Check poetry version
         run: poetry --version
+      - name: Check pytest version
+        run: pytest --version
       - name: Check pylint version
         run: pylint --version
       - name: Check black version

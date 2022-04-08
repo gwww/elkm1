@@ -446,7 +446,7 @@ def cx_encode(counter: int, value: int) -> MessageEncode:
 
 def dm_encode(
     keypad_area: int, clear: int, beep: bool, timeout: int, line1: str, line2: str
-) -> MessageEncode:  # pylint: disable=too-many-arguments
+) -> MessageEncode:
     """dm: Display message on keypad."""
     return MessageEncode(
         f"2Edm{keypad_area + 1:1}{clear:1}{beep:1}{timeout:05}{line1:^<16.16}{line2:^<16.16}00",

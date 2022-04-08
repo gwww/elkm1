@@ -13,7 +13,7 @@ from .message import get_elk_command
 LOG = logging.getLogger(__name__)
 
 
-class Connection(asyncio.Protocol):  # pylint: disable=too-many-instance-attributes
+class Connection(asyncio.Protocol):
     """asyncio Protocol with line parsing and queuing writes"""
 
     def __init__(
@@ -24,7 +24,7 @@ class Connection(asyncio.Protocol):  # pylint: disable=too-many-instance-attribu
         disconnected: Callable[[], None],
         got_data: Callable[[str], None],
         timeout: Callable[[str | None], None],
-    ) -> None:  # pylint: disable=too-many-arguments
+    ) -> None:
         self.loop = loop
         self._heartbeat_time = heartbeat_time
         self._connected_callback = connected

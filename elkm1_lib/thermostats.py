@@ -59,7 +59,7 @@ class Thermostats(Elements):
         heat_setpoint: int,
         cool_setpoint: int,
         humidity: int,
-    ) -> None:  # pylint: disable=too-many-arguments
+    ) -> None:
         thermostat = self.elements[thermostat_index]
         thermostat.setattr("mode", mode, False)
         thermostat.setattr("hold", hold, False)

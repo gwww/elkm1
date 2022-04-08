@@ -10,7 +10,7 @@ from .elk import Elk
 from .message import al_encode, as_encode, az_encode, dm_encode, zb_encode
 
 
-class Area(Element):  # pylint: disable=too-many-instance-attributes
+class Area(Element):
     """Class representing an Area"""
 
     def __init__(self, index: int, elk: Elk) -> None:
@@ -40,7 +40,7 @@ class Area(Element):  # pylint: disable=too-many-instance-attributes
 
     def display_message(
         self, clear: int, beep: bool, timeout: int, line1: str, line2: str
-    ) -> None:  # pylint: disable=too-many-arguments
+    ) -> None:
         """(Helper) Display a message on all of the keypads in this area."""
         self._elk.send(dm_encode(self._index, clear, beep, timeout, line1, line2))
 
@@ -92,7 +92,7 @@ class Areas(Elements):
 
     def _ee_handler(
         self, msg_area: int, is_exit: bool, timer1: int, timer2: int, armed_status: str
-    ) -> None:  # pylint: disable=too-many-arguments
+    ) -> None:
         area: Area = cast(Area, self.elements[msg_area])
         area.setattr("armed_status", armed_status, False)
         area.setattr("timer1", timer1, False)

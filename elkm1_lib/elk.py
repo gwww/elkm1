@@ -17,7 +17,7 @@ from .util import parse_url, url_scheme_is_secure
 LOG = logging.getLogger(__name__)
 
 
-class Elk:  # pylint: disable=too-many-instance-attributes
+class Elk:
     """Represents all the components on an Elk panel."""
 
     # For typing dynamic attrs in element_list
@@ -61,7 +61,7 @@ class Elk:  # pylint: disable=too-many-instance-attributes
             class_ = getattr(module, element.capitalize())
             setattr(self, element, class_(self))
 
-    def _sync_complete(self, **kwargs: dict) -> None:  # pylint: disable=unused-argument
+    def _sync_complete(self, **kwargs: dict) -> None:
         self._message_decode.call_handlers("sync_complete", {})
 
         # So that other apps can send UA and not trigger sync_complete

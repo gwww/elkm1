@@ -5,8 +5,8 @@ from typing import Any, Optional
 
 from .const import ElkRPStatus
 from .elements import Element
-from .message import lw_encode, rw_encode, sp_encode, ss_encode, sw_encode, vn_encode
 from .elk import Elk
+from .message import lw_encode, rw_encode, sp_encode, ss_encode, sw_encode, vn_encode
 
 
 class Panel(Element):

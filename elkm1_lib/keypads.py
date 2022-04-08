@@ -4,8 +4,8 @@ from typing import Optional
 
 from .const import KeypadKeys, Max, TextDescriptions
 from .elements import Element, Elements
-from .message import ka_encode
 from .elk import Elk
+from .message import ka_encode
 
 
 class Keypad(Element):

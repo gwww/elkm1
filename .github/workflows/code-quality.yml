@@ -54,7 +54,7 @@ jobs:
           source .venv/bin/activate
           pylint elkm1_lib
 
-      - name: Run black
+      - name: Run black check
         run: |
           source .venv/bin/activate
           black --check .
@@ -64,7 +64,12 @@ jobs:
           source .venv/bin/activate
           mypy elkm1_lib
 
-      - name: Run pytest
+      - name: Run isort check
         run: |
           source .venv/bin/activate
-          pytest
+          isort --check-only
+
+      # - name: Run pytest
+      #   run: |
+      #     source .venv/bin/activate
+      #     pytest

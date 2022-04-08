@@ -6,10 +6,10 @@ import asyncio
 import logging
 import socket
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
 from struct import unpack
 from typing import Optional, cast
-from collections.abc import Callable
 
 _LOGGER = logging.getLogger(__name__)
 

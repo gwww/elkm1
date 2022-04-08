@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from .const import Max, TextDescriptions
 from .elements import Element, Elements
-from .message import cv_encode, cx_encode
 from .elk import Elk
+from .message import cv_encode, cx_encode
 
 
 class Counter(Element):

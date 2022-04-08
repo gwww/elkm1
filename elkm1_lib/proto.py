@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from functools import reduce
 from collections.abc import Callable
+from functools import reduce
 from typing import Optional, cast
 
 from .message import get_elk_command

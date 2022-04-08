@@ -1,7 +1,7 @@
 """Definition of an ElkM1 Area"""
 import datetime as dt
 import time
-from typing import Optional
+from typing import Any, Optional
 
 from .const import ElkRPStatus
 from .elements import Element
@@ -103,6 +103,6 @@ class Panel(Element):
             self._elk.pause()
         self.setattr("remote_programming_status", remote_programming_status, True)
 
-    def _ua_handler(self, **kwargs: dict) -> None:
+    def _ua_handler(self, **kwargs: dict[str, Any]) -> None:
         self.setattr("user_code_length", kwargs["user_code_length"], False)
         self.setattr("temperature_units", kwargs["temperature_units"], True)

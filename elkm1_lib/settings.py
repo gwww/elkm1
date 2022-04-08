@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from typing import Any
 
 from .const import Max, TextDescriptions
 from .elements import Element, Elements
@@ -34,7 +35,7 @@ class Settings(Elements):
         self.elk.send(cp_encode())
         self.get_descriptions(TextDescriptions.SETTING.value)
 
-    def _cr_handler(self, values: dict) -> None:
+    def _cr_handler(self, values: list[dict[str, Any]]) -> None:
         settings: list[Setting] = getattr(self.elk, "settings")
         for value in values:
             setting = settings[value["index"]]

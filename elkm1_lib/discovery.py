@@ -1,5 +1,7 @@
 """Discovery of Elk panels."""
 
+from __future__ import annotations
+
 import asyncio
 import logging
 import socket
@@ -159,7 +161,7 @@ class AIOELKDiscovery:
         """Discover ELK devices."""
         sock = create_udp_socket(self.DISCOVERY_PORT)
         destination = self._destination_from_address(address)
-        found_all_future: asyncio.Future = asyncio.Future()
+        found_all_future: asyncio.Future[bool] = asyncio.Future()
         response_list: dict[tuple[str, int], ElkSystem] = {}
 
         def _on_response(data: bytes, addr: tuple[str, int]) -> None:

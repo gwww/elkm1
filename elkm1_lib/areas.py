@@ -93,7 +93,7 @@ class Areas(Elements):
     def _ee_handler(
         self, msg_area: int, is_exit: bool, timer1: int, timer2: int, armed_status: str
     ) -> None:
-        area: Area = cast(Area, self.elements[msg_area])
+        area = cast(Area, self.elements[msg_area])
         area.setattr("armed_status", armed_status, False)
         area.setattr("timer1", timer1, False)
         area.setattr("timer2", timer2, False)

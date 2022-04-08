@@ -61,7 +61,7 @@ class Elk:
             class_ = getattr(module, element.capitalize())
             setattr(self, element, class_(self))
 
-    def _sync_complete(self, **kwargs: dict) -> None:
+    def _sync_complete(self, **kwargs: dict[str, Any]) -> None:
         self._message_decode.call_handlers("sync_complete", {})
 
         # So that other apps can send UA and not trigger sync_complete

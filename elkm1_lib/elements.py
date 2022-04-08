@@ -101,7 +101,6 @@ class Elements:
         self._get_description_state: tuple[
             int, int, list[str | None], Callable[[list[str | None], int], None]
         ] | None = None
-        # self._get_description_state = (desc_type, count, results, self._got_desc)
         elk.add_handler("SD", self._sd_handler)
 
     def __iter__(self) -> Iterable[Element]:

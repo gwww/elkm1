@@ -20,10 +20,6 @@ LOG = logging.getLogger(__name__)
 class Elk:
     """Represents all the components on an Elk panel."""
 
-    # For typing dynamic attrs in element_list
-    # def __setattr__(self, name: str, value: Any) -> None:
-    #     super().__setattr__(name, value)
-    #
     def __init__(
         self, config: dict[str, Any], loop: asyncio.AbstractEventLoop | None = None
     ) -> None:

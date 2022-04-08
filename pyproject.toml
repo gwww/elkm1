@@ -33,7 +33,6 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.pyright]
 pythonVersion = "3.9"
-reportUnusedVariable = true
 
 [tool.pylint."MESSAGES CONTROL"]
 # Reasons disabled:

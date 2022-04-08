@@ -10,9 +10,7 @@ from .message import tn_encode
 class Task(Element):
     """Class representing an Task"""
 
-    def __init__(
-        self, index: int, elk: Elk
-    ) -> None:  # pylint: disable=useless-super-delegation
+    def __init__(self, index: int, elk: Elk) -> None:
         super().__init__(index, elk)
         self.last_change = None
 

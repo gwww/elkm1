@@ -11,9 +11,7 @@ from .message import tr_encode, ts_encode
 class Thermostat(Element):
     """Class representing an Thermostat"""
 
-    def __init__(
-        self, index: int, elk: Elk
-    ) -> None:  # pylint: disable=useless-super-delegation
+    def __init__(self, index: int, elk: Elk) -> None:
         super().__init__(index, elk)
         self.mode = 0
         self.hold = False

@@ -24,6 +24,7 @@ colorlog = ">= 4.0"
 mypy = ">= 0.9"
 pylint = ">= 2"
 pytest = ">= 7"
+pytest-asyncio = ">= 0.18"
 urwid = ">= 2.0"
 
 [build-system]

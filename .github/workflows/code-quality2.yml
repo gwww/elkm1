@@ -52,18 +52,19 @@ jobs:
       - name: Check pylint version
         run: |
           source .venv/bin/activate
-          pylint --version
+          pylint elkm1_lib
 
       - name: Check black version
         run: |
           source .venv/bin/activate
-          black --version
+          black --check .
 
       - name: Check mypy version
         run: |
           source .venv/bin/activate
-          mypy --version
+          mypy elkm1_lib
 
       - name: Check pytest version
         run: |
-          pytest --version
+          source .venv/bin/activate
+          pytest

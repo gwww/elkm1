@@ -26,27 +26,44 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Run image
-        uses: abatilo/actions-poetry@v2.0.0
+        uses: snok/install-poetry@v1
         with:
-          poetry-version: ${{ matrix.poetry-version }}
+          version: ${{ matrix.poetry-version }}
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+          installer-parallel: true
 
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
-        run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v2
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
 
-      - name: Run poetry install
-        run: |
-          poetry install
-          poetry shell
+      - name: Install dependencies with poetry
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction --no-root
+
       - name: Check poetry version
-        run: poetry --version
-      - name: Check pytest version
-        run: pytest --version
+        run: |
+          source .venv/bin/activate
+          poetry --version
+
       - name: Check pylint version
-        run: pylint --version
+        run: |
+          source .venv/bin/activate
+          pylint --version
+
       - name: Check black version
-        run: black --version
+        run: |
+          source .venv/bin/activate
+          black --version
+
       - name: Check mypy version
-        run: mypy --version
+        run: |
+          source .venv/bin/activate
+          mypy --version
+
+      - name: Check pytest version
+        run: |
+          pytest --version

@@ -71,7 +71,7 @@ class Zones(Elements):
 
     def _lw_handler(
         self, keypad_temps: list[int], zone_temps: list[int]
-    ) -> None:  # pylint: disable=unused-argument
+    ) -> None:
         for i in range(16):
             zone = self.elements[i]
             if zone_temps[zone.index] > -60:
@@ -83,7 +83,7 @@ class Zones(Elements):
 
     def _zb_handler(
         self, zone_number: int, zone_bypassed: bool
-    ) -> None:  # pylint: disable=unused-argument
+    ) -> None:
         # If specific zone number was specified, then a ZC (zone change)
         # message will be received to update the bypass state.
         # If zone was 000 or 999 then we don't know which area was bypassed or

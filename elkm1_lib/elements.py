@@ -110,7 +110,7 @@ class Elements:
 
     def _sd_handler(
         self, desc_type: int, unit: int, desc: str, show_on_keypad: bool
-    ) -> None:  # pylint: disable=unused-argument
+    ) -> None:
         if not self._get_description_state:
             return
         (_desc_type, count, results, callback) = self._get_description_state
@@ -152,4 +152,3 @@ class Elements:
     @abstractmethod
     def sync(self) -> None:
         """Synchronize elements"""
-        pass  # pylint: disable=unnecessary-pass

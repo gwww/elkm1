@@ -37,7 +37,7 @@ class Keypads(Elements):
         self.elk.send(ka_encode())
         self.get_descriptions(TextDescriptions.KEYPAD.value)
 
-    def _ic_handler(self, code: int, user: int, keypad: int) -> None:  # pylint: disable=unused-argument
+    def _ic_handler(self, code: int, user: int, keypad: int) -> None:
         keypad_ = self.elements[keypad]
 
         # By setting a time this will force the IC change to always be reported
@@ -61,7 +61,7 @@ class Keypads(Elements):
             name = ""
         self.elements[keypad].setattr("last_keypress", (name, key), True)
 
-    def _lw_handler(self, keypad_temps: list[int], zone_temps: list[int]) -> None:  # pylint: disable=unused-argument
+    def _lw_handler(self, keypad_temps: list[int], zone_temps: list[int]) -> None:
         for keypad in self.elements:
             if keypad_temps[keypad.index] > -40:
                 keypad.setattr("temperature", keypad_temps[keypad.index], True)

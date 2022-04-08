@@ -43,7 +43,7 @@ class Lights(Elements):
 
     def _pc_handler(
         self, housecode: str, index: int, light_level: int
-    ) -> None:  # pylint: disable=unused-argument
+    ) -> None:
         self.elements[index].setattr("status", light_level, True)
 
     def _ps_handler(self, bank: int, statuses: list[int]) -> None:

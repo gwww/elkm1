@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## [1.3.0]
+- Add typing: https://peps.python.org/pep-0561/
+- Changed minimum Python version to 3.9
+- Part of the typing change caused a circular import for username in util;
+  Moved username to be a method on Users
+
 ## [1.2.2]
 - On a non-secure connection still generate a login event on got_connection 
   (it will always be successful)

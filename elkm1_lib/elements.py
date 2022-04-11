@@ -2,52 +2,61 @@
   Base of all the elements found on the Elk panel... Zone, Keypad, etc.
 """
 
+from __future__ import annotations
+
 import re
 from abc import abstractmethod
+from collections.abc import Callable, Iterable
+from typing import Any, Type
 
 from .const import TextDescriptions
+from .elk import Elk
 from .message import sd_encode
 
 
 class Element:
     """Element class"""
 
-    def __init__(self, index, elk):
+    def __init__(self, index: int, elk: Elk) -> None:
         self._index = index
         self._elk = elk
-        self._callbacks = []
-        self.name = self.default_name()
-        self._changeset = {}
-        self._configured = False
+        self._callbacks: list[Callable[[Element, dict[str, Any]], None]] = []
+        self.name: str = self.default_name()
+        self._changeset: dict[str, Any] = {}
+        self._configured: bool = False
 
     @property
-    def index(self):
+    def index(self) -> int:
         """Get the index, immutable once class created"""
         return self._index
 
     @property
-    def configured(self):
+    def configured(self) -> bool:
         """If a callback has ever been triggered this will be true."""
         return self._configured
 
-    def add_callback(self, callback):
+    def add_callback(self, callback: Callable[[Element, dict[str, Any]], None]) -> None:
         """Callbacks when attribute of element changes"""
         self._callbacks.append(callback)
 
-    def remove_callback(self, callback):
+    def remove_callback(
+        self, callback: Callable[[Element, dict[str, Any]], None]
+    ) -> None:
         """Callbacks when attribute of element changes"""
         if callback in self._callbacks:
             self._callbacks.remove(callback)
 
-    def _call_callbacks(self):
+    def _call_callbacks(self) -> None:
         """Callbacks when attribute of element changes"""
         for callback in self._callbacks:
             callback(self, self._changeset)
         self._changeset = {}
 
-    def setattr(self, attr, new_value, close_the_changeset=True):
+    def setattr(
+        self, attr: str, new_value: Any, close_the_changeset: bool = True
+    ) -> None:
         """If attribute value has changed then set it and call the callbacks"""
-        existing_value = getattr(self, attr, None)
+        existing_value: Any = getattr(self, attr, None)
         if existing_value != new_value:
             setattr(self, attr, new_value)
             self._changeset[attr] = new_value
@@ -55,24 +64,27 @@ class Element:
         if close_the_changeset and self._changeset:
             self._call_callbacks()
 
-    def default_name(self, separator="-"):
+    def default_name(self, separator: str = "-") -> str:
         """Return a default name for based on class and index of element"""
         return f"{self.__class__.__name__}{separator}{self._index + 1:03}"
 
-    def is_default_name(self):
+    def is_default_name(self) -> bool:
         """Check if the name assigned is the default_name"""
         return self.name == self.default_name()
 
-    def __str__(self):
+    def __str__(self) -> str:
         varlist = {
             k: v
             for (k, v) in vars(self).items()
             if not k.startswith("_") and k != "name"
         }.items()
-        varstr = " ".join("%s:%s" % item for item in varlist)
+        varstr = " ".join(
+            "%s:%s" % item  # pylint: disable=consider-using-f-string
+            for item in varlist
+        )
         return f"{self._index} '{self.name}' {varstr}"
 
-    def as_dict(self):
+    def as_dict(self) -> dict[str, Any]:
         """Package up the public attributes as a dict."""
         attrs = vars(self)
         return {key: attrs[key] for key in attrs if not key.startswith("_")}
@@ -81,24 +93,26 @@ class Element:
 class Elements:
     """Base for list of elements."""
 
-    def __init__(self, elk, class_, max_elements):
+    def __init__(self, elk: Elk, class_: Type[Element], max_elements: int) -> None:
         self.elk = elk
         self.max_elements = max_elements
         self.elements = [class_(i, elk) for i in range(max_elements)]
 
-        self._get_description_state = None
+        self._get_description_state: tuple[
+            int, int, list[str | None], Callable[[list[str | None], int], None]
+        ] | None = None
         elk.add_handler("SD", self._sd_handler)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterable[Element]:
         for element in self.elements:
             yield element
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: int) -> Element:
         return self.elements[key]
 
     def _sd_handler(
-        self, desc_type, unit, desc, show_on_keypad
-    ):  # pylint: disable=unused-argument
+        self, desc_type: int, unit: int, desc: str, show_on_keypad: bool
+    ) -> None:
         if not self._get_description_state:
             return
         (_desc_type, count, results, callback) = self._get_description_state
@@ -112,7 +126,7 @@ class Elements:
             results[unit] = desc
             self.elk.send(sd_encode(desc_type, unit + 1))
 
-    def _got_desc(self, descriptions, desc_type):
+    def _got_desc(self, descriptions: list[str | None], desc_type: int) -> None:
         # Elk reports descriptions for all 199 users, irregardless of how many
         # are configured. Only set configured for those that are really there.
         if desc_type == TextDescriptions.USER.value[0]:
@@ -130,14 +144,13 @@ class Elements:
                 element.setattr("name", name, True)
                 element._configured = True  # pylint: disable=protected-access
 
-    def get_descriptions(self, description_type):
+    def get_descriptions(self, description_type: tuple[int, int]) -> None:
         """Gets the descriptions for specified type."""
         (desc_type, count) = description_type
-        results = [None] * count
+        results: list[str | None] = [None] * count
         self._get_description_state = (desc_type, count, results, self._got_desc)
         self.elk.send(sd_encode(desc_type, 0))
 
     @abstractmethod
-    def sync(self):
+    def sync(self) -> None:
         """Synchronize elements"""
-        pass  # pylint: disable=unnecessary-pass

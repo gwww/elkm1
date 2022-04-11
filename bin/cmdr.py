@@ -246,7 +246,7 @@ class Input(FocusMixin, urwid.Edit):
                 urwid.emit_signal(self, "line_entered", line)
                 self.history.append(line)
             self._history_index = len(self.history)
-            self.edit_text = u""
+            self.edit_text = ""
         if key == "up":
             self._history_index -= 1
             if self._history_index < 0:
@@ -257,7 +257,7 @@ class Input(FocusMixin, urwid.Edit):
             self._history_index += 1
             if self._history_index >= len(self.history):
                 self._history_index = len(self.history)
-                self.edit_text = u""
+                self.edit_text = ""
             else:
                 self.edit_text = self.history[self._history_index]
         else:

@@ -1,7 +1,5 @@
 """Definition of an ElkM1 User"""
 
-from typing import cast
-
 from .const import Max, TextDescriptions
 from .elements import Element, Elements
 from .elk import Elk
@@ -23,7 +21,7 @@ class Users(Elements):
 
     def username(self, user_number: int) -> str:
         """Return name of user."""
-        if user_number >= 0 and user_number < self.max_elements:
+        if 0 <= user_number < self.max_elements:
             return self.elements[user_number].name
         if user_number == 201:
             return "*Program*"

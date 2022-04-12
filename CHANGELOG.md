@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## [1.3.1]
+- Add py.typed
+- Tweak CI to be more informative
+
 ## [1.3.0]
 - Add typing: https://peps.python.org/pep-0561/
 - Changed minimum Python version to 3.9

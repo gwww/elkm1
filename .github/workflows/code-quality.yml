@@ -59,7 +59,7 @@ jobs:
       - name: Run mypy
         run: |
           source .venv/bin/activate
-          mypy elkm1_lib
+          mypy --strict elkm1_lib
 
       - name: Run isort check
         run: |

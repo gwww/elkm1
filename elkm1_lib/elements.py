@@ -6,8 +6,8 @@ from __future__ import annotations
 
 import re
 from abc import abstractmethod
-from collections.abc import Callable, Iterable
-from typing import Any, Type
+from collections.abc import Callable
+from typing import Any, Generator, Type
 
 from .const import TextDescriptions
 from .elk import Elk
@@ -103,7 +103,7 @@ class Elements:
         ] | None = None
         elk.add_handler("SD", self._sd_handler)
 
-    def __iter__(self) -> Iterable[Element]:
+    def __iter__(self) -> Generator[Element, None, None]:
         for element in self.elements:
             yield element
 

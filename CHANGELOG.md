@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## [1.3.2]
+- Fix __iter__ type to be a Generator
+- All the elements (Areas, Counters, Zones, etc) are now attributes of the
+  Elk class instead of being dynamic attributes
+
 ## [1.3.1]
 - Add py.typed
 - Tweak CI to be more informative

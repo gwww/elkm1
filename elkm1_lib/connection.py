@@ -115,12 +115,12 @@ class Connection:
         LOG.info("Connected to ElkM1")
         self._elk_protocol = elk_protocol
         self._connection_retry_time = 1
-        self._msg_decode.call_handlers("connected", {})
         if elk_protocol is not None and url_scheme_is_secure(self._config["url"]):
             self._elk_protocol.write_data(self._config["userid"], raw=True)
             self._elk_protocol.write_data(self._config["password"], raw=True)
         else:
             self._msg_decode.call_handlers("login", {"succeeded": True})
+        self._msg_decode.call_handlers("connected", {})
 
     def _reconnect(self) -> None:
         asyncio.ensure_future(self.connect())

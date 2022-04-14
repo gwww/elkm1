@@ -5,6 +5,7 @@ This project follows [Semantic Versioning](https://semver.org/).
 ## [1.3.3]
 - Remove pause/resume from `elk.py`; not used outside of internal lib and
   available in `Connection` if really needed
+- Fix over zealous cleanup where password sent after sync. Doh.
 
 ## [1.3.2]
 - Fix __iter__ type to be a Generator

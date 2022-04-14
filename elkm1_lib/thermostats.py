@@ -2,17 +2,17 @@
 
 from __future__ import annotations
 
+from .connection import Connection
 from .const import Max, TextDescriptions
 from .elements import Element, Elements
-from .elk import Elk
 from .message import tr_encode, ts_encode
 
 
 class Thermostat(Element):
     """Class representing an Thermostat"""
 
-    def __init__(self, index: int, elk: Elk) -> None:
-        super().__init__(index, elk)
+    def __init__(self, index: int, connection: Connection) -> None:
+        super().__init__(index, connection)
         self.mode = 0
         self.hold = False
         self.fan = 0
@@ -23,16 +23,16 @@ class Thermostat(Element):
 
     def set(self, element_to_set: int, value: int) -> None:
         """(Helper) Set thermostat"""
-        self._elk.send(ts_encode(self.index, value, element_to_set))
+        self._connection.send(ts_encode(self.index, value, element_to_set))
 
 
 class Thermostats(Elements):
     """Handling for multiple areas"""
 
-    def __init__(self, elk: Elk) -> None:
-        super().__init__(elk, Thermostat, Max.THERMOSTATS.value)
-        elk.add_handler("ST", self._st_handler)
-        elk.add_handler("TR", self._tr_handler)
+    def __init__(self, connection: Connection) -> None:
+        super().__init__(connection, Thermostat, Max.THERMOSTATS.value)
+        connection.msg_decode.add_handler("ST", self._st_handler)
+        connection.msg_decode.add_handler("TR", self._tr_handler)
 
     def sync(self) -> None:
         """Retrieve areas from ElkM1"""
@@ -43,7 +43,7 @@ class Thermostats(Elements):
         # Only poll thermostats that have a name defined
         for thermostat in self.elements:
             if not thermostat.is_default_name():
-                self.elk.send(tr_encode(thermostat.index))
+                self._connection.send(tr_encode(thermostat.index))
 
     def _st_handler(self, group: int, device: int, temperature: int) -> None:
         if group == 2:

@@ -9,17 +9,17 @@ from abc import abstractmethod
 from collections.abc import Callable
 from typing import Any, Generator, Type
 
+from .connection import Connection
 from .const import TextDescriptions
-from .elk import Elk
 from .message import sd_encode
 
 
 class Element:
     """Element class"""
 
-    def __init__(self, index: int, elk: Elk) -> None:
+    def __init__(self, index: int, connection: Connection) -> None:
         self._index = index
-        self._elk = elk
+        self._connection = connection
         self._callbacks: list[Callable[[Element, dict[str, Any]], None]] = []
         self.name: str = self.default_name()
         self._changeset: dict[str, Any] = {}
@@ -93,15 +93,17 @@ class Element:
 class Elements:
     """Base for list of elements."""
 
-    def __init__(self, elk: Elk, class_: Type[Element], max_elements: int) -> None:
-        self.elk = elk
+    def __init__(
+        self, connection: Connection, class_: Type[Element], max_elements: int
+    ) -> None:
+        self._connection = connection
         self.max_elements = max_elements
-        self.elements = [class_(i, elk) for i in range(max_elements)]
+        self.elements = [class_(i, connection) for i in range(max_elements)]
 
         self._get_description_state: tuple[
             int, int, list[str | None], Callable[[list[str | None], int], None]
         ] | None = None
-        elk.add_handler("SD", self._sd_handler)
+        connection.msg_decode.add_handler("SD", self._sd_handler)
 
     def __iter__(self) -> Generator[Element, None, None]:
         for element in self.elements:
@@ -124,7 +126,7 @@ class Elements:
             self._get_description_state = None
         else:
             results[unit] = desc
-            self.elk.send(sd_encode(desc_type, unit + 1))
+            self._connection.send(sd_encode(desc_type, unit + 1))
 
     def _got_desc(self, descriptions: list[str | None], desc_type: int) -> None:
         # Elk reports descriptions for all 199 users, irregardless of how many
@@ -149,7 +151,7 @@ class Elements:
         (desc_type, count) = description_type
         results: list[str | None] = [None] * count
         self._get_description_state = (desc_type, count, results, self._got_desc)
-        self.elk.send(sd_encode(desc_type, 0))
+        self._connection.send(sd_encode(desc_type, 0))
 
     @abstractmethod
     def sync(self) -> None:

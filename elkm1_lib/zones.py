@@ -1,4 +1,6 @@
 """Definition of an ElkM1 Zone"""
+
+from .connection import Connection
 from .const import (
     Max,
     TextDescriptions,
@@ -7,7 +9,6 @@ from .const import (
     ZoneType,
 )
 from .elements import Element, Elements
-from .elk import Elk
 from .message import (
     az_encode,
     zb_encode,
@@ -22,8 +23,8 @@ from .message import (
 class Zone(Element):
     """Class representing a Zone"""
 
-    def __init__(self, index: int, elk: Elk) -> None:
-        super().__init__(index, elk)
+    def __init__(self, index: int, connection: Connection) -> None:
+        super().__init__(index, connection)
         self.definition = 0
         self.area = -1
         self.logical_status = 0
@@ -43,38 +44,38 @@ class Zone(Element):
 
     def bypass(self, code: int) -> None:
         """(Helper) Bypass zone."""
-        self._elk.send(zb_encode(self._index, 0, code))
+        self._connection.send(zb_encode(self._index, 0, code))
 
     def trigger(self) -> None:
         """(Helper) Trigger zone."""
-        self._elk.send(zt_encode(self._index))
+        self._connection.send(zt_encode(self._index))
 
     def get_voltage(self) -> None:
         """(Helper) Get zone voltage."""
-        self._elk.send(zv_encode(self._index))
+        self._connection.send(zv_encode(self._index))
 
 
 class Zones(Elements):
     """Handling for multiple zones"""
 
-    def __init__(self, elk: Elk) -> None:
-        super().__init__(elk, Zone, Max.ZONES.value)
-        elk.add_handler("AZ", self._az_handler)
-        elk.add_handler("LW", self._lw_handler)
-        elk.add_handler("ST", self._st_handler)
-        elk.add_handler("ZB", self._zb_handler)
-        elk.add_handler("ZC", self._zc_handler)
-        elk.add_handler("ZD", self._zd_handler)
-        elk.add_handler("ZP", self._zp_handler)
-        elk.add_handler("ZS", self._zs_handler)
-        elk.add_handler("ZV", self._zv_handler)
+    def __init__(self, connection: Connection) -> None:
+        super().__init__(connection, Zone, Max.ZONES.value)
+        connection.msg_decode.add_handler("AZ", self._az_handler)
+        connection.msg_decode.add_handler("LW", self._lw_handler)
+        connection.msg_decode.add_handler("ST", self._st_handler)
+        connection.msg_decode.add_handler("ZB", self._zb_handler)
+        connection.msg_decode.add_handler("ZC", self._zc_handler)
+        connection.msg_decode.add_handler("ZD", self._zd_handler)
+        connection.msg_decode.add_handler("ZP", self._zp_handler)
+        connection.msg_decode.add_handler("ZS", self._zs_handler)
+        connection.msg_decode.add_handler("ZV", self._zv_handler)
 
     def sync(self) -> None:
         """Retrieve zones from ElkM1"""
-        self.elk.send(az_encode())
-        self.elk.send(zd_encode())
-        self.elk.send(zp_encode())
-        self.elk.send(zs_encode())
+        self._connection.send(az_encode())
+        self._connection.send(zd_encode())
+        self._connection.send(zp_encode())
+        self._connection.send(zs_encode())
         self.get_descriptions(TextDescriptions.ZONE.value)
 
     def _az_handler(self, alarm_status: str) -> None:
@@ -97,7 +98,7 @@ class Zones(Elements):
         # If zone was 000 or 999 then we don't know which area was bypassed or
         # cleared and there is no ZC. Retrieve the current zone statuses...
         if zone_number < 0 or zone_number >= Max.ZONES.value:
-            self.elk.send(zs_encode())
+            self._connection.send(zs_encode())
 
     def _zc_handler(self, zone_number: int, zone_status: tuple[int, int]) -> None:
         self.elements[zone_number].setattr("logical_status", zone_status[0], False)

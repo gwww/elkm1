@@ -4,17 +4,17 @@ from __future__ import annotations
 
 from typing import Any, cast
 
+from .connection import Connection
 from .const import ArmedStatus, Max, TextDescriptions
 from .elements import Element, Elements
-from .elk import Elk
 from .message import al_encode, as_encode, az_encode, dm_encode, zb_encode
 
 
 class Area(Element):
     """Class representing an Area"""
 
-    def __init__(self, index: int, elk: Elk) -> None:
-        super().__init__(index, elk)
+    def __init__(self, index: int, connection: Connection) -> None:
+        super().__init__(index, connection)
         self.armed_status: str | None = None
         self.arm_up_state: str | None = None
         self.alarm_state: str | None = None
@@ -32,7 +32,7 @@ class Area(Element):
         """(Helper) Arm system at specified level (away, vacation, etc)"""
         if self.is_armed() and level > "0":
             return
-        self._elk.send(al_encode(level, self._index, code))
+        self._connection.send(al_encode(level, self._index, code))
 
     def disarm(self, code: int) -> None:
         """(Helper) Disarm system."""
@@ -42,30 +42,32 @@ class Area(Element):
         self, clear: int, beep: bool, timeout: int, line1: str, line2: str
     ) -> None:
         """(Helper) Display a message on all of the keypads in this area."""
-        self._elk.send(dm_encode(self._index, clear, beep, timeout, line1, line2))
+        self._connection.send(
+            dm_encode(self._index, clear, beep, timeout, line1, line2)
+        )
 
     def bypass(self, code: int) -> None:
         """(Helper) Bypass area."""
-        self._elk.send(zb_encode(999, self._index, code))
+        self._connection.send(zb_encode(999, self._index, code))
 
     def clear_bypass(self, code: int) -> None:
         """(Helper) Clear bypass area."""
-        self._elk.send(zb_encode(-1, self._index, code))
+        self._connection.send(zb_encode(-1, self._index, code))
 
 
 class Areas(Elements):
     """Handling for multiple areas"""
 
-    def __init__(self, elk: Elk) -> None:
-        super().__init__(elk, Area, Max.AREAS.value)
-        elk.add_handler("AM", self._am_handler)
-        elk.add_handler("AS", self._as_handler)
-        elk.add_handler("EE", self._ee_handler)
-        elk.add_handler("LD", self._ld_handler)
+    def __init__(self, connection: Connection) -> None:
+        super().__init__(connection, Area, Max.AREAS.value)
+        connection.msg_decode.add_handler("AM", self._am_handler)
+        connection.msg_decode.add_handler("AS", self._as_handler)
+        connection.msg_decode.add_handler("EE", self._ee_handler)
+        connection.msg_decode.add_handler("LD", self._ld_handler)
 
     def sync(self) -> None:
         """Retrieve areas from ElkM1"""
-        self.elk.send(as_encode())
+        self._connection.send(as_encode())
         self.get_descriptions(TextDescriptions.AREA.value)
 
     def _am_handler(self, alarm_memory: str) -> None:
@@ -88,7 +90,7 @@ class Areas(Elements):
             area.setattr("alarm_state", alarm_states[area.index], True)
 
         if update_alarm_triggers:
-            self.elk.send(az_encode())
+            self._connection.send(az_encode())
 
     def _ee_handler(
         self, msg_area: int, is_exit: bool, timer1: int, timer2: int, armed_status: str

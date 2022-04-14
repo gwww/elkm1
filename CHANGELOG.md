@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## [1.3.3]
+- Remove pause/resume from `elk.py`; not used outside of internal lib and
+  available in `Connection` if really needed
+
 ## [1.3.2]
 - Fix __iter__ type to be a Generator
 - All the elements (Areas, Counters, Zones, etc) are now attributes of the

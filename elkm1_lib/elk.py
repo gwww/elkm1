@@ -109,26 +109,18 @@ class Elk:
         """Helper to connection remove_handler."""
         self._connection.msg_decode.remove_handler(msg_type, handler)
 
-    def is_connected(self) -> bool:
-        """Helper to connection is_connected."""
-        return self._connection.is_connected()
-
     def connect(self) -> None:
         """Helper to connection connect."""
         asyncio.ensure_future(self._connection.connect())
 
-    def send(self, msg: MessageEncode) -> None:
-        """Helper to connection send."""
-        self._connection.send(msg)
-
-    def pause(self) -> None:
-        """Helper to connection pause."""
-        self._connection.pause()
-
-    def resume(self) -> None:
-        """Helper to connection resume."""
-        self._connection.resume()
-
     def disconnect(self) -> None:
         """Helper to connection disconnect."""
         self._connection.disconnect()
+
+    def is_connected(self) -> bool:
+        """Helper to connection is_connected."""
+        return self._connection.is_connected()
+
+    def send(self, msg: MessageEncode) -> None:
+        """Helper to connection send."""
+        self._connection.send(msg)

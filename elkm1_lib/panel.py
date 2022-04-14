@@ -3,17 +3,17 @@ import datetime as dt
 import time
 from typing import Any, Optional
 
+from .connection import Connection
 from .const import ElkRPStatus
 from .elements import Element
-from .elk import Elk
 from .message import lw_encode, rw_encode, sp_encode, ss_encode, sw_encode, vn_encode
 
 
 class Panel(Element):
     """Class representing the overall Elk panel"""
 
-    def __init__(self, elk: Elk) -> None:
-        super().__init__(0, elk)
+    def __init__(self, connection: Connection) -> None:
+        super().__init__(0, connection)
         self.real_time_clock = None
         self.elkm1_version = None
         self.xep_version = None
@@ -24,34 +24,36 @@ class Panel(Element):
         self._configured = True
         self.setattr("name", "ElkM1", True)
 
-        self._elk.add_handler("VN", self._vn_handler)
-        self._elk.add_handler("XK", self._xk_handler)
-        self._elk.add_handler("RR", self._xk_handler)  # RR/XK use same handler
-        self._elk.add_handler("RP", self._rp_handler)
-        self._elk.add_handler("SS", self._ss_handler)
-        self._elk.add_handler("UA", self._ua_handler)
+        self._connection.msg_decode.add_handler("VN", self._vn_handler)
+        self._connection.msg_decode.add_handler("XK", self._xk_handler)
+        self._connection.msg_decode.add_handler(
+            "RR", self._xk_handler
+        )  # RR/XK use same handler
+        self._connection.msg_decode.add_handler("RP", self._rp_handler)
+        self._connection.msg_decode.add_handler("SS", self._ss_handler)
+        self._connection.msg_decode.add_handler("UA", self._ua_handler)
 
     def sync(self) -> None:
         """Retrieve panel information from ElkM1"""
-        self._elk.send(vn_encode())
-        self._elk.send(lw_encode())
-        self._elk.send(ss_encode())
+        self._connection.send(vn_encode())
+        self._connection.send(lw_encode())
+        self._connection.send(ss_encode())
         # Don't sync UA from here as it is used as a "sync complete" marker
 
     def speak_word(self, word: int) -> None:
         """(Helper) Speak word."""
-        self._elk.send(sw_encode(word))
+        self._connection.send(sw_encode(word))
 
     def speak_phrase(self, phrase: int) -> None:
         """(Helper) Speak phrase."""
-        self._elk.send(sp_encode(phrase))
+        self._connection.send(sp_encode(phrase))
 
     def set_time(self, datetime: Optional[dt.datetime] = None) -> None:
         """(Helper) Set the time given a datetime."""
         if datetime is None:
             struct_time = time.localtime()
             datetime = dt.datetime(*struct_time[:6])
-        self._elk.send(rw_encode(datetime))
+        self._connection.send(rw_encode(datetime))
 
     def _vn_handler(self, elkm1_version: str, xep_version: str) -> None:
         self.setattr("elkm1_version", elkm1_version, False)
@@ -97,9 +99,9 @@ class Panel(Element):
 
     def _rp_handler(self, remote_programming_status: int) -> None:
         if remote_programming_status == ElkRPStatus.DISCONNECTED.value:
-            self._elk.resume()
+            self._connection.resume()
         else:
-            self._elk.pause()
+            self._connection.pause()
         self.setattr("remote_programming_status", remote_programming_status, True)
 
     def _ua_handler(self, **kwargs: dict[str, Any]) -> None:

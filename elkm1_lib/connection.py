@@ -71,13 +71,16 @@ class Connection:
             self._start_connection_retry_timer()
 
     def is_connected(self) -> bool:
+        """Is the connection active?"""
         return self._elk_protocol is not None
 
     @property
-    def msg_decode(self):
+    def msg_decode(self) -> MessageDecode:
+        """Get the message decoder instance."""
         return self._msg_decode
 
     def send(self, msg: MessageEncode) -> None:
+        """Send a message on the connection."""
         if self._elk_protocol:
             self._elk_protocol.write_data(msg.message, msg.response_command)
 
@@ -146,7 +149,7 @@ class _ElkProtocol(asyncio.Protocol):
         self,
         loop: asyncio.AbstractEventLoop,
         heartbeat_time: float,
-        connected: Callable[[_ElkProtocol], None],  # TODO: is this the right type?
+        connected: Callable[[_ElkProtocol], None],
         disconnected: Callable[[], None],
         got_data: Callable[[str], None],
         timeout: Callable[[str | None], None],

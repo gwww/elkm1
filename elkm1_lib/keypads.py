@@ -1,18 +1,18 @@
 """Definition of an ElkM1 Keypad."""
 import datetime as dt
-from typing import Optional
+from typing import Optional, cast
 
+from .connection import Connection
 from .const import KeypadKeys, Max, TextDescriptions
 from .elements import Element, Elements
-from .elk import Elk
 from .message import ka_encode
 
 
 class Keypad(Element):
     """Class representing an Keypad"""
 
-    def __init__(self, index: int, elk: Elk) -> None:
-        super().__init__(index, elk)
+    def __init__(self, index: int, connection: Connection) -> None:
+        super().__init__(index, connection)
         self.area = -1
         self.temperature = -40
         self.last_user_time = dt.datetime.now(dt.timezone.utc)
@@ -24,17 +24,17 @@ class Keypad(Element):
 class Keypads(Elements):
     """Handling for multiple areas"""
 
-    def __init__(self, elk: Elk) -> None:
-        super().__init__(elk, Keypad, Max.KEYPADS.value)
-        elk.add_handler("IC", self._ic_handler)
-        elk.add_handler("KA", self._ka_handler)
-        elk.add_handler("KC", self._kc_handler)
-        elk.add_handler("LW", self._lw_handler)
-        elk.add_handler("ST", self._st_handler)
+    def __init__(self, connection: Connection) -> None:
+        super().__init__(connection, Keypad, Max.KEYPADS.value)
+        connection.msg_decode.add_handler("IC", self._ic_handler)
+        connection.msg_decode.add_handler("KA", self._ka_handler)
+        connection.msg_decode.add_handler("KC", self._kc_handler)
+        connection.msg_decode.add_handler("LW", self._lw_handler)
+        connection.msg_decode.add_handler("ST", self._st_handler)
 
     def sync(self) -> None:
         """Retrieve areas from ElkM1"""
-        self.elk.send(ka_encode())
+        self._connection.send(ka_encode())
         self.get_descriptions(TextDescriptions.KEYPAD.value)
 
     def _ic_handler(self, code: int, user: int, keypad: int) -> None:
@@ -53,7 +53,7 @@ class Keypads(Elements):
                 keypad.setattr("area", keypad_areas[keypad.index], True)
 
     def _kc_handler(self, keypad: int, key: int) -> None:
-        keypads: list[Keypad] = getattr(self.elk, "keypads")
+        keypads: list[Keypad] = cast(list[Keypad], self.elements)
         keypads[keypad].last_keypress = None  # Force a change notification
         try:
             name = KeypadKeys(key).name

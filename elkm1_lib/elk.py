@@ -4,12 +4,21 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from importlib import import_module
 from typing import Any
 
-
-from .message import MessageEncode, MsgHandler, ua_encode
+from .areas import Areas
 from .connection import Connection
+from .counters import Counters
+from .keypads import Keypads
+from .lights import Lights
+from .message import MessageEncode, MsgHandler, ua_encode
+from .outputs import Outputs
+from .panel import Panel
+from .settings import Settings
+from .tasks import Tasks
+from .thermostats import Thermostats
+from .users import Users
+from .zones import Zones
 
 LOG = logging.getLogger(__name__)
 
@@ -48,10 +57,17 @@ class Elk:
         self.add_handler("login", self._login_status)
         self.add_handler("IE", self._call_sync_handlers)
 
-        for element in self.element_list:
-            module = import_module("elkm1_lib." + element)
-            class_ = getattr(module, element.capitalize())
-            setattr(self, element, class_(self))
+        self.areas: Areas = Areas(self._connection)
+        self.counters: Counters = Counters(self._connection)
+        self.keypads: Keypads = Keypads(self._connection)
+        self.lights: Lights = Lights(self._connection)
+        self.outputs: Outputs = Outputs(self._connection)
+        self.panel: Panel = Panel(self._connection)
+        self.settings: Settings = Settings(self._connection)
+        self.tasks: Tasks = Tasks(self._connection)
+        self.thermostats: Thermostats = Thermostats(self._connection)
+        self.users: Users = Users(self._connection)
+        self.zones: Zones = Zones(self._connection)
 
     def _login_status(self, succeeded: bool) -> None:
         if not succeeded:
@@ -78,6 +94,7 @@ class Elk:
 
     @property
     def connection(self):
+        """Return the connection instance."""
         return self._connection
 
     def run(self) -> None:

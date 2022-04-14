@@ -21,7 +21,7 @@ jobs:
         with:
           python-version: 3.9
 
-      - name: Run image
+      - name: Install poetry
         uses: snok/install-poetry@v1
         with:
           version: 1.1.13
@@ -63,4 +63,5 @@ jobs:
       - name: Run pytest
         run: |
           source .venv/bin/activate
+          poetry install --no-interaction
           pytest test

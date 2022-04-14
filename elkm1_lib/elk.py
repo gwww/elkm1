@@ -74,7 +74,7 @@ class Elk:
             self._connection.disconnect()
             LOG.error("Invalid username or password.")
 
-    def _connected(self):
+    def _connected(self) -> None:
         self._call_sync_handlers()
 
     def _sync_complete(self, **_: dict[str, Any]) -> None:
@@ -83,7 +83,7 @@ class Elk:
         # Remove so that other apps can send UA and not trigger sync_complete
         self.remove_handler("UA", self._sync_complete)
 
-    def _call_sync_handlers(self):
+    def _call_sync_handlers(self) -> None:
         """Invoke the synchronization handlers."""
 
         LOG.debug("Synchronizing panel...")
@@ -93,7 +93,7 @@ class Elk:
         self.send(ua_encode(0))  # Used to mark end of sync
 
     @property
-    def connection(self):
+    def connection(self) -> Connection:
         """Return the connection instance."""
         return self._connection
 

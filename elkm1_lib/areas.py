@@ -93,13 +93,13 @@ class Areas(Elements):
             self._connection.send(az_encode())
 
     def _ee_handler(
-        self, msg_area: int, is_exit: bool, timer1: int, timer2: int, armed_status: str
+        self, area: int, is_exit: bool, timer1: int, timer2: int, armed_status: str
     ) -> None:
-        area = cast(Area, self.elements[msg_area])
-        area.setattr("armed_status", armed_status, False)
-        area.setattr("timer1", timer1, False)
-        area.setattr("timer2", timer2, False)
-        area.setattr("is_exit", is_exit, True)
+        area_element = cast(Area, self.elements[area])
+        area_element.setattr("armed_status", armed_status, False)
+        area_element.setattr("timer1", timer1, False)
+        area_element.setattr("timer2", timer2, False)
+        area_element.setattr("is_exit", is_exit, True)
 
     # ElkM1 global setting G35 must be set for LD messages to be sent
     def _ld_handler(self, area: int, log: dict[str, Any]) -> None:

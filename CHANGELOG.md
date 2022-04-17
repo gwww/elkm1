@@ -2,6 +2,9 @@
 All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## [1.3.4]
+- Fix wrong parameter introduced in typing exercise.
+
 ## [1.3.3]
 - Remove pause/resume from `elk.py`; not used outside of internal lib and
   available in `Connection` if really needed

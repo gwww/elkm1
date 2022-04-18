@@ -1,24 +1,47 @@
 #!/usr/bin/env python
 
+# This takes a data file that is simply the output of connecting to the panel.
+# Typically, on a unix like system, this: `./simple 2>test.data`
+# Once the program is running it prints the port that the ElkM1 should connect
+# to. Usually something such as `/dev/tty00`. Run whatever Elk program you like 
+# with the URL being something such as `serial:///dev/tty00`.
+# Note, the parsing of the data file is not perfect and you may have to edit
+# the data file. Watch for the message "Data mismatch" -- it's real dumb. If
+# the write message code != the read message code then it prints.
+
+import re
 import os
-import termios
-import tty
+# import termios
+# import tty
 
+pattern = re.compile("'(.*)'")
+got_write = None
 responses = {}
-with open('test-serial.data') as fp:
-    line1 = fp.readline()
-    while line1:
-        line2 = fp.readline()
-        if not line2:
-            break
 
-        (cmd1, data1) = line1.split(None, 1)
-        (cmd2, data2) = line2.split(None, 1)
+with open('test.data') as fp:
+    line = fp.readline()
+    while line:
+        if line.startswith("write_data '"):
+            got_write = line
+        elif line.startswith("got_data '"):
+            if got_write is not None:
+                write_match = pattern.search(got_write)
+                write_data = write_match.group(1)
+                write_msg_code = write_data[2:4]
 
-        if cmd1 == 'write_data' and cmd2 == 'got_data':
-            responses[data1.strip().strip("'")] = data2.strip().strip("'")
+                read_match = pattern.search(line)
+                read_data = read_match.group(1)
+                read_msg_code = read_data[2:4]
 
-        line1 = fp.readline()
+                if (write_msg_code == read_msg_code.lower()
+                    or (write_msg_code == "cp" and read_msg_code == "CR")):
+                    responses[write_data] = read_data
+                    got_write = None
+                else:
+                    print(f"Data mismatch, write {write_data}, read {read_data}")
+
+        line = fp.readline()
+
 
 master, slave = os.openpty()
 # tty.setraw(master, termios.TCSANOW)
@@ -33,7 +56,7 @@ while True:
         break
 
     data = data.strip().decode('ISO-8859-1')
-    print("got_data: '{}'".format(data))
+    print(f"test-serial got_data: '{data}'")
     if data in responses:
         os.write(master, (responses[data] + '\r\n').encode('ISO-8859-1'))
-        print("write_data: '{}'".format(responses[data]))
+        print(f"test-serial write_data: '{responses[data]}'")

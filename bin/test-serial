@@ -3,14 +3,15 @@
 # This takes a data file that is simply the output of connecting to the panel.
 # Typically, on a unix like system, this: `./simple 2>test.data`
 # Once the program is running it prints the port that the ElkM1 should connect
-# to. Usually something such as `/dev/tty00`. Run whatever Elk program you like 
+# to. Usually something such as `/dev/tty00`. Run whatever Elk program you like
 # with the URL being something such as `serial:///dev/tty00`.
 # Note, the parsing of the data file is not perfect and you may have to edit
 # the data file. Watch for the message "Data mismatch" -- it's real dumb. If
 # the write message code != the read message code then it prints.
 
-import re
 import os
+import re
+
 # import termios
 # import tty
 
@@ -18,7 +19,7 @@ pattern = re.compile("'(.*)'")
 got_write = None
 responses = {}
 
-with open('test.data') as fp:
+with open("test.data") as fp:
     line = fp.readline()
     while line:
         if line.startswith("write_data '"):
@@ -33,8 +34,9 @@ with open('test.data') as fp:
                 read_data = read_match.group(1)
                 read_msg_code = read_data[2:4]
 
-                if (write_msg_code == read_msg_code.lower()
-                    or (write_msg_code == "cp" and read_msg_code == "CR")):
+                if write_msg_code == read_msg_code.lower() or (
+                    write_msg_code == "cp" and read_msg_code == "CR"
+                ):
                     responses[write_data] = read_data
                     got_write = None
                 else:
@@ -55,8 +57,8 @@ while True:
     if not data:
         break
 
-    data = data.strip().decode('ISO-8859-1')
+    data = data.strip().decode("ISO-8859-1")
     print(f"test-serial got_data: '{data}'")
     if data in responses:
-        os.write(master, (responses[data] + '\r\n').encode('ISO-8859-1'))
+        os.write(master, (responses[data] + "\r\n").encode("ISO-8859-1"))
         print(f"test-serial write_data: '{responses[data]}'")

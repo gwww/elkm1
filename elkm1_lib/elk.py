@@ -81,7 +81,7 @@ class Elk:
 
     def _got_first_message(self, **kwargs: dict[str, Any]) -> None:
         if not self._logged_in:
-            self._connection._msg_decode.call_handlers("login", {"succeeded": True})
+            self._connection.msg_decode.call_handlers("login", {"succeeded": True})
 
     def _connected(self) -> None:
         if url_scheme_is_secure(self._config["url"]):

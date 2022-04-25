@@ -11,7 +11,7 @@ from typing import Any, Optional, cast
 import serial_asyncio
 
 from .message import MessageDecode, MessageEncode, get_elk_command
-from .util import parse_url, url_scheme_is_secure
+from .util import parse_url
 
 LOG = logging.getLogger(__name__)
 

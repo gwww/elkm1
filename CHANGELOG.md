@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## [1.3.5]
+- Add logging of exception information on disconnect
+- Add login event callback when first message received
+- Move user/pass sending from connection to elk.py (cleaner connection code)
+
 ## [1.3.4]
 - Fix wrong parameter introduced in typing exercise.
 

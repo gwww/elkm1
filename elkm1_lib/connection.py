@@ -11,7 +11,7 @@ from typing import Any, Optional, cast
 import serial_asyncio
 
 from .message import MessageDecode, MessageEncode, get_elk_command
-from .util import parse_url, url_scheme_is_secure
+from .util import parse_url
 
 LOG = logging.getLogger(__name__)
 
@@ -84,6 +84,11 @@ class Connection:
         if self._elk_protocol:
             self._elk_protocol.write_data(msg.message, msg.response_command)
 
+    def send_raw(self, msg: str) -> None:
+        """Send a message on the connection."""
+        if self._elk_protocol:
+            self._elk_protocol.write_data(msg, raw=True)
+
     def pause(self) -> None:
         """Pause the connection from sending/receiving."""
         if self._elk_protocol:
@@ -115,11 +120,6 @@ class Connection:
         LOG.info("Connected to ElkM1")
         self._elk_protocol = elk_protocol
         self._connection_retry_time = 1
-        if elk_protocol is not None and url_scheme_is_secure(self._config["url"]):
-            self._elk_protocol.write_data(self._config["userid"], raw=True)
-            self._elk_protocol.write_data(self._config["password"], raw=True)
-        else:
-            self._msg_decode.call_handlers("login", {"succeeded": True})
         self._msg_decode.call_handlers("connected", {})
 
     def _reconnect(self) -> None:
@@ -175,7 +175,10 @@ class _ElkProtocol(asyncio.Protocol):
         self._connected_callback(self)
 
     def connection_lost(self, exc: Optional[Exception]) -> None:
-        LOG.debug("disconnected callback")
+        if exc:
+            LOG.exception(exc)
+        exc_str = f" (exception: {exc.__class__.__name__})" if exc is not None else ""
+        LOG.debug("disconnected callback%s", exc_str)
         self._transport = None
         self._cleanup()
         if self._disconnected_callback:

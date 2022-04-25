@@ -18,6 +18,7 @@ from .settings import Settings
 from .tasks import Tasks
 from .thermostats import Thermostats
 from .users import Users
+from .util import url_scheme_is_secure
 from .zones import Zones
 
 LOG = logging.getLogger(__name__)
@@ -34,6 +35,7 @@ class Elk:
         self.loop = loop if loop else asyncio.get_event_loop()
 
         self._connection: Connection = Connection(config)
+        self._logged_in = False
 
         # Setup for all the types of elements tracked
         if "element_list" in config:
@@ -54,8 +56,10 @@ class Elk:
             ]
 
         self.add_handler("connected", self._connected)
+        self.add_handler("disconnected", self._disconnected)
         self.add_handler("login", self._login_status)
         self.add_handler("IE", self._call_sync_handlers)
+        self.add_handler("VN", self._got_first_message)
 
         self.areas: Areas = Areas(self._connection)
         self.counters: Counters = Counters(self._connection)
@@ -70,12 +74,23 @@ class Elk:
         self.zones: Zones = Zones(self._connection)
 
     def _login_status(self, succeeded: bool) -> None:
+        self._logged_in = succeeded
         if not succeeded:
             self._connection.disconnect()
             LOG.error("Invalid username or password.")
 
+    def _got_first_message(self, **kwargs: dict[str, Any]) -> None:
+        if not self._logged_in:
+            self._connection._msg_decode.call_handlers("login", {"succeeded": True})
+
     def _connected(self) -> None:
+        if url_scheme_is_secure(self._config["url"]):
+            self._connection.send_raw(self._config["userid"])
+            self._connection.send_raw(self._config["password"])
         self._call_sync_handlers()
+
+    def _disconnected(self) -> None:
+        self._logged_in = False
 
     def _sync_complete(self, **_: dict[str, Any]) -> None:
         self._connection.msg_decode.call_handlers("sync_complete", {})

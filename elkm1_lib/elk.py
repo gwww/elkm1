@@ -9,6 +9,7 @@ from typing import Any
 from .areas import Areas
 from .connection import Connection
 from .counters import Counters
+from .events import EventHandling
 from .keypads import Keypads
 from .lights import Lights
 from .message import MessageEncode, MsgHandler, ua_encode
@@ -34,7 +35,8 @@ class Elk:
         self._config = config
         self.loop = loop if loop else asyncio.get_event_loop()
 
-        self._connection: Connection = Connection(config["url"])
+        self._events = EventHandling()
+        self._connection = Connection(config["url"], self._events)
         self._logged_in = False
 
         # Setup for all the types of elements tracked

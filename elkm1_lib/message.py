@@ -31,38 +31,6 @@ MessageEncode = namedtuple("MessageEncode", ["message", "response_command"])
 MsgHandler = Callable[..., None]
 
 
-class MessageDecode:
-    """Message decode and dispatcher."""
-
-    def __init__(self) -> None:
-        """Initialize a new Message instance."""
-        self._handlers: dict[str, list[MsgHandler]] = {}
-
-    def add_handler(self, message_type: str, handler: MsgHandler) -> None:
-        """Add callback for handlers."""
-        if message_type not in self._handlers:
-            self._handlers[message_type] = []
-
-        if handler not in self._handlers[message_type]:
-            self._handlers[message_type].append(handler)
-
-    def remove_handler(self, message_type: str, handler: MsgHandler) -> None:
-        """Remove callback for handlers."""
-        if message_type not in self._handlers:
-            return
-        if handler in self._handlers[message_type]:
-            self._handlers[message_type].remove(handler)
-
-    def call_handlers(self, cmd: str, decoded_msg: dict[str, Any]) -> None:
-        """Call the message handlers."""
-        # Copy the handlers list as add/remove could be
-        # called when invoking the handlers
-        handlers = list(self._handlers.get(cmd, []))
-
-        for handler in handlers:
-            handler(**decoded_msg)
-
-
 def decode(msg: str) -> tuple[str, dict[str, Any]] | None:
     """Decode an Elk message by passing to appropriate decoder"""
     valid, error_msg = _is_valid_length_and_checksum(msg)

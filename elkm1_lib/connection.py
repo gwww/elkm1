@@ -10,7 +10,8 @@ from typing import Optional, cast
 
 import serial_asyncio
 
-from .message import MessageDecode, MessageEncode, decode, get_elk_command
+from .events import EventHandling
+from .message import MessageEncode, decode, get_elk_command
 from .util import parse_url
 
 LOG = logging.getLogger(__name__)
@@ -25,7 +26,7 @@ class Connection:
         self._loop = loop if loop else asyncio.get_event_loop()
 
         self._elk_protocol: _ElkProtocol | None = None
-        self._msg_decode: MessageDecode = MessageDecode()
+        self._msg_decode = EventHandling()
         self._connection_retry_time = 1
         self._reconnect_task: asyncio.TimerHandle | None = None
 
@@ -73,7 +74,7 @@ class Connection:
         return self._elk_protocol is not None
 
     @property
-    def msg_decode(self) -> MessageDecode:
+    def msg_decode(self) -> EventHandling:
         """Get the message decoder instance."""
         return self._msg_decode
 

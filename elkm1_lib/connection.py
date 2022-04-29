@@ -10,7 +10,7 @@ from typing import Optional, cast
 
 import serial_asyncio
 
-from .message import MessageDecode, MessageEncode, get_elk_command
+from .message import MessageDecode, MessageEncode, decode, get_elk_command
 from .util import parse_url
 
 LOG = logging.getLogger(__name__)
@@ -19,9 +19,7 @@ LOG = logging.getLogger(__name__)
 class Connection:
     """Method to manage a connection to the ElkM1."""
 
-    def __init__(
-        self, url: str, loop: asyncio.AbstractEventLoop | None = None
-    ):
+    def __init__(self, url: str, loop: asyncio.AbstractEventLoop | None = None):
         """Setup a connection."""
         self._url = url
         self._loop = loop if loop else asyncio.get_event_loop()
@@ -134,7 +132,9 @@ class Connection:
     def _got_data_callback(self, data: str) -> None:
         LOG.debug("got_data '%s'", data)
         try:
-            self._msg_decode.decode(data)
+            decoded = decode(data)
+            if decoded:
+                self._msg_decode.call_handlers(decoded[0], decoded[1])
         except (ValueError, AttributeError) as exc:
             LOG.error("Invalid message '%s'", data, exc_info=exc)
 

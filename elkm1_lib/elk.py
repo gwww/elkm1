@@ -34,7 +34,7 @@ class Elk:
         self._config = config
         self.loop = loop if loop else asyncio.get_event_loop()
 
-        self._connection: Connection = Connection(config)
+        self._connection: Connection = Connection(config["url"])
         self._logged_in = False
 
         # Setup for all the types of elements tracked

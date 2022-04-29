@@ -6,7 +6,7 @@ import asyncio
 import logging
 from collections.abc import Callable
 from functools import partial, reduce
-from typing import Any, Optional, cast
+from typing import Optional, cast
 
 import serial_asyncio
 
@@ -20,10 +20,10 @@ class Connection:
     """Method to manage a connection to the ElkM1."""
 
     def __init__(
-        self, config: dict[str, Any], loop: asyncio.AbstractEventLoop | None = None
+        self, url: str, loop: asyncio.AbstractEventLoop | None = None
     ):
         """Setup a connection."""
-        self._config = config
+        self._url = url
         self._loop = loop if loop else asyncio.get_event_loop()
 
         self._elk_protocol: _ElkProtocol | None = None
@@ -34,8 +34,8 @@ class Connection:
     async def connect(self) -> None:
         """Asyncio connection to Elk."""
 
-        LOG.info("Connecting to ElkM1 at %s", self._config["url"])
-        scheme, dest, param, ssl_context = parse_url(self._config["url"])
+        LOG.info("Connecting to ElkM1 at %s", self._url)
+        scheme, dest, param, ssl_context = parse_url(self._url)
         heartbeat_time = 120 if scheme != "serial" else -1
 
         connection = partial(
@@ -126,7 +126,7 @@ class Connection:
         asyncio.ensure_future(self.connect())
 
     def _disconnected_callback(self) -> None:
-        LOG.warning("ElkM1 at %s disconnected", self._config["url"])
+        LOG.warning("ElkM1 at %s disconnected", self._url)
         self._elk_protocol = None
         self._start_connection_retry_timer()
         self._msg_decode.call_handlers("disconnected", {})

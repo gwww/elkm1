@@ -1,7 +1,5 @@
 from unittest.mock import Mock, call
 
-import pytest
-
 from elkm1_lib.connection import _ElkProtocol
 
 

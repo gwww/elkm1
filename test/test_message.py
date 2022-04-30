@@ -1,10 +1,8 @@
 import datetime as dt
-from unittest.mock import Mock
 
 import pytest
 
 import elkm1_lib.message as m
-from elkm1_lib.notify import Notifier
 
 
 def test_housecode_to_index_accepts_valid_codes():

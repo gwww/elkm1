@@ -61,9 +61,11 @@ def parse_range(rng, max):
 
 def parse_element_command(cmd, line, max):
     match = re.match("([\d,\- <*]+)(\w*.*)", line)
-    ids = parse_range(match.groups()[0], max)
-    subcommand = parse_subcommand(match.groups()[1])
-    return (ids, subcommand[0], subcommand[1])
+    if match:
+        ids = parse_range(match.groups()[0], max)
+        subcommand = parse_subcommand(match.groups()[1])
+        return (ids, subcommand[0], subcommand[1])
+    return None
 
 
 def find_class(module, class_name):
@@ -105,7 +107,7 @@ class Commands:
             cmd = fn_name[0:2]
             params = [p for p in inspect.signature(fn).parameters]
             params = " ".join(["<" + p + ">" for p in params])
-            self.encode_cmds[cmd] = Command(fn, "{} {}".format(cmd, params), fn.__doc__)
+            self.encode_cmds[cmd] = Command(fn, f"{cmd} {params}", fn.__doc__)
 
         self.element_cmds = {}
         self.subcommands = {}
@@ -174,7 +176,15 @@ class Commands:
 
     def print_elements(self, cmd, args):
         element_list = getattr(self.elk, cmd + "s", None)
+        if element_list is None:
+            print("Command not supported.")
+            return
+
         args = parse_element_command(cmd, " ".join(args), element_list.max_elements)
+        if args is None:
+            print("Cannot parse command.")
+            return
+
         if args[1]:
             if args[1] in self.element_cmds[cmd][3]:
                 fn = self.element_cmds[cmd][3][args[1]][0]

@@ -49,7 +49,7 @@ def decode(msg: str) -> tuple[str, dict[str, Any]] | None:
         return None
     if "Login successful" in msg:
         return ("login", {"succeeded": True})
-    elif msg.startswith("Username/Password not found") or msg == "Disabled":
+    if msg.startswith("Username/Password not found") or msg == "Disabled":
         return ("login", {"succeeded": False})
     raise ValueError(error_msg)
 

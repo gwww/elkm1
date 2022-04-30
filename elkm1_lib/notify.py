@@ -1,3 +1,5 @@
+"""Observer for notifying when messages received or events occur."""
+
 from collections.abc import Callable
 import logging
 from typing import Any
@@ -35,5 +37,5 @@ class Notifier:
         for observer in observers:
             try:
                 observer(**notify_parameters)
-            except Exception as exc:
+            except Exception as exc:  # pylint: disable=broad-except
                 LOG.exception(exc)

@@ -22,7 +22,7 @@ class Element:
         self._index = index
         self._connection = connection
         self._notifier = notifier
-        self._callbacks: list[Callable[[Element, dict[str, Any]], None]] = []
+        self._observers: list[Callable[[Element, dict[str, Any]], None]] = []
         self.name: str = self.default_name()
         self._changeset: dict[str, Any] = {}
         self._configured: bool = False
@@ -37,21 +37,21 @@ class Element:
         """If a callback has ever been triggered this will be true."""
         return self._configured
 
-    def add_callback(self, callback: Callable[[Element, dict[str, Any]], None]) -> None:
+    def add_callback(self, observer: Callable[[Element, dict[str, Any]], None]) -> None:
         """Callbacks when attribute of element changes"""
-        self._callbacks.append(callback)
+        self._observers.append(observer)
 
     def remove_callback(
-        self, callback: Callable[[Element, dict[str, Any]], None]
+        self, observer: Callable[[Element, dict[str, Any]], None]
     ) -> None:
         """Callbacks when attribute of element changes"""
-        if callback in self._callbacks:
-            self._callbacks.remove(callback)
+        if observer in self._observers:
+            self._observers.remove(observer)
 
-    def _call_callbacks(self) -> None:
+    def _notify(self) -> None:
         """Callbacks when attribute of element changes"""
-        for callback in self._callbacks:
-            callback(self, self._changeset)
+        for observer in self._observers:
+            observer(self, self._changeset)
         self._changeset = {}
 
     def setattr(
@@ -64,7 +64,7 @@ class Element:
             self._changeset[attr] = new_value
 
         if close_the_changeset and self._changeset:
-            self._call_callbacks()
+            self._notify()
 
     def default_name(self, separator: str = "-") -> str:
         """Return a default name for based on class and index of element"""

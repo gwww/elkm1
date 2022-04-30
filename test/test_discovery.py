@@ -3,7 +3,6 @@ import contextlib
 from unittest.mock import MagicMock, patch
 
 import pytest
-
 from elkm1_lib.discovery import AIOELKDiscovery, ELKDiscovery, ElkSystem
 
 

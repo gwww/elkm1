@@ -1,8 +1,4 @@
-from unittest.mock import Mock
-
 import pytest
-
-from elkm1_lib.const import TextDescriptions
 from elkm1_lib.util import parse_url, pretty_const
 
 

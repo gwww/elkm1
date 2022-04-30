@@ -10,8 +10,8 @@ from typing import Optional, cast
 
 import serial_asyncio
 
-from .notify import Notifier
 from .message import MessageEncode, decode, get_elk_command
+from .notify import Notifier
 from .util import parse_url
 
 LOG = logging.getLogger(__name__)

@@ -9,10 +9,10 @@ from typing import Any
 from .areas import Areas
 from .connection import Connection
 from .counters import Counters
-from .notify import Notifier
 from .keypads import Keypads
 from .lights import Lights
 from .message import MessageEncode, MsgHandler, ua_encode
+from .notify import Notifier
 from .outputs import Outputs
 from .panel import Panel
 from .settings import Settings

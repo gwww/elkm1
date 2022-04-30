@@ -1,4 +1,5 @@
 import pytest
+
 from elkm1_lib.util import parse_url, pretty_const
 
 

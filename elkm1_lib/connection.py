@@ -10,7 +10,7 @@ from typing import Optional, cast
 
 import serial_asyncio
 
-from .events import EventHandling
+from .notify import Notifier
 from .message import MessageEncode, decode, get_elk_command
 from .util import parse_url
 
@@ -20,13 +20,18 @@ LOG = logging.getLogger(__name__)
 class Connection:
     """Method to manage a connection to the ElkM1."""
 
-    def __init__(self, url: str, events: EventHandling, loop: asyncio.AbstractEventLoop | None = None):
+    def __init__(
+        self,
+        url: str,
+        notifier: Notifier,
+        loop: asyncio.AbstractEventLoop | None = None,
+    ):
         """Setup a connection."""
         self._url = url
+        self._notifier = notifier
         self._loop = loop if loop else asyncio.get_event_loop()
 
         self._elk_protocol: _ElkProtocol | None = None
-        self._events = events
         self._connection_retry_time = 1
         self._reconnect_task: asyncio.TimerHandle | None = None
 
@@ -73,11 +78,6 @@ class Connection:
         """Is the connection active?"""
         return self._elk_protocol is not None
 
-    @property
-    def msg_decode(self) -> EventHandling:
-        """Get the message decoder instance."""
-        return self._events
-
     def send(self, msg: MessageEncode) -> None:
         """Send a message on the connection."""
         if self._elk_protocol:
@@ -119,7 +119,7 @@ class Connection:
         LOG.info("Connected to ElkM1")
         self._elk_protocol = elk_protocol
         self._connection_retry_time = 1
-        self._events.call_handlers("connected", {})
+        self._notifier.notify("connected", {})
 
     def _reconnect(self) -> None:
         asyncio.ensure_future(self.connect())
@@ -128,19 +128,19 @@ class Connection:
         LOG.warning("ElkM1 at %s disconnected", self._url)
         self._elk_protocol = None
         self._start_connection_retry_timer()
-        self._events.call_handlers("disconnected", {})
+        self._notifier.notify("disconnected", {})
 
     def _got_data_callback(self, data: str) -> None:
         LOG.debug("got_data '%s'", data)
         try:
             decoded = decode(data)
             if decoded:
-                self._events.call_handlers(decoded[0], decoded[1])
+                self._notifier.notify(decoded[0], decoded[1])
         except (ValueError, AttributeError) as exc:
             LOG.error("Invalid message '%s'", data, exc_info=exc)
 
     def _timeout_callback(self, msg_code: str) -> None:
-        self._events.call_handlers("timeout", {"msg_code": msg_code})
+        self._notifier.notify("timeout", {"msg_code": msg_code})
 
 
 class _ElkProtocol(asyncio.Protocol):

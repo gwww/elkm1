@@ -6,13 +6,14 @@ from .connection import Connection
 from .const import Max, TextDescriptions
 from .elements import Element, Elements
 from .message import cv_encode, cx_encode
+from .notify import Notifier
 
 
 class Counter(Element):
     """Class representing an Counter"""
 
-    def __init__(self, index: int, connection: Connection) -> None:
-        super().__init__(index, connection)
+    def __init__(self, index: int, connection: Connection, notifier: Notifier) -> None:
+        super().__init__(index, connection, notifier)
         self.value = None
 
     def get(self) -> None:
@@ -27,9 +28,9 @@ class Counter(Element):
 class Counters(Elements):
     """Handling for multiple counters"""
 
-    def __init__(self, connection: Connection) -> None:
-        super().__init__(connection, Counter, Max.COUNTERS.value)
-        connection.msg_decode.add_handler("CV", self._cv_handler)
+    def __init__(self, connection: Connection, notifier: Notifier) -> None:
+        super().__init__(connection, notifier, Counter, Max.COUNTERS.value)
+        notifier.attach("CV", self._cv_handler)
 
     def sync(self) -> None:
         """Retrieve values from ElkM1 on demand"""

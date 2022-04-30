@@ -12,14 +12,16 @@ from typing import Any, Generator, Type
 from .connection import Connection
 from .const import TextDescriptions
 from .message import sd_encode
+from .notify import Notifier
 
 
 class Element:
     """Element class"""
 
-    def __init__(self, index: int, connection: Connection) -> None:
+    def __init__(self, index: int, connection: Connection, notifier: Notifier) -> None:
         self._index = index
         self._connection = connection
+        self._notifier = notifier
         self._callbacks: list[Callable[[Element, dict[str, Any]], None]] = []
         self.name: str = self.default_name()
         self._changeset: dict[str, Any] = {}
@@ -94,16 +96,21 @@ class Elements:
     """Base for list of elements."""
 
     def __init__(
-        self, connection: Connection, class_: Type[Element], max_elements: int
+        self,
+        connection: Connection,
+        notifier: Notifier,
+        class_: Type[Element],
+        max_elements: int,
     ) -> None:
         self._connection = connection
+        self._notifier = notifier
         self.max_elements = max_elements
-        self.elements = [class_(i, connection) for i in range(max_elements)]
+        self.elements = [class_(i, connection, notifier) for i in range(max_elements)]
 
         self._get_description_state: tuple[
             int, int, list[str | None], Callable[[list[str | None], int], None]
         ] | None = None
-        connection.msg_decode.add_handler("SD", self._sd_handler)
+        notifier.attach("SD", self._sd_handler)
 
     def __iter__(self) -> Generator[Element, None, None]:
         for element in self.elements:

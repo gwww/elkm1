@@ -5,13 +5,14 @@ from .connection import Connection
 from .const import Max, TextDescriptions
 from .elements import Element, Elements
 from .message import tn_encode
+from .notify import Notifier
 
 
 class Task(Element):
     """Class representing an Task"""
 
-    def __init__(self, index: int, connection: Connection) -> None:
-        super().__init__(index, connection)
+    def __init__(self, index: int, connection: Connection, notifier: Notifier) -> None:
+        super().__init__(index, connection, notifier)
         self.last_change = None
 
     def activate(self) -> None:
@@ -22,9 +23,9 @@ class Task(Element):
 class Tasks(Elements):
     """Handling for multiple tasks"""
 
-    def __init__(self, connection: Connection) -> None:
-        super().__init__(connection, Task, Max.TASKS.value)
-        connection.msg_decode.add_handler("TC", self._tc_handler)
+    def __init__(self, connection: Connection, notifier: Notifier) -> None:
+        super().__init__(connection, notifier, Task, Max.TASKS.value)
+        notifier.attach("TC", self._tc_handler)
 
     def sync(self) -> None:
         """Retrieve tasks from ElkM1"""

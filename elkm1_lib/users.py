@@ -3,6 +3,7 @@
 from .connection import Connection
 from .const import Max, TextDescriptions
 from .elements import Element, Elements
+from .notify import Notifier
 
 
 class User(Element):
@@ -12,8 +13,8 @@ class User(Element):
 class Users(Elements):
     """Handling for multiple areas"""
 
-    def __init__(self, connection: Connection) -> None:
-        super().__init__(connection, User, Max.USERS.value)
+    def __init__(self, connection: Connection, notifier: Notifier) -> None:
+        super().__init__(connection, notifier, User, Max.USERS.value)
 
     def sync(self) -> None:
         """Retrieve areas from ElkM1"""

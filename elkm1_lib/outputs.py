@@ -4,13 +4,14 @@ from .connection import Connection
 from .const import Max, TextDescriptions
 from .elements import Element, Elements
 from .message import cf_encode, cn_encode, cs_encode, ct_encode
+from .notify import Notifier
 
 
 class Output(Element):
     """Class representing an Output"""
 
-    def __init__(self, index: int, connection: Connection) -> None:
-        super().__init__(index, connection)
+    def __init__(self, index: int, connection: Connection, notifier: Notifier) -> None:
+        super().__init__(index, connection, notifier)
         self.output_on = False
 
     def turn_off(self) -> None:
@@ -29,10 +30,10 @@ class Output(Element):
 class Outputs(Elements):
     """Handling for multiple areas"""
 
-    def __init__(self, connection: Connection) -> None:
-        super().__init__(connection, Output, Max.OUTPUTS.value)
-        connection.msg_decode.add_handler("CC", self._cc_handler)
-        connection.msg_decode.add_handler("CS", self._cs_handler)
+    def __init__(self, connection: Connection, notifier: Notifier) -> None:
+        super().__init__(connection, notifier, Output, Max.OUTPUTS.value)
+        notifier.attach("CC", self._cc_handler)
+        notifier.attach("CS", self._cs_handler)
 
     def sync(self) -> None:
         """Retrieve areas from ElkM1"""

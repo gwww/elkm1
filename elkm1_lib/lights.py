@@ -4,13 +4,14 @@ from .connection import Connection
 from .const import Max, TextDescriptions
 from .elements import Element, Elements
 from .message import pc_encode, pf_encode, pn_encode, ps_encode, pt_encode
+from .notify import Notifier
 
 
 class Light(Element):
     """Class representing a Light"""
 
-    def __init__(self, index: int, connection: Connection) -> None:
-        super().__init__(index, connection)
+    def __init__(self, index: int, connection: Connection, notifier: Notifier) -> None:
+        super().__init__(index, connection, notifier)
         self.status = 0
 
     def level(self, level: int, time: int = 0) -> None:
@@ -30,10 +31,10 @@ class Light(Element):
 class Lights(Elements):
     """Handling for multiple lights"""
 
-    def __init__(self, connection: Connection) -> None:
-        super().__init__(connection, Light, Max.LIGHTS.value)
-        connection.msg_decode.add_handler("PC", self._pc_handler)
-        connection.msg_decode.add_handler("PS", self._ps_handler)
+    def __init__(self, connection: Connection, notifier: Notifier) -> None:
+        super().__init__(connection, notifier, Light, Max.LIGHTS.value)
+        notifier.attach("PC", self._pc_handler)
+        notifier.attach("PS", self._ps_handler)
 
     def sync(self) -> None:
         """Retrieve lights from ElkM1"""

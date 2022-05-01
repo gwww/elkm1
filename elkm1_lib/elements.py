@@ -12,15 +12,17 @@ from typing import Any, Generator, Type
 from .connection import Connection
 from .const import TextDescriptions
 from .message import sd_encode
+from .notify import Notifier
 
 
 class Element:
     """Element class"""
 
-    def __init__(self, index: int, connection: Connection) -> None:
+    def __init__(self, index: int, connection: Connection, notifier: Notifier) -> None:
         self._index = index
         self._connection = connection
-        self._callbacks: list[Callable[[Element, dict[str, Any]], None]] = []
+        self._notifier = notifier
+        self._observers: list[Callable[[Element, dict[str, Any]], None]] = []
         self.name: str = self.default_name()
         self._changeset: dict[str, Any] = {}
         self._configured: bool = False
@@ -35,21 +37,21 @@ class Element:
         """If a callback has ever been triggered this will be true."""
         return self._configured
 
-    def add_callback(self, callback: Callable[[Element, dict[str, Any]], None]) -> None:
+    def add_callback(self, observer: Callable[[Element, dict[str, Any]], None]) -> None:
         """Callbacks when attribute of element changes"""
-        self._callbacks.append(callback)
+        self._observers.append(observer)
 
     def remove_callback(
-        self, callback: Callable[[Element, dict[str, Any]], None]
+        self, observer: Callable[[Element, dict[str, Any]], None]
     ) -> None:
         """Callbacks when attribute of element changes"""
-        if callback in self._callbacks:
-            self._callbacks.remove(callback)
+        if observer in self._observers:
+            self._observers.remove(observer)
 
-    def _call_callbacks(self) -> None:
+    def _notify(self) -> None:
         """Callbacks when attribute of element changes"""
-        for callback in self._callbacks:
-            callback(self, self._changeset)
+        for observer in self._observers:
+            observer(self, self._changeset)
         self._changeset = {}
 
     def setattr(
@@ -62,7 +64,7 @@ class Element:
             self._changeset[attr] = new_value
 
         if close_the_changeset and self._changeset:
-            self._call_callbacks()
+            self._notify()
 
     def default_name(self, separator: str = "-") -> str:
         """Return a default name for based on class and index of element"""
@@ -94,16 +96,21 @@ class Elements:
     """Base for list of elements."""
 
     def __init__(
-        self, connection: Connection, class_: Type[Element], max_elements: int
+        self,
+        connection: Connection,
+        notifier: Notifier,
+        class_: Type[Element],
+        max_elements: int,
     ) -> None:
         self._connection = connection
+        self._notifier = notifier
         self.max_elements = max_elements
-        self.elements = [class_(i, connection) for i in range(max_elements)]
+        self.elements = [class_(i, connection, notifier) for i in range(max_elements)]
 
         self._get_description_state: tuple[
             int, int, list[str | None], Callable[[list[str | None], int], None]
         ] | None = None
-        connection.msg_decode.add_handler("SD", self._sd_handler)
+        notifier.attach("SD", self._sd_handler)
 
     def __iter__(self) -> Generator[Element, None, None]:
         for element in self.elements:

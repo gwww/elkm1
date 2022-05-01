@@ -7,13 +7,14 @@ from .connection import Connection
 from .const import ElkRPStatus
 from .elements import Element
 from .message import lw_encode, rw_encode, sp_encode, ss_encode, sw_encode, vn_encode
+from .notify import Notifier
 
 
 class Panel(Element):
     """Class representing the overall Elk panel"""
 
-    def __init__(self, connection: Connection) -> None:
-        super().__init__(0, connection)
+    def __init__(self, connection: Connection, notifier: Notifier) -> None:
+        super().__init__(0, connection, notifier)
         self.real_time_clock = None
         self.elkm1_version = None
         self.xep_version = None
@@ -24,14 +25,12 @@ class Panel(Element):
         self._configured = True
         self.setattr("name", "ElkM1", True)
 
-        self._connection.msg_decode.add_handler("VN", self._vn_handler)
-        self._connection.msg_decode.add_handler("XK", self._xk_handler)
-        self._connection.msg_decode.add_handler(
-            "RR", self._xk_handler
-        )  # RR/XK use same handler
-        self._connection.msg_decode.add_handler("RP", self._rp_handler)
-        self._connection.msg_decode.add_handler("SS", self._ss_handler)
-        self._connection.msg_decode.add_handler("UA", self._ua_handler)
+        notifier.attach("VN", self._vn_handler)
+        notifier.attach("XK", self._xk_handler)
+        notifier.attach("RR", self._xk_handler)  # RR/XK use same handler
+        notifier.attach("RP", self._rp_handler)
+        notifier.attach("SS", self._ss_handler)
+        notifier.attach("UA", self._ua_handler)
 
     def sync(self) -> None:
         """Retrieve panel information from ElkM1"""

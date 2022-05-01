@@ -6,13 +6,14 @@ from .connection import Connection
 from .const import Max, TextDescriptions
 from .elements import Element, Elements
 from .message import tr_encode, ts_encode
+from .notify import Notifier
 
 
 class Thermostat(Element):
     """Class representing an Thermostat"""
 
-    def __init__(self, index: int, connection: Connection) -> None:
-        super().__init__(index, connection)
+    def __init__(self, index: int, connection: Connection, notifier: Notifier) -> None:
+        super().__init__(index, connection, notifier)
         self.mode = 0
         self.hold = False
         self.fan = 0
@@ -29,10 +30,10 @@ class Thermostat(Element):
 class Thermostats(Elements):
     """Handling for multiple areas"""
 
-    def __init__(self, connection: Connection) -> None:
-        super().__init__(connection, Thermostat, Max.THERMOSTATS.value)
-        connection.msg_decode.add_handler("ST", self._st_handler)
-        connection.msg_decode.add_handler("TR", self._tr_handler)
+    def __init__(self, connection: Connection, notifier: Notifier) -> None:
+        super().__init__(connection, notifier, Thermostat, Max.THERMOSTATS.value)
+        notifier.attach("ST", self._st_handler)
+        notifier.attach("TR", self._tr_handler)
 
     def sync(self) -> None:
         """Retrieve areas from ElkM1"""

@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import datetime as dt
 import re
+import sys
 import time
 from collections import namedtuple
 from collections.abc import Callable
@@ -27,305 +28,295 @@ from typing import Any, cast
 from .const import Max
 
 MessageEncode = namedtuple("MessageEncode", ["message", "response_command"])
-# MsgHandler = Callable[[dict[str, Any]], None] # Gives type error
 MsgHandler = Callable[..., None]
 
-# pylint: disable=no-self-use
-class MessageDecode:
-    """Message decode and dispatcher."""
 
-    def __init__(self) -> None:
-        """Initialize a new Message instance."""
-        self._handlers: dict[str, list[MsgHandler]] = {}
+def decode(msg: str) -> tuple[str, dict[str, Any]] | None:
+    """Decode an Elk message by passing to appropriate decoder"""
+    valid, error_msg = _is_valid_length_and_checksum(msg)
+    if valid:
+        cmd = msg[2:4]
+        decoder = getattr(sys.modules[__name__], f"{cmd.lower()}_decode", None)
+        if not decoder:
+            return ("unknown", {"msg_code": cmd, "data": msg[4:-2]})
+        try:
+            decoded_msg = decoder(msg)
+        except (IndexError, ValueError, AttributeError) as exc:
+            raise ValueError("Cannot decode message") from exc
+        return (cmd, decoded_msg)
 
-    def add_handler(self, message_type: str, handler: MsgHandler) -> None:
-        """Add callback for handlers."""
-        if message_type not in self._handlers:
-            self._handlers[message_type] = []
-
-        if handler not in self._handlers[message_type]:
-            self._handlers[message_type].append(handler)
-
-    def remove_handler(self, message_type: str, handler: MsgHandler) -> None:
-        """Remove callback for handlers."""
-        if message_type not in self._handlers:
-            return
-        if handler in self._handlers[message_type]:
-            self._handlers[message_type].remove(handler)
-
-    def call_handlers(self, cmd: str, decoded_msg: dict[str, Any]) -> None:
-        """Call the message handlers."""
-        # Copy the handlers list as add/remove could be
-        # called when invoking the handlers
-        handlers = list(self._handlers.get(cmd, []))
-
-        for handler in handlers:
-            handler(**decoded_msg)
-
-    def decode(self, msg: str) -> None:
-        """Decode an Elk message by passing to appropriate decoder"""
-        valid, error_msg = _is_valid_length_and_checksum(msg)
-        if valid:
-            cmd = msg[2:4]
-            decoder = getattr(self, f"_{cmd.lower()}_decode", None)
-            if not decoder:
-                cmd = "unknown"
-                decoder = self._unknown_decode
-            try:
-                self.call_handlers(cmd, decoder(msg))
-            except (IndexError, ValueError) as exc:
-                raise ValueError("Cannot decode message") from exc
-            return
-
-        if not msg or msg.startswith("Username: ") or msg.startswith("Password: "):
-            return
-        if "Login successful" in msg:
-            self.call_handlers("login", {"succeeded": True})
-        elif msg.startswith("Username/Password not found") or msg == "Disabled":
-            self.call_handlers("login", {"succeeded": False})
-        else:
-            raise ValueError(error_msg)
-
-    def _am_decode(self, msg: str) -> dict[str, str]:
-        """AM: Alarm memory by area report."""
-        return {"alarm_memory": msg[4 : 4 + Max.AREAS.value]}
-
-    def _as_decode(self, msg: str) -> dict[str, str]:
-        """AS: Arming status report."""
-        return {
-            "armed_statuses": msg[4:12],
-            "arm_up_states": msg[12:20],
-            "alarm_states": msg[20:28],
-        }
-
-    def _az_decode(self, msg: str) -> dict[str, str]:
-        """AZ: Alarm by zone report."""
-        return {"alarm_status": msg[4 : 4 + Max.ZONES.value]}
-
-    def _cr_one_custom_value_decode(self, index: int, part: str) -> dict[str, Any]:
-        value = int(part[0:5])
-        value_format = int(part[5])
-        if value_format == 2:
-            ret: int | tuple[int, int] = ((value >> 8) & 0xFF, value & 0xFF)
-        else:
-            ret = value
-        return {"index": index, "value": ret, "value_format": value_format}
-
-    def _cr_decode(self, msg: str) -> dict[str, Any]:
-        """CR: Custom values"""
-        if int(msg[4:6]) > 0:
-            index = int(msg[4:6]) - 1
-            return {"values": [self._cr_one_custom_value_decode(index, msg[6:12])]}
-
-        part = 6
-        ret = []
-        for i in range(Max.SETTINGS.value):
-            ret.append(self._cr_one_custom_value_decode(i, msg[part : part + 6]))
-            part += 6
-        return {"values": ret}
-
-    def _cc_decode(self, msg: str) -> dict[str, Any]:
-        """CC: Output status for single output."""
-        return {"output": int(msg[4:7]) - 1, "output_status": msg[7] == "1"}
-
-    def _cs_decode(self, msg: str) -> dict[str, Any]:
-        """CS: Output status for all outputs."""
-        output_status = [x == "1" for x in msg[4 : 4 + Max.OUTPUTS.value]]
-        return {"output_status": output_status}
-
-    def _cv_decode(self, msg: str) -> dict[str, Any]:
-        """CV: Counter value."""
-        return {"counter": int(msg[4:6]) - 1, "value": int(msg[6:11])}
-
-    def _ee_decode(self, msg: str) -> dict[str, Any]:
-        """EE: Entry/exit timer report."""
-        return {
-            "area": int(msg[4:5]) - 1,
-            "is_exit": msg[5:6] == "0",
-            "timer1": int(msg[6:9]),
-            "timer2": int(msg[9:12]),
-            "armed_status": msg[12:13],
-        }
-
-    def _ic_decode(self, msg: str) -> dict[str, Any]:
-        """IC: Send Valid Or Invalid User Code Format."""
-        code = msg[4:16]
-        if re.match(r"(0\d){6}", code):
-            code = re.sub(r"0(\d)", r"\1", code)
-        return {
-            "code": code,
-            "user": int(msg[16:19]) - 1,
-            "keypad": int(msg[19:21]) - 1,
-        }
-
-    def _ie_decode(self, msg: str) -> dict[str, str]:
-        """IE: Installer mode exited."""
-        return {}
-
-    def _ka_decode(self, msg: str) -> dict[str, Any]:
-        """KA: Keypad areas for all keypads."""
-        return {"keypad_areas": [ord(x) - 0x31 for x in msg[4 : 4 + Max.KEYPADS.value]]}
-
-    def _kc_decode(self, msg: str) -> dict[str, Any]:
-        """KC: Keypad key change."""
-        return {"keypad": int(msg[4:6]) - 1, "key": int(msg[6:8])}
-
-    def _ld_decode(self, msg: str) -> dict[str, Any]:
-        """LD: System Log Data Update."""
-        area = int(msg[11]) - 1
-        hour = int(msg[12:14])
-        minute = int(msg[14:16])
-        month = int(msg[16:18])
-        day = int(msg[18:20])
-        year = int(msg[24:26]) + 2000
-        log_local_datetime = dt.datetime(year, month, day, hour, minute)
-        log_local_time = time.mktime(log_local_datetime.timetuple())
-        log_gm_timestruct = time.gmtime(log_local_time)
-
-        log: dict[str, Any] = {}
-        log["event"] = int(msg[4:8])
-        log["number"] = int(msg[8:11])
-        log["index"] = int(msg[20:23])
-        log["timestamp"] = dt.datetime(
-            *log_gm_timestruct[:6], tzinfo=dt.timezone.utc
-        ).isoformat()
-
-        return {"area": area, "log": log}
-
-    def _lw_decode(self, msg: str) -> dict[str, Any]:
-        """LW: temperatures from all keypads and zones 1-16."""
-        keypad_temps = []
-        zone_temps = []
-        for i in range(16):
-            keypad_temps.append(int(msg[4 + 3 * i : 7 + 3 * i]) - 40)
-            zone_temps.append(int(msg[52 + 3 * i : 55 + 3 * i]) - 60)
-        return {"keypad_temps": keypad_temps, "zone_temps": zone_temps}
-
-    def _pc_decode(self, msg: str) -> dict[str, Any]:
-        """PC: PLC (lighting) change."""
-        housecode = msg[4:7]
-        return {
-            "housecode": housecode,
-            "index": housecode_to_index(housecode),
-            "light_level": int(msg[7:9]),
-        }
-
-    def _ps_decode(self, msg: str) -> dict[str, Any]:
-        """PS: PLC (lighting) status."""
-        return {
-            "bank": ord(msg[4]) - 0x30,
-            "statuses": [ord(x) - 0x30 for x in msg[5:69]],
-        }
-
-    def _rp_decode(self, msg: str) -> dict[str, int]:
-        """RP: Remote programming status."""
-        return {"remote_programming_status": int(msg[4:6])}
-
-    def _rr_decode(self, msg: str) -> dict[str, str]:
-        """RR: Realtime clock."""
-        return {"real_time_clock": msg[4:20]}
-
-    def _sd_decode(self, msg: str) -> dict[str, Any]:
-        """SD: Description text."""
-        desc_ch1 = msg[9]
-        show_on_keypad = ord(desc_ch1) >= 0x80
-        if show_on_keypad:
-            desc_ch1 = chr(ord(desc_ch1) & 0x7F)
-        return {
-            "desc_type": int(msg[4:6]),
-            "unit": int(msg[6:9]) - 1,
-            "desc": (desc_ch1 + msg[10:25]).rstrip(),
-            "show_on_keypad": show_on_keypad,
-        }
-
-    def _ss_decode(self, msg: str) -> dict[str, str]:
-        """SS: System status."""
-        return {"system_trouble_status": msg[4:-2]}
-
-    def _st_decode(self, msg: str) -> dict[str, int]:
-        """ST: Temperature update."""
-        group = int(msg[4:5])
-        temperature = int(msg[7:10])
-        if group == 0:
-            temperature -= 60
-        elif group == 1:
-            temperature -= 40
-        return {"group": group, "device": int(msg[5:7]) - 1, "temperature": temperature}
-
-    def _tc_decode(self, msg: str) -> dict[str, int]:
-        """TC: Task change."""
-        return {"task": int(msg[4:7]) - 1}
-
-    def _tr_decode(self, msg: str) -> dict[str, Any]:
-        """TR: Thermostat data response."""
-        return {
-            "thermostat_index": int(msg[4:6]) - 1,
-            "mode": int(msg[6]),
-            "hold": msg[7] == "1",
-            "fan": int(msg[8]),
-            "current_temp": int(msg[9:11]),
-            "heat_setpoint": int(msg[11:13]),
-            "cool_setpoint": int(msg[13:15]),
-            "humidity": int(msg[15:17]),
-        }
-
-    def _ua_decode(self, msg: str) -> dict[str, Any]:
-        """UA: Valid User Code Areas."""
-        return {
-            "user_code": int(msg[4:10]),
-            "valid_areas": int(msg[10:12], 16),
-            "diagnostic": msg[12:20],
-            "user_code_length": int(msg[20]),
-            "user_code_type": int(msg[21]),
-            "temperature_units": msg[22],
-        }
-
-    def _vn_decode(self, msg: str) -> dict[str, str]:
-        """VN: Version information."""
-        elkm1_version = f"{int(msg[4:6], 16)}.{int(msg[6:8], 16)}.{int(msg[8:10], 16)}"
-        xep_version = (
-            f"{int(msg[10:12], 16)}.{int(msg[12:14], 16)}.{int(msg[14:16], 16)}"
-        )
-        return {"elkm1_version": elkm1_version, "xep_version": xep_version}
-
-    def _xk_decode(self, msg: str) -> dict[str, str]:
-        """XK: Ethernet Test."""
-        return {"real_time_clock": msg[4:20]}
-
-    def _zb_decode(self, msg: str) -> dict[str, Any]:
-        """ZB: Zone bypass report."""
-        return {"zone_number": int(msg[4:7]) - 1, "zone_bypassed": msg[7] == "1"}
-
-    def _zc_decode(self, msg: str) -> dict[str, Any]:
-        """ZC: Zone Change."""
-        status = _status_decode(int(msg[7:8], 16))
-        return {"zone_number": int(msg[4:7]) - 1, "zone_status": status}
-
-    def _zd_decode(self, msg: str) -> dict[str, list[int]]:
-        """ZD: Zone definitions."""
-        zone_definitions = [ord(x) - 0x30 for x in msg[4 : 4 + Max.ZONES.value]]
-        return {"zone_definitions": zone_definitions}
-
-    def _zp_decode(self, msg: str) -> dict[str, list[int]]:
-        """ZP: Zone partitions."""
-        zone_partitions = [ord(x) - 0x31 for x in msg[4 : 4 + Max.ZONES.value]]
-        return {"zone_partitions": zone_partitions}
-
-    def _zs_decode(self, msg: str) -> dict[str, list[tuple[int, int]]]:
-        """ZS: Zone statuses."""
-        status = [_status_decode(int(x, 16)) for x in msg[4 : 4 + Max.ZONES.value]]
-        return {"zone_statuses": status}
-
-    def _zv_decode(self, msg: str) -> dict[str, Any]:
-        """ZV: Zone voltage."""
-        return {"zone_number": int(msg[4:7]) - 1, "zone_voltage": int(msg[7:10]) / 10}
-
-    def _unknown_decode(self, msg: str) -> dict[str, str]:
-        """Generic handler called when no specific handler exists"""
-        return {"msg_code": msg[2:4], "data": msg[4:-2]}
+    if not msg or msg.startswith("Username: ") or msg.startswith("Password: "):
+        return None
+    if "Login successful" in msg:
+        return ("login", {"succeeded": True})
+    if msg.startswith("Username/Password not found") or msg == "Disabled":
+        return ("login", {"succeeded": False})
+    raise ValueError(error_msg)
 
 
-# pylint: enable=no-self-use
+def am_decode(msg: str) -> dict[str, str]:
+    """AM: Alarm memory by area report."""
+    return {"alarm_memory": msg[4 : 4 + Max.AREAS.value]}
+
+
+def as_decode(msg: str) -> dict[str, str]:
+    """AS: Arming status report."""
+    return {
+        "armed_statuses": msg[4:12],
+        "arm_up_states": msg[12:20],
+        "alarm_states": msg[20:28],
+    }
+
+
+def az_decode(msg: str) -> dict[str, str]:
+    """AZ: Alarm by zone report."""
+    return {"alarm_status": msg[4 : 4 + Max.ZONES.value]}
+
+
+def _cr_one_custom_value_decode(index: int, part: str) -> dict[str, Any]:
+    value = int(part[0:5])
+    value_format = int(part[5])
+    if value_format == 2:
+        ret: int | tuple[int, int] = ((value >> 8) & 0xFF, value & 0xFF)
+    else:
+        ret = value
+    return {"index": index, "value": ret, "value_format": value_format}
+
+
+def cr_decode(msg: str) -> dict[str, Any]:
+    """CR: Custom values"""
+    if int(msg[4:6]) > 0:
+        index = int(msg[4:6]) - 1
+        return {"values": [_cr_one_custom_value_decode(index, msg[6:12])]}
+
+    part = 6
+    ret = []
+    for i in range(Max.SETTINGS.value):
+        ret.append(_cr_one_custom_value_decode(i, msg[part : part + 6]))
+        part += 6
+    return {"values": ret}
+
+
+def cc_decode(msg: str) -> dict[str, Any]:
+    """CC: Output status for single output."""
+    return {"output": int(msg[4:7]) - 1, "output_status": msg[7] == "1"}
+
+
+def cs_decode(msg: str) -> dict[str, Any]:
+    """CS: Output status for all outputs."""
+    output_status = [x == "1" for x in msg[4 : 4 + Max.OUTPUTS.value]]
+    return {"output_status": output_status}
+
+
+def cv_decode(msg: str) -> dict[str, Any]:
+    """CV: Counter value."""
+    return {"counter": int(msg[4:6]) - 1, "value": int(msg[6:11])}
+
+
+def ee_decode(msg: str) -> dict[str, Any]:
+    """EE: Entry/exit timer report."""
+    return {
+        "area": int(msg[4:5]) - 1,
+        "is_exit": msg[5:6] == "0",
+        "timer1": int(msg[6:9]),
+        "timer2": int(msg[9:12]),
+        "armed_status": msg[12:13],
+    }
+
+
+def ic_decode(msg: str) -> dict[str, Any]:
+    """IC: Send Valid Or Invalid User Code Format."""
+    code = msg[4:16]
+    if re.match(r"(0\d){6}", code):
+        code = re.sub(r"0(\d)", r"\1", code)
+    return {
+        "code": code,
+        "user": int(msg[16:19]) - 1,
+        "keypad": int(msg[19:21]) - 1,
+    }
+
+
+def ie_decode(msg: str) -> dict[str, str]:
+    """IE: Installer mode exited."""
+    return {}
+
+
+def ka_decode(msg: str) -> dict[str, Any]:
+    """KA: Keypad areas for all keypads."""
+    return {"keypad_areas": [ord(x) - 0x31 for x in msg[4 : 4 + Max.KEYPADS.value]]}
+
+
+def kc_decode(msg: str) -> dict[str, Any]:
+    """KC: Keypad key change."""
+    return {"keypad": int(msg[4:6]) - 1, "key": int(msg[6:8])}
+
+
+def ld_decode(msg: str) -> dict[str, Any]:
+    """LD: System Log Data Update."""
+    area = int(msg[11]) - 1
+    hour = int(msg[12:14])
+    minute = int(msg[14:16])
+    month = int(msg[16:18])
+    day = int(msg[18:20])
+    year = int(msg[24:26]) + 2000
+    log_local_datetime = dt.datetime(year, month, day, hour, minute)
+    log_local_time = time.mktime(log_local_datetime.timetuple())
+    log_gm_timestruct = time.gmtime(log_local_time)
+
+    log: dict[str, Any] = {}
+    log["event"] = int(msg[4:8])
+    log["number"] = int(msg[8:11])
+    log["index"] = int(msg[20:23])
+    log["timestamp"] = dt.datetime(
+        *log_gm_timestruct[:6], tzinfo=dt.timezone.utc
+    ).isoformat()
+
+    return {"area": area, "log": log}
+
+
+def lw_decode(msg: str) -> dict[str, Any]:
+    """LW: temperatures from all keypads and zones 1-16."""
+    keypad_temps = []
+    zone_temps = []
+    for i in range(16):
+        keypad_temps.append(int(msg[4 + 3 * i : 7 + 3 * i]) - 40)
+        zone_temps.append(int(msg[52 + 3 * i : 55 + 3 * i]) - 60)
+    return {"keypad_temps": keypad_temps, "zone_temps": zone_temps}
+
+
+def pc_decode(msg: str) -> dict[str, Any]:
+    """PC: PLC (lighting) change."""
+    housecode = msg[4:7]
+    return {
+        "housecode": housecode,
+        "index": housecode_to_index(housecode),
+        "light_level": int(msg[7:9]),
+    }
+
+
+def ps_decode(msg: str) -> dict[str, Any]:
+    """PS: PLC (lighting) status."""
+    return {
+        "bank": ord(msg[4]) - 0x30,
+        "statuses": [ord(x) - 0x30 for x in msg[5:69]],
+    }
+
+
+def rp_decode(msg: str) -> dict[str, int]:
+    """RP: Remote programming status."""
+    return {"remote_programming_status": int(msg[4:6])}
+
+
+def rr_decode(msg: str) -> dict[str, str]:
+    """RR: Realtime clock."""
+    return {"real_time_clock": msg[4:20]}
+
+
+def sd_decode(msg: str) -> dict[str, Any]:
+    """SD: Description text."""
+    desc_ch1 = msg[9]
+    show_on_keypad = ord(desc_ch1) >= 0x80
+    if show_on_keypad:
+        desc_ch1 = chr(ord(desc_ch1) & 0x7F)
+    return {
+        "desc_type": int(msg[4:6]),
+        "unit": int(msg[6:9]) - 1,
+        "desc": (desc_ch1 + msg[10:25]).rstrip(),
+        "show_on_keypad": show_on_keypad,
+    }
+
+
+def ss_decode(msg: str) -> dict[str, str]:
+    """SS: System status."""
+    return {"system_trouble_status": msg[4:-2]}
+
+
+def st_decode(msg: str) -> dict[str, int]:
+    """ST: Temperature update."""
+    group = int(msg[4:5])
+    temperature = int(msg[7:10])
+    if group == 0:
+        temperature -= 60
+    elif group == 1:
+        temperature -= 40
+    return {"group": group, "device": int(msg[5:7]) - 1, "temperature": temperature}
+
+
+def tc_decode(msg: str) -> dict[str, int]:
+    """TC: Task change."""
+    return {"task": int(msg[4:7]) - 1}
+
+
+def tr_decode(msg: str) -> dict[str, Any]:
+    """TR: Thermostat data response."""
+    return {
+        "thermostat_index": int(msg[4:6]) - 1,
+        "mode": int(msg[6]),
+        "hold": msg[7] == "1",
+        "fan": int(msg[8]),
+        "current_temp": int(msg[9:11]),
+        "heat_setpoint": int(msg[11:13]),
+        "cool_setpoint": int(msg[13:15]),
+        "humidity": int(msg[15:17]),
+    }
+
+
+def ua_decode(msg: str) -> dict[str, Any]:
+    """UA: Valid User Code Areas."""
+    return {
+        "user_code": int(msg[4:10]),
+        "valid_areas": int(msg[10:12], 16),
+        "diagnostic": msg[12:20],
+        "user_code_length": int(msg[20]),
+        "user_code_type": int(msg[21]),
+        "temperature_units": msg[22],
+    }
+
+
+def vn_decode(msg: str) -> dict[str, str]:
+    """VN: Version information."""
+    elkm1_version = f"{int(msg[4:6], 16)}.{int(msg[6:8], 16)}.{int(msg[8:10], 16)}"
+    xep_version = f"{int(msg[10:12], 16)}.{int(msg[12:14], 16)}.{int(msg[14:16], 16)}"
+    return {"elkm1_version": elkm1_version, "xep_version": xep_version}
+
+
+def xk_decode(msg: str) -> dict[str, str]:
+    """XK: Ethernet Test."""
+    return {"real_time_clock": msg[4:20]}
+
+
+def zb_decode(msg: str) -> dict[str, Any]:
+    """ZB: Zone bypass report."""
+    return {"zone_number": int(msg[4:7]) - 1, "zone_bypassed": msg[7] == "1"}
+
+
+def zc_decode(msg: str) -> dict[str, Any]:
+    """ZC: Zone Change."""
+    status = _status_decode(int(msg[7:8], 16))
+    return {"zone_number": int(msg[4:7]) - 1, "zone_status": status}
+
+
+def zd_decode(msg: str) -> dict[str, list[int]]:
+    """ZD: Zone definitions."""
+    zone_definitions = [ord(x) - 0x30 for x in msg[4 : 4 + Max.ZONES.value]]
+    return {"zone_definitions": zone_definitions}
+
+
+def zp_decode(msg: str) -> dict[str, list[int]]:
+    """ZP: Zone partitions."""
+    zone_partitions = [ord(x) - 0x31 for x in msg[4 : 4 + Max.ZONES.value]]
+    return {"zone_partitions": zone_partitions}
+
+
+def zs_decode(msg: str) -> dict[str, list[tuple[int, int]]]:
+    """ZS: Zone statuses."""
+    status = [_status_decode(int(x, 16)) for x in msg[4 : 4 + Max.ZONES.value]]
+    return {"zone_statuses": status}
+
+
+def zv_decode(msg: str) -> dict[str, Any]:
+    """ZV: Zone voltage."""
+    return {"zone_number": int(msg[4:7]) - 1, "zone_voltage": int(msg[7:10]) / 10}
 
 
 def housecode_to_index(housecode: str) -> int:

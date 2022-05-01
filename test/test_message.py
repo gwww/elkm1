@@ -1,5 +1,4 @@
 import datetime as dt
-from unittest.mock import Mock
 
 import pytest
 
@@ -38,61 +37,53 @@ def test_index_to_housecode_raises_error_on_invalid():
 
 
 def test_decode_raises_value_error_on_bad_message():
-    decoder = m.MessageDecode()
     with pytest.raises(ValueError):
-        decoder.decode("a really really bad message")
+        m.decode("a really really bad message")
 
 
 def test_decode_calls_unknown_handler_on_bad_command_or_not_implemented():
-    mock_unknown_handler = Mock()
-    decoder = m.MessageDecode()
-    decoder.add_handler("unknown", mock_unknown_handler)
-    decoder.decode("08XXtest28")
-    mock_unknown_handler.assert_called_once_with(msg_code="XX", data="test")
+    decoded = m.decode("08XXtest28")
+    assert decoded
+    assert decoded[0] == "unknown"
+    assert decoded[1] == {"msg_code": "XX", "data": "test"}
 
 
 def test_decode_raises_value_error_on_length_too_long():
-    decoder = m.MessageDecode()
     with pytest.raises(ValueError) as excinfo:
-        decoder.decode("42CV01000990030")
+        m.decode("42CV01000990030")
     assert str(excinfo.value) == "Incorrect message length"
 
 
 def test_decode_raises_value_error_on_length_too_short():
-    decoder = m.MessageDecode()
     with pytest.raises(ValueError) as excinfo:
-        decoder.decode("02CV01000990030")
+        m.decode("02CV01000990030")
     assert str(excinfo.value) == "Incorrect message length"
 
 
 def test_decode_raises_value_error_on_bad_checksum():
-    decoder = m.MessageDecode()
     with pytest.raises(ValueError) as excinfo:
-        decoder.decode("0DCV01000990042")
+        m.decode("0DCV01000990042")
     assert str(excinfo.value) == "Bad checksum"
 
 
 def test_decode_raises_value_error_on_short_message():
-    decoder = m.MessageDecode()
     with pytest.raises(ValueError) as excinfo:
-        decoder.decode("X")
+        m.decode("X")
     assert str(excinfo.value) == "Message invalid"
 
 
 def test_decode_login_success():
-    mock_login_success_handler = Mock()
-    decoder = m.MessageDecode()
-    decoder.add_handler("login", mock_login_success_handler)
-    decoder.decode("Login successful")
-    mock_login_success_handler.assert_called_once_with(succeeded=True)
+    decoded = m.decode("Login successful")
+    assert decoded
+    assert decoded[0] == "login"
+    assert decoded[1] == {"succeeded": True}
 
 
 def test_decode_login_failed():
-    mock_login_failed_handler = Mock()
-    decoder = m.MessageDecode()
-    decoder.add_handler("login", mock_login_failed_handler)
-    decoder.decode("Username/Password not found")
-    mock_login_failed_handler.assert_called_once_with(succeeded=False)
+    decoded = m.decode("Username/Password not found")
+    assert decoded
+    assert decoded[0] == "login"
+    assert decoded[1] == {"succeeded": False}
 
 
 def test_encode_message_with_a_variable():
@@ -100,7 +91,7 @@ def test_encode_message_with_a_variable():
 
 
 def test_al_encode():
-    assert m.al_encode(4, 2, 4242) == ("0Da4300424200", "AS")
+    assert m.al_encode("4", 2, 4242) == ("0Da4300424200", "AS")
 
 
 def test_cf_encode():
@@ -132,14 +123,14 @@ def test_cx_encode():
 
 
 def test_dm_encode():
-    assert m.dm_encode(4, 1, 0, 42, "Hello", "  World") == (
+    assert m.dm_encode(4, 1, False, 42, "Hello", "  World") == (
         "2Edm51000042Hello^^^^^^^^^^^  World^^^^^^^^^00",
         None,
     )
 
 
 def test_dm_encode_too_long_is_truncated():
-    assert m.dm_encode(4, 1, 0, 42, "Hello this is a long message", "  World") == (
+    assert m.dm_encode(4, 1, False, 42, "Hello this is a long message", "  World") == (
         "2Edm51000042Hello this is a   World^^^^^^^^^00",
         None,
     )

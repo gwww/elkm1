@@ -18,13 +18,14 @@ from .message import (
     zt_encode,
     zv_encode,
 )
+from .notify import Notifier
 
 
 class Zone(Element):
     """Class representing a Zone"""
 
-    def __init__(self, index: int, connection: Connection) -> None:
-        super().__init__(index, connection)
+    def __init__(self, index: int, connection: Connection, notifier: Notifier) -> None:
+        super().__init__(index, connection, notifier)
         self.definition = 0
         self.area = -1
         self.logical_status = 0
@@ -58,17 +59,17 @@ class Zone(Element):
 class Zones(Elements):
     """Handling for multiple zones"""
 
-    def __init__(self, connection: Connection) -> None:
-        super().__init__(connection, Zone, Max.ZONES.value)
-        connection.msg_decode.add_handler("AZ", self._az_handler)
-        connection.msg_decode.add_handler("LW", self._lw_handler)
-        connection.msg_decode.add_handler("ST", self._st_handler)
-        connection.msg_decode.add_handler("ZB", self._zb_handler)
-        connection.msg_decode.add_handler("ZC", self._zc_handler)
-        connection.msg_decode.add_handler("ZD", self._zd_handler)
-        connection.msg_decode.add_handler("ZP", self._zp_handler)
-        connection.msg_decode.add_handler("ZS", self._zs_handler)
-        connection.msg_decode.add_handler("ZV", self._zv_handler)
+    def __init__(self, connection: Connection, notifier: Notifier) -> None:
+        super().__init__(connection, notifier, Zone, Max.ZONES.value)
+        notifier.attach("AZ", self._az_handler)
+        notifier.attach("LW", self._lw_handler)
+        notifier.attach("ST", self._st_handler)
+        notifier.attach("ZB", self._zb_handler)
+        notifier.attach("ZC", self._zc_handler)
+        notifier.attach("ZD", self._zd_handler)
+        notifier.attach("ZP", self._zp_handler)
+        notifier.attach("ZS", self._zs_handler)
+        notifier.attach("ZV", self._zv_handler)
 
     def sync(self) -> None:
         """Retrieve zones from ElkM1"""

@@ -2,6 +2,13 @@
 All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## [1.3.6]
+- Refactor to separate concerns. Major part of this separation was pulling the
+  observer code out of message.py and putting it in a separate class. This
+  simplified message.py so that it is now just a set of encode/decode functions,
+  no more class. This also made the connection.py code cleaner and focused
+  on just the transport concerns.
+
 ## [1.3.5]
 - Add logging of exception information on disconnect
 - Add login event callback when first message received

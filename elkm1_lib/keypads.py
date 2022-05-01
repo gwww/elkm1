@@ -6,13 +6,14 @@ from .connection import Connection
 from .const import KeypadKeys, Max, TextDescriptions
 from .elements import Element, Elements
 from .message import ka_encode
+from .notify import Notifier
 
 
 class Keypad(Element):
     """Class representing an Keypad"""
 
-    def __init__(self, index: int, connection: Connection) -> None:
-        super().__init__(index, connection)
+    def __init__(self, index: int, connection: Connection, notifier: Notifier) -> None:
+        super().__init__(index, connection, notifier)
         self.area = -1
         self.temperature = -40
         self.last_user_time = dt.datetime.now(dt.timezone.utc)
@@ -24,13 +25,13 @@ class Keypad(Element):
 class Keypads(Elements):
     """Handling for multiple areas"""
 
-    def __init__(self, connection: Connection) -> None:
-        super().__init__(connection, Keypad, Max.KEYPADS.value)
-        connection.msg_decode.add_handler("IC", self._ic_handler)
-        connection.msg_decode.add_handler("KA", self._ka_handler)
-        connection.msg_decode.add_handler("KC", self._kc_handler)
-        connection.msg_decode.add_handler("LW", self._lw_handler)
-        connection.msg_decode.add_handler("ST", self._st_handler)
+    def __init__(self, connection: Connection, notifier: Notifier) -> None:
+        super().__init__(connection, notifier, Keypad, Max.KEYPADS.value)
+        notifier.attach("IC", self._ic_handler)
+        notifier.attach("KA", self._ka_handler)
+        notifier.attach("KC", self._kc_handler)
+        notifier.attach("LW", self._lw_handler)
+        notifier.attach("ST", self._st_handler)
 
     def sync(self) -> None:
         """Retrieve areas from ElkM1"""

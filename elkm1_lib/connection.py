@@ -6,11 +6,12 @@ import asyncio
 import logging
 from collections.abc import Callable
 from functools import partial, reduce
-from typing import Any, Optional, cast
+from typing import Optional, cast
 
 import serial_asyncio
 
-from .message import MessageDecode, MessageEncode, get_elk_command
+from .message import MessageEncode, decode, get_elk_command
+from .notify import Notifier
 from .util import parse_url
 
 LOG = logging.getLogger(__name__)
@@ -20,22 +21,25 @@ class Connection:
     """Method to manage a connection to the ElkM1."""
 
     def __init__(
-        self, config: dict[str, Any], loop: asyncio.AbstractEventLoop | None = None
+        self,
+        url: str,
+        notifier: Notifier,
+        loop: asyncio.AbstractEventLoop | None = None,
     ):
         """Setup a connection."""
-        self._config = config
+        self._url = url
+        self._notifier = notifier
         self._loop = loop if loop else asyncio.get_event_loop()
 
         self._elk_protocol: _ElkProtocol | None = None
-        self._msg_decode: MessageDecode = MessageDecode()
         self._connection_retry_time = 1
         self._reconnect_task: asyncio.TimerHandle | None = None
 
     async def connect(self) -> None:
         """Asyncio connection to Elk."""
 
-        LOG.info("Connecting to ElkM1 at %s", self._config["url"])
-        scheme, dest, param, ssl_context = parse_url(self._config["url"])
+        LOG.info("Connecting to ElkM1 at %s", self._url)
+        scheme, dest, param, ssl_context = parse_url(self._url)
         heartbeat_time = 120 if scheme != "serial" else -1
 
         connection = partial(
@@ -73,11 +77,6 @@ class Connection:
     def is_connected(self) -> bool:
         """Is the connection active?"""
         return self._elk_protocol is not None
-
-    @property
-    def msg_decode(self) -> MessageDecode:
-        """Get the message decoder instance."""
-        return self._msg_decode
 
     def send(self, msg: MessageEncode) -> None:
         """Send a message on the connection."""
@@ -120,26 +119,28 @@ class Connection:
         LOG.info("Connected to ElkM1")
         self._elk_protocol = elk_protocol
         self._connection_retry_time = 1
-        self._msg_decode.call_handlers("connected", {})
+        self._notifier.notify("connected", {})
 
     def _reconnect(self) -> None:
         asyncio.ensure_future(self.connect())
 
     def _disconnected_callback(self) -> None:
-        LOG.warning("ElkM1 at %s disconnected", self._config["url"])
+        LOG.warning("ElkM1 at %s disconnected", self._url)
         self._elk_protocol = None
         self._start_connection_retry_timer()
-        self._msg_decode.call_handlers("disconnected", {})
+        self._notifier.notify("disconnected", {})
 
     def _got_data_callback(self, data: str) -> None:
         LOG.debug("got_data '%s'", data)
         try:
-            self._msg_decode.decode(data)
+            decoded = decode(data)
+            if decoded:
+                self._notifier.notify(decoded[0], decoded[1])
         except (ValueError, AttributeError) as exc:
             LOG.error("Invalid message '%s'", data, exc_info=exc)
 
     def _timeout_callback(self, msg_code: str) -> None:
-        self._msg_decode.call_handlers("timeout", {"msg_code": msg_code})
+        self._notifier.notify("timeout", {"msg_code": msg_code})
 
 
 class _ElkProtocol(asyncio.Protocol):

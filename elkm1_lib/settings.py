@@ -8,13 +8,14 @@ from .connection import Connection
 from .const import Max, TextDescriptions
 from .elements import Element, Elements
 from .message import cp_encode, cw_encode
+from .notify import Notifier
 
 
 class Setting(Element):
     """Class representing an Custom Value"""
 
-    def __init__(self, index: int, connection: Connection) -> None:
-        super().__init__(index, connection)
+    def __init__(self, index: int, connection: Connection, notifier: Notifier) -> None:
+        super().__init__(index, connection, notifier)
         self.value_format = 0
         self.value = None
 
@@ -26,9 +27,9 @@ class Setting(Element):
 class Settings(Elements):
     """Handling for multiple custom values"""
 
-    def __init__(self, connection: Connection) -> None:
-        super().__init__(connection, Setting, Max.SETTINGS.value)
-        connection.msg_decode.add_handler("CR", self._cr_handler)
+    def __init__(self, connection: Connection, notifier: Notifier) -> None:
+        super().__init__(connection, notifier, Setting, Max.SETTINGS.value)
+        notifier.attach("CR", self._cr_handler)
 
     def sync(self) -> None:
         """Retrieve custom values from ElkM1"""

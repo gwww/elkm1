@@ -8,13 +8,14 @@ from .connection import Connection
 from .const import ArmedStatus, Max, TextDescriptions
 from .elements import Element, Elements
 from .message import al_encode, as_encode, az_encode, dm_encode, zb_encode
+from .notify import Notifier
 
 
 class Area(Element):
     """Class representing an Area"""
 
-    def __init__(self, index: int, connection: Connection) -> None:
-        super().__init__(index, connection)
+    def __init__(self, index: int, connection: Connection, notifier: Notifier) -> None:
+        super().__init__(index, connection, notifier)
         self.armed_status: str | None = None
         self.arm_up_state: str | None = None
         self.alarm_state: str | None = None
@@ -58,12 +59,12 @@ class Area(Element):
 class Areas(Elements):
     """Handling for multiple areas"""
 
-    def __init__(self, connection: Connection) -> None:
-        super().__init__(connection, Area, Max.AREAS.value)
-        connection.msg_decode.add_handler("AM", self._am_handler)
-        connection.msg_decode.add_handler("AS", self._as_handler)
-        connection.msg_decode.add_handler("EE", self._ee_handler)
-        connection.msg_decode.add_handler("LD", self._ld_handler)
+    def __init__(self, connection: Connection, notifier: Notifier) -> None:
+        super().__init__(connection, notifier, Area, Max.AREAS.value)
+        notifier.attach("AM", self._am_handler)
+        notifier.attach("AS", self._as_handler)
+        notifier.attach("EE", self._ee_handler)
+        notifier.attach("LD", self._ld_handler)
 
     def sync(self) -> None:
         """Retrieve areas from ElkM1"""

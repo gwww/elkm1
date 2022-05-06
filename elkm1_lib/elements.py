@@ -7,7 +7,7 @@ from __future__ import annotations
 import re
 from abc import abstractmethod
 from collections.abc import Callable
-from typing import Any, Generator, Type, Generic, TypeVar
+from typing import Any, Generator, Generic, Type, TypeVar
 
 from .connection import Connection
 from .const import TextDescriptions

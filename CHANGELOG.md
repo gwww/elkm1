@@ -2,6 +2,17 @@
 All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## [2.0.0]
+- **Breaking change**: use Enums proper instead of Enum.values; signature of many
+  of the xx_encode/xx_decode functions change as the parameters that were str,
+  int, etc are now AlarmLevel, etc. Full list of of the enums used is in `const.py`
+  Inspiration for this change from from Home Assistant move to using more
+  enums to eliminate constants. Attributes changed:
+  - Zone.definition
+  - Zone.logical_status
+  - Zone.physical_status
+- Add use of Generics on Elements to give better typing of self.elements
+
 ## [1.3.6]
 - Refactor to separate concerns. Major part of this separation was pulling the
   observer code out of message.py and putting it in a separate class. This

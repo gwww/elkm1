@@ -25,7 +25,7 @@ from collections import namedtuple
 from collections.abc import Callable
 from typing import Any, cast
 
-from .const import Max
+from .const import Max, ZoneAlarmState, ZoneLogicalStatus, ZonePhysicalStatus, ZoneType
 
 MessageEncode = namedtuple("MessageEncode", ["message", "response_command"])
 MsgHandler = Callable[..., None]
@@ -54,6 +54,28 @@ def decode(msg: str) -> tuple[str, dict[str, Any]] | None:
     raise ValueError(error_msg)
 
 
+def _is_valid_length_and_checksum(msg: str) -> tuple[bool, str]:
+    """Check packet length valid and that checksum is good."""
+    try:
+        if int(msg[:2], 16) != (len(msg) - 2):
+            return False, "Incorrect message length"
+
+        checksum = int(msg[-2:], 16)
+        for char in msg[:-2]:
+            checksum += ord(char)
+        if (checksum % 256) != 0:
+            return False, "Bad checksum"
+    except ValueError:
+        return False, "Message invalid"
+
+    return True, ""
+
+
+def _chk_len(msg: str, msg_len: str) -> None:
+    if msg[:2] != msg_len:
+        raise ValueError(f"Incorrect length on msg. Expected {msg_len}. Msg {msg}")
+
+
 def am_decode(msg: str) -> dict[str, str]:
     """AM: Alarm memory by area report."""
     return {"alarm_memory": msg[4 : 4 + Max.AREAS.value]}
@@ -68,9 +90,9 @@ def as_decode(msg: str) -> dict[str, str]:
     }
 
 
-def az_decode(msg: str) -> dict[str, str]:
+def az_decode(msg: str) -> dict[str, list[ZoneAlarmState]]:
     """AZ: Alarm by zone report."""
-    return {"alarm_status": msg[4 : 4 + Max.ZONES.value]}
+    return {"alarm_status": [ZoneAlarmState(x) for x in msg[4 : 4 + Max.ZONES.value]]}
 
 
 def _cr_one_custom_value_decode(index: int, part: str) -> dict[str, Any]:
@@ -290,15 +312,19 @@ def zb_decode(msg: str) -> dict[str, Any]:
     return {"zone_number": int(msg[4:7]) - 1, "zone_bypassed": msg[7] == "1"}
 
 
-def zc_decode(msg: str) -> dict[str, Any]:
+def zc_decode(
+    msg: str,
+) -> dict[str, int | tuple[ZoneLogicalStatus, ZonePhysicalStatus]]:
     """ZC: Zone Change."""
+    _chk_len(msg[:2], "0A")
     status = _status_decode(int(msg[7:8], 16))
     return {"zone_number": int(msg[4:7]) - 1, "zone_status": status}
 
 
-def zd_decode(msg: str) -> dict[str, list[int]]:
+def zd_decode(msg: str) -> dict[str, list[ZoneType]]:
     """ZD: Zone definitions."""
-    zone_definitions = [ord(x) - 0x30 for x in msg[4 : 4 + Max.ZONES.value]]
+    _chk_len(msg[:2], "D6")
+    zone_definitions = [ZoneType(ord(x) - 0x30) for x in msg[4 : 4 + Max.ZONES.value]]
     return {"zone_definitions": zone_definitions}
 
 
@@ -308,8 +334,11 @@ def zp_decode(msg: str) -> dict[str, list[int]]:
     return {"zone_partitions": zone_partitions}
 
 
-def zs_decode(msg: str) -> dict[str, list[tuple[int, int]]]:
+def zs_decode(
+    msg: str,
+) -> dict[str, list[tuple[ZoneLogicalStatus, ZonePhysicalStatus]]]:
     """ZS: Zone statuses."""
+    _chk_len(msg[:2], "D6")
     status = [_status_decode(int(x, 16)) for x in msg[4 : 4 + Max.ZONES.value]]
     return {"zone_statuses": status}
 
@@ -344,28 +373,11 @@ def get_elk_command(line: str) -> str:
     return line[2:4]
 
 
-def _status_decode(status: int) -> tuple[int, int]:
+def _status_decode(status: int) -> tuple[ZoneLogicalStatus, ZonePhysicalStatus]:
     """Decode a 1 byte status into logical and physical statuses."""
-    logical_status = (status & 0b00001100) >> 2
-    physical_status = status & 0b00000011
+    logical_status = ZoneLogicalStatus((status & 0b00001100) >> 2)
+    physical_status = ZonePhysicalStatus(status & 0b00000011)
     return (logical_status, physical_status)
-
-
-def _is_valid_length_and_checksum(msg: str) -> tuple[bool, str]:
-    """Check packet length valid and that checksum is good."""
-    try:
-        if int(msg[:2], 16) != (len(msg) - 2):
-            return False, "Incorrect message length"
-
-        checksum = int(msg[-2:], 16)
-        for char in msg[:-2]:
-            checksum += ord(char)
-        if (checksum % 256) != 0:
-            return False, "Bad checksum"
-    except ValueError:
-        return False, "Message invalid"
-
-    return True, ""
 
 
 def al_encode(arm_mode: str, area: int, user_code: int) -> MessageEncode:

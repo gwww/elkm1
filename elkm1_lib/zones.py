@@ -4,6 +4,7 @@ from .connection import Connection
 from .const import (
     Max,
     TextDescriptions,
+    ZoneAlarmState,
     ZoneLogicalStatus,
     ZonePhysicalStatus,
     ZoneType,
@@ -26,10 +27,10 @@ class Zone(Element):
 
     def __init__(self, index: int, connection: Connection, notifier: Notifier) -> None:
         super().__init__(index, connection, notifier)
-        self.definition = 0
+        self.definition = ZoneType.DISABLED
+        self.logical_status = ZoneLogicalStatus.NORMAL
+        self.physical_status = ZonePhysicalStatus.UNCONFIGURED
         self.area = -1
-        self.logical_status = 0
-        self.physical_status = 0
         self.voltage = 0
         self.temperature = -60
         self.triggered_alarm = False
@@ -79,9 +80,13 @@ class Zones(Elements[Zone]):
         self._connection.send(zs_encode())
         self.get_descriptions(TextDescriptions.ZONE.value)
 
-    def _az_handler(self, alarm_status: str) -> None:
+    def _az_handler(self, alarm_status: list[ZoneAlarmState]) -> None:
         for zone in self.elements:
-            zone.setattr("triggered_alarm", alarm_status[zone.index] != "0", True)
+            zone.setattr(
+                "triggered_alarm",
+                alarm_status[zone.index] != ZoneAlarmState.NO_ALARM,
+                True,
+            )
 
     def _lw_handler(self, keypad_temps: list[int], zone_temps: list[int]) -> None:
         for i in range(16):
@@ -101,11 +106,15 @@ class Zones(Elements[Zone]):
         if zone_number < 0 or zone_number >= Max.ZONES.value:
             self._connection.send(zs_encode())
 
-    def _zc_handler(self, zone_number: int, zone_status: tuple[int, int]) -> None:
+    def _zc_handler(
+        self,
+        zone_number: int,
+        zone_status: tuple[ZoneLogicalStatus, ZonePhysicalStatus],
+    ) -> None:
         self.elements[zone_number].setattr("logical_status", zone_status[0], False)
         self.elements[zone_number].setattr("physical_status", zone_status[1], True)
 
-    def _zd_handler(self, zone_definitions: list[int]) -> None:
+    def _zd_handler(self, zone_definitions: list[ZoneType]) -> None:
         for zone in self.elements:
             zone.setattr("definition", zone_definitions[zone.index], True)
 
@@ -113,7 +122,9 @@ class Zones(Elements[Zone]):
         for zone in self.elements:
             zone.setattr("area", zone_partitions[zone.index], True)
 
-    def _zs_handler(self, zone_statuses: list[tuple[int, int]]) -> None:
+    def _zs_handler(
+        self, zone_statuses: list[tuple[ZoneLogicalStatus, ZonePhysicalStatus]]
+    ) -> None:
         for zone in self.elements:
             zone.setattr("logical_status", zone_statuses[zone.index][0], False)
             zone.setattr("physical_status", zone_statuses[zone.index][1], True)

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, cast
+from typing import Any
 
 from .connection import Connection
 from .const import Max, TextDescriptions
@@ -24,7 +24,7 @@ class Setting(Element):
         self._connection.send(cw_encode(self._index, value, self.value_format))
 
 
-class Settings(Elements):
+class Settings(Elements[Setting]):
     """Handling for multiple custom values"""
 
     def __init__(self, connection: Connection, notifier: Notifier) -> None:
@@ -37,7 +37,7 @@ class Settings(Elements):
         self.get_descriptions(TextDescriptions.SETTING.value)
 
     def _cr_handler(self, values: list[dict[str, Any]]) -> None:
-        settings: list[Setting] = cast(list[Setting], self.elements)
+        settings = self.elements
         for value in values:
             setting = settings[value["index"]]
             setting.value_format = value["value_format"]

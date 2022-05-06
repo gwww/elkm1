@@ -27,7 +27,7 @@ class Thermostat(Element):
         self._connection.send(ts_encode(self.index, value, element_to_set))
 
 
-class Thermostats(Elements):
+class Thermostats(Elements[Thermostat]):
     """Handling for multiple areas"""
 
     def __init__(self, connection: Connection, notifier: Notifier) -> None:

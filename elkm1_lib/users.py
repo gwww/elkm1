@@ -10,7 +10,7 @@ class User(Element):
     """Class representing an User"""
 
 
-class Users(Elements):
+class Users(Elements[User]):
     """Handling for multiple areas"""
 
     def __init__(self, connection: Connection, notifier: Notifier) -> None:

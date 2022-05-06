@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, cast
+from typing import Any
 
 from .connection import Connection
 from .const import ArmedStatus, Max, TextDescriptions
@@ -56,7 +56,7 @@ class Area(Element):
         self._connection.send(zb_encode(-1, self._index, code))
 
 
-class Areas(Elements):
+class Areas(Elements[Area]):
     """Handling for multiple areas"""
 
     def __init__(self, connection: Connection, notifier: Notifier) -> None:
@@ -80,7 +80,6 @@ class Areas(Elements):
     ) -> None:
         update_alarm_triggers = False
         for area in self.elements:
-            area = cast(Area, area)
             area.setattr("armed_status", armed_statuses[area.index], False)
             area.setattr("arm_up_state", arm_up_states[area.index], False)
             if (
@@ -96,7 +95,7 @@ class Areas(Elements):
     def _ee_handler(
         self, area: int, is_exit: bool, timer1: int, timer2: int, armed_status: str
     ) -> None:
-        area_element = cast(Area, self.elements[area])
+        area_element = self.elements[area]
         area_element.setattr("armed_status", armed_status, False)
         area_element.setattr("timer1", timer1, False)
         area_element.setattr("timer2", timer2, False)

@@ -56,7 +56,7 @@ class Zone(Element):
         self._connection.send(zv_encode(self._index))
 
 
-class Zones(Elements):
+class Zones(Elements[Zone]):
     """Handling for multiple zones"""
 
     def __init__(self, connection: Connection, notifier: Notifier) -> None:

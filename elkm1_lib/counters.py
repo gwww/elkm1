@@ -25,7 +25,7 @@ class Counter(Element):
         self._connection.send(cx_encode(self._index, value))
 
 
-class Counters(Elements):
+class Counters(Elements[Counter]):
     """Handling for multiple counters"""
 
     def __init__(self, connection: Connection, notifier: Notifier) -> None:

@@ -92,6 +92,7 @@ def as_decode(msg: str) -> dict[str, str]:
 
 def az_decode(msg: str) -> dict[str, list[ZoneAlarmState]]:
     """AZ: Alarm by zone report."""
+    _chk_len(msg[:2], "D6")
     return {"alarm_status": [ZoneAlarmState(x) for x in msg[4 : 4 + Max.ZONES.value]]}
 
 

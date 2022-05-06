@@ -39,3 +39,8 @@ def test_zone_alarm_state(zones, notifier):
     assert zones[1].triggered_alarm == True
     assert zones[2].triggered_alarm == True
     assert zones[3].triggered_alarm == True
+
+
+def test_zone_voltage(zones, notifier):
+    rx_msg("ZV", "123072", notifier)
+    assert zones[122].voltage == pytest.approx(7.2)

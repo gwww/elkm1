@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 from .connection import Connection
-from .const import ArmedStatus, Max, TextDescriptions
+from .const import AlarmState, ArmedStatus, ArmLevel, ArmUpState, Max, TextDescriptions
 from .elements import Element, Elements
 from .message import al_encode, as_encode, az_encode, dm_encode, zb_encode
 from .notify import Notifier
@@ -16,10 +16,10 @@ class Area(Element):
 
     def __init__(self, index: int, connection: Connection, notifier: Notifier) -> None:
         super().__init__(index, connection, notifier)
-        self.armed_status: str | None = None
-        self.arm_up_state: str | None = None
-        self.alarm_state: str | None = None
-        self.alarm_memory: str | None = None
+        self.armed_status: ArmedStatus | None = None
+        self.arm_up_state: ArmUpState | None = None
+        self.alarm_state = AlarmState.NO_ALARM_ACTIVE
+        self.alarm_memory = False
         self.is_exit = False
         self.timer1 = 0
         self.timer2 = 0
@@ -27,17 +27,19 @@ class Area(Element):
 
     def is_armed(self) -> bool:
         """Return if the area is armed."""
-        return self.armed_status != ArmedStatus.DISARMED.value
+        if self.armed_status is None:
+            return False
+        return self.armed_status != ArmedStatus.DISARMED
 
-    def arm(self, level: str, code: int) -> None:
+    def arm(self, level: ArmLevel, code: int) -> None:
         """(Helper) Arm system at specified level (away, vacation, etc)"""
-        if self.is_armed() and level > "0":
+        if self.is_armed() and level != ArmLevel.DISARM:
             return
         self._connection.send(al_encode(level, self._index, code))
 
     def disarm(self, code: int) -> None:
         """(Helper) Disarm system."""
-        self.arm("0", code)
+        self.arm(ArmLevel.DISARM, code)
 
     def display_message(
         self, clear: int, beep: bool, timeout: int, line1: str, line2: str
@@ -71,12 +73,15 @@ class Areas(Elements[Area]):
         self._connection.send(as_encode())
         self.get_descriptions(TextDescriptions.AREA.value)
 
-    def _am_handler(self, alarm_memory: str) -> None:
+    def _am_handler(self, alarm_memory: list[bool]) -> None:
         for area in self.elements:
             area.setattr("alarm_memory", alarm_memory[area.index], True)
 
     def _as_handler(
-        self, armed_statuses: str, arm_up_states: str, alarm_states: str
+        self,
+        armed_statuses: list[ArmedStatus],
+        arm_up_states: list[ArmUpState],
+        alarm_states: list[AlarmState],
     ) -> None:
         update_alarm_triggers = False
         for area in self.elements:
@@ -84,7 +89,7 @@ class Areas(Elements[Area]):
             area.setattr("arm_up_state", arm_up_states[area.index], False)
             if (
                 area.alarm_state != alarm_states[area.index]
-                or alarm_states[area.index] != "0"
+                or alarm_states[area.index] != AlarmState.NO_ALARM_ACTIVE
             ):
                 update_alarm_triggers = True
             area.setattr("alarm_state", alarm_states[area.index], True)
@@ -93,7 +98,12 @@ class Areas(Elements[Area]):
             self._connection.send(az_encode())
 
     def _ee_handler(
-        self, area: int, is_exit: bool, timer1: int, timer2: int, armed_status: str
+        self,
+        area: int,
+        is_exit: bool,
+        timer1: int,
+        timer2: int,
+        armed_status: ArmedStatus,
     ) -> None:
         area_element = self.elements[area]
         area_element.setattr("armed_status", armed_status, False)

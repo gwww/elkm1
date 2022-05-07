@@ -11,6 +11,11 @@ This project follows [Semantic Versioning](https://semver.org/).
   - Zone.definition
   - Zone.logical_status
   - Zone.physical_status
+  - Area.armed_status
+  - Area.arm_up_state
+  - Area.alarm_status
+  - Area.arm method uses ArmLevel now instead of a string
+  - Area.alarm_memory (changed from "0"/"1" string to bool)
 - Add use of Generics on Elements to give better typing of self.elements
 
 ## [1.3.6]

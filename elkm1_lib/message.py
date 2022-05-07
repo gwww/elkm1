@@ -25,7 +25,17 @@ from collections import namedtuple
 from collections.abc import Callable
 from typing import Any, cast
 
-from .const import Max, ZoneAlarmState, ZoneLogicalStatus, ZonePhysicalStatus, ZoneType
+from .const import (
+    AlarmState,
+    ArmedStatus,
+    ArmLevel,
+    ArmUpState,
+    Max,
+    ZoneAlarmState,
+    ZoneLogicalStatus,
+    ZonePhysicalStatus,
+    ZoneType,
+)
 
 MessageEncode = namedtuple("MessageEncode", ["message", "response_command"])
 MsgHandler = Callable[..., None]
@@ -76,23 +86,26 @@ def _chk_len(msg: str, msg_len: str) -> None:
         raise ValueError(f"Incorrect length on msg. Expected {msg_len}. Msg {msg}")
 
 
-def am_decode(msg: str) -> dict[str, str]:
+def am_decode(msg: str) -> dict[str, list[bool]]:
     """AM: Alarm memory by area report."""
-    return {"alarm_memory": msg[4 : 4 + Max.AREAS.value]}
+    _chk_len(msg, "0C")
+    return {"alarm_memory": [x == "1" for x in msg[4 : 4 + Max.AREAS.value]]}
 
 
-def as_decode(msg: str) -> dict[str, str]:
+def as_decode(
+    msg: str,
+) -> dict[str, list[ArmedStatus] | list[ArmUpState] | list[AlarmState]]:
     """AS: Arming status report."""
     return {
-        "armed_statuses": msg[4:12],
-        "arm_up_states": msg[12:20],
-        "alarm_states": msg[20:28],
+        "armed_statuses": [ArmedStatus(x) for x in msg[4:12]],
+        "arm_up_states": [ArmUpState(x) for x in msg[12:20]],
+        "alarm_states": [AlarmState(x) for x in msg[20:28]],
     }
 
 
 def az_decode(msg: str) -> dict[str, list[ZoneAlarmState]]:
     """AZ: Alarm by zone report."""
-    _chk_len(msg[:2], "D6")
+    _chk_len(msg, "D6")
     return {"alarm_status": [ZoneAlarmState(x) for x in msg[4 : 4 + Max.ZONES.value]]}
 
 
@@ -136,14 +149,14 @@ def cv_decode(msg: str) -> dict[str, Any]:
     return {"counter": int(msg[4:6]) - 1, "value": int(msg[6:11])}
 
 
-def ee_decode(msg: str) -> dict[str, Any]:
+def ee_decode(msg: str) -> dict[str, int | bool | ArmedStatus]:
     """EE: Entry/exit timer report."""
     return {
         "area": int(msg[4:5]) - 1,
         "is_exit": msg[5:6] == "0",
         "timer1": int(msg[6:9]),
         "timer2": int(msg[9:12]),
-        "armed_status": msg[12:13],
+        "armed_status": ArmedStatus(msg[12:13]),
     }
 
 
@@ -317,14 +330,14 @@ def zc_decode(
     msg: str,
 ) -> dict[str, int | tuple[ZoneLogicalStatus, ZonePhysicalStatus]]:
     """ZC: Zone Change."""
-    _chk_len(msg[:2], "0A")
+    _chk_len(msg, "0A")
     status = _status_decode(int(msg[7:8], 16))
     return {"zone_number": int(msg[4:7]) - 1, "zone_status": status}
 
 
 def zd_decode(msg: str) -> dict[str, list[ZoneType]]:
     """ZD: Zone definitions."""
-    _chk_len(msg[:2], "D6")
+    _chk_len(msg, "D6")
     zone_definitions = [ZoneType(ord(x) - 0x30) for x in msg[4 : 4 + Max.ZONES.value]]
     return {"zone_definitions": zone_definitions}
 
@@ -339,7 +352,7 @@ def zs_decode(
     msg: str,
 ) -> dict[str, list[tuple[ZoneLogicalStatus, ZonePhysicalStatus]]]:
     """ZS: Zone statuses."""
-    _chk_len(msg[:2], "D6")
+    _chk_len(msg, "D6")
     status = [_status_decode(int(x, 16)) for x in msg[4 : 4 + Max.ZONES.value]]
     return {"zone_statuses": status}
 
@@ -381,9 +394,9 @@ def _status_decode(status: int) -> tuple[ZoneLogicalStatus, ZonePhysicalStatus]:
     return (logical_status, physical_status)
 
 
-def al_encode(arm_mode: str, area: int, user_code: int) -> MessageEncode:
+def al_encode(arm_mode: ArmLevel, area: int, user_code: int) -> MessageEncode:
     """al: Arm system. Note in 'al' the 'l' can vary"""
-    return MessageEncode(f"0Da{arm_mode}{area + 1:1}{user_code:06}00", "AS")
+    return MessageEncode(f"0Da{arm_mode.value}{area + 1:1}{user_code:06}00", "AS")
 
 
 def as_encode() -> MessageEncode:

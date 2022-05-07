@@ -3,6 +3,7 @@ import datetime as dt
 import pytest
 
 import elkm1_lib.message as m
+from elkm1_lib.const import ArmLevel
 
 
 def test_housecode_to_index_accepts_valid_codes():
@@ -91,7 +92,7 @@ def test_encode_message_with_a_variable():
 
 
 def test_al_encode():
-    assert m.al_encode("4", 2, 4242) == ("0Da4300424200", "AS")
+    assert m.al_encode(ArmLevel.ARMED_NIGHT, 2, 4242) == ("0Da4300424200", "AS")
 
 
 def test_cf_encode():

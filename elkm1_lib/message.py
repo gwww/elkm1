@@ -31,6 +31,10 @@ from .const import (
     ArmLevel,
     ArmUpState,
     Max,
+    SettingFormat,
+    ThermostatFan,
+    ThermostatMode,
+    ThermostatSetting,
     ZoneAlarmState,
     ZoneLogicalStatus,
     ZonePhysicalStatus,
@@ -68,13 +72,12 @@ def _is_valid_length_and_checksum(msg: str) -> tuple[bool, str]:
     """Check packet length valid and that checksum is good."""
     try:
         if int(msg[:2], 16) != (len(msg) - 2):
-            return False, "Incorrect message length"
-
+            return False, f"Incorrect message length, expected {msg[:2]}, got {len(msg)-2:02X}. Msg {msg}"
         checksum = int(msg[-2:], 16)
         for char in msg[:-2]:
             checksum += ord(char)
         if (checksum % 256) != 0:
-            return False, "Bad checksum"
+            return False, f"Bad checksum. Msg: {msg}"
     except ValueError:
         return False, "Message invalid"
 
@@ -83,7 +86,7 @@ def _is_valid_length_and_checksum(msg: str) -> tuple[bool, str]:
 
 def _chk_len(msg: str, msg_len: str) -> None:
     if msg[:2] != msg_len:
-        raise ValueError(f"Incorrect length on msg. Expected {msg_len}. Msg {msg}")
+        raise ValueError(f"Expected msg len {msg_len}. Got msg {msg}")
 
 
 def am_decode(msg: str) -> dict[str, list[bool]]:
@@ -111,8 +114,8 @@ def az_decode(msg: str) -> dict[str, list[ZoneAlarmState]]:
 
 def _cr_one_custom_value_decode(index: int, part: str) -> dict[str, Any]:
     value = int(part[0:5])
-    value_format = int(part[5])
-    if value_format == 2:
+    value_format = SettingFormat(int(part[5]))
+    if value_format == SettingFormat.TIME_OF_DAY:
         ret: int | tuple[int, int] = ((value >> 8) & 0xFF, value & 0xFF)
     else:
         ret = value
@@ -285,11 +288,12 @@ def tc_decode(msg: str) -> dict[str, int]:
 
 def tr_decode(msg: str) -> dict[str, Any]:
     """TR: Thermostat data response."""
+    _chk_len(msg, "13")
     return {
         "thermostat_index": int(msg[4:6]) - 1,
-        "mode": int(msg[6]),
+        "mode": ThermostatMode(int(msg[6])),
         "hold": msg[7] == "1",
-        "fan": int(msg[8]),
+        "fan": ThermostatFan(int(msg[8])),
         "current_temp": int(msg[9:11]),
         "heat_setpoint": int(msg[11:13]),
         "cool_setpoint": int(msg[13:15]),
@@ -440,10 +444,10 @@ def cr_encode(index: int) -> MessageEncode:
 
 
 def cw_encode(
-    index: int, value: int | tuple[int, int], value_format: int
+    index: int, value: int | tuple[int, int], value_format: SettingFormat
 ) -> MessageEncode:
     """cw: Write a custom value."""
-    if value_format == 2:
+    if value_format == SettingFormat.TIME_OF_DAY:
         val = cast(tuple[int, int], value)
         enc = val[0] * 256 + val[1]
     else:
@@ -548,9 +552,9 @@ def tr_encode(thermostat: int) -> MessageEncode:
     return MessageEncode(f"08tr{thermostat + 1:02}00", None)
 
 
-def ts_encode(thermostat: int, value: int, element: int) -> MessageEncode:
+def ts_encode(thermostat: int, value: int, element: ThermostatSetting) -> MessageEncode:
     """ts: Set thermostat data."""
-    return MessageEncode(f"0Bts{thermostat + 1:02}{value:02}{element:1}00", None)
+    return MessageEncode(f"0Bts{thermostat + 1:02}{value:02}{element.value:1}00", None)
 
 
 def ua_encode(user_code: int) -> MessageEncode:

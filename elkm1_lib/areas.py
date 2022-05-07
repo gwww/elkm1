@@ -18,7 +18,7 @@ class Area(Element):
         super().__init__(index, connection, notifier)
         self.armed_status: ArmedStatus | None = None
         self.arm_up_state: ArmUpState | None = None
-        self.alarm_state = AlarmState.NO_ALARM_ACTIVE
+        self.alarm_state: AlarmState | None = None
         self.alarm_memory = False
         self.is_exit = False
         self.timer1 = 0
@@ -30,6 +30,10 @@ class Area(Element):
         if self.armed_status is None:
             return False
         return self.armed_status != ArmedStatus.DISARMED
+
+    def in_alarm_state(self) -> bool:
+        """Return if area is in alarm state."""
+        return not self.alarm_state in {None, AlarmState.NO_ALARM_ACTIVE, AlarmState.ENTRANCE_DELAY_ACTIVE, AlarmState.ALARM_ABORT_DELAY_ACTIVE}
 
     def arm(self, level: ArmLevel, code: int) -> None:
         """(Helper) Arm system at specified level (away, vacation, etc)"""

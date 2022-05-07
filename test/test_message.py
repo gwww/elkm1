@@ -3,7 +3,7 @@ import datetime as dt
 import pytest
 
 import elkm1_lib.message as m
-from elkm1_lib.const import ArmLevel
+from elkm1_lib.const import ArmLevel, SettingFormat, ThermostatSetting
 
 
 def test_housecode_to_index_accepts_valid_codes():
@@ -52,19 +52,19 @@ def test_decode_calls_unknown_handler_on_bad_command_or_not_implemented():
 def test_decode_raises_value_error_on_length_too_long():
     with pytest.raises(ValueError) as excinfo:
         m.decode("42CV01000990030")
-    assert str(excinfo.value) == "Incorrect message length"
+    assert str(excinfo.value).startswith("Incorrect message length")
 
 
 def test_decode_raises_value_error_on_length_too_short():
     with pytest.raises(ValueError) as excinfo:
         m.decode("02CV01000990030")
-    assert str(excinfo.value) == "Incorrect message length"
+    assert str(excinfo.value).startswith("Incorrect message length")
 
 
 def test_decode_raises_value_error_on_bad_checksum():
     with pytest.raises(ValueError) as excinfo:
         m.decode("0DCV01000990042")
-    assert str(excinfo.value) == "Bad checksum"
+    assert str(excinfo.value).startswith("Bad checksum")
 
 
 def test_decode_raises_value_error_on_short_message():
@@ -112,7 +112,7 @@ def test_cr_encode():
 
 
 def test_cw_encode():
-    assert m.cw_encode(5, (21, 40), 2) == ("0Dcw060541600", None)
+    assert m.cw_encode(5, (21, 40), SettingFormat.TIME_OF_DAY) == ("0Dcw060541600", None)
 
 
 def test_cv_encode():
@@ -185,7 +185,7 @@ def test_tr_encode():
 
 
 def test_ts_encode():
-    assert m.ts_encode(6, 7, 42) == ("0Bts07074200", None)
+    assert m.ts_encode(3, 7, ThermostatSetting.MODE) == ("0Bts0407000", None)
 
 
 def test_zb_encode():

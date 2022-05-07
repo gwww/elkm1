@@ -3,10 +3,19 @@
 from __future__ import annotations
 
 from .connection import Connection
-from .const import Max, TextDescriptions
+from .const import Max, TextDescriptions, ThermostatFan, ThermostatMode, ThermostatSetting
 from .elements import Element, Elements
 from .message import tr_encode, ts_encode
 from .notify import Notifier
+
+SETTING_TYPING = {
+    ThermostatSetting.MODE: ThermostatMode,
+    ThermostatSetting.HOLD: bool,
+    ThermostatSetting.FAN: ThermostatFan,
+    ThermostatSetting.GET_TEMPERATURE: int,
+    ThermostatSetting.COOL_SETPOINT: int,
+    ThermostatSetting.HEAT_SETPOINT: int,
+}
 
 
 class Thermostat(Element):
@@ -14,17 +23,26 @@ class Thermostat(Element):
 
     def __init__(self, index: int, connection: Connection, notifier: Notifier) -> None:
         super().__init__(index, connection, notifier)
-        self.mode = 0
+        self.mode: ThermostatMode | None = None
         self.hold = False
-        self.fan = 0
+        self.fan: ThermostatFan | None = None
         self.current_temp = 0
         self.heat_setpoint = 0
         self.cool_setpoint = 0
         self.humidity = 0
 
-    def set(self, element_to_set: int, value: int) -> None:
+    def set(self, element_to_set: ThermostatSetting, val: bool | int | ThermostatMode | ThermostatFan) -> None:
         """(Helper) Set thermostat"""
-        self._connection.send(ts_encode(self.index, value, element_to_set))
+        if type(val) != SETTING_TYPING[element_to_set]:
+            raise ValueError("Wrong type for thermostat setting.")
+        if isinstance(val, bool):
+            setting = 1 if val else 0
+        elif isinstance(val, ThermostatMode) or isinstance(val, ThermostatFan):
+            setting = val.value
+        elif isinstance(val, int):
+            setting = val
+
+        self._connection.send(ts_encode(self.index, setting, element_to_set))
 
 
 class Thermostats(Elements[Thermostat]):
@@ -53,9 +71,9 @@ class Thermostats(Elements[Thermostat]):
     def _tr_handler(
         self,
         thermostat_index: int,
-        mode: int,
+        mode: ThermostatMode,
         hold: bool,
-        fan: int,
+        fan: ThermostatFan,
         current_temp: int,
         heat_setpoint: int,
         cool_setpoint: int,

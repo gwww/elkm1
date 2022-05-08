@@ -2,7 +2,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from elkm1_lib.areas import Areas, Area
+from elkm1_lib.areas import Area, Areas
 from elkm1_lib.const import AlarmState, ArmedStatus, ArmLevel, ArmUpState
 from elkm1_lib.message import MessageEncode
 
@@ -56,6 +56,6 @@ def test_armed_status_updates_alarm_triggers(notifier):
 def test_is_in_alarm_state():
     area = Area(0, Mock(), Mock())
     assert area.in_alarm_state() == False
-    
+
     area.alarm_state = AlarmState.POLICE_ALARM
     assert area.in_alarm_state() == True

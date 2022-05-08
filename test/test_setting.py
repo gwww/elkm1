@@ -4,7 +4,7 @@ import pytest
 
 from elkm1_lib.const import SettingFormat
 from elkm1_lib.message import MessageEncode
-from elkm1_lib.settings import Settings, Setting
+from elkm1_lib.settings import Setting, Settings
 
 from .util import rx_msg
 
@@ -33,11 +33,12 @@ def test_setting_set_types_are_correct():
 
     setting.value_format = SettingFormat.NUMBER
     with pytest.raises(ValueError):
-        setting.set((1,2))
+        setting.set((1, 2))
 
     setting.value_format = SettingFormat.TIME_OF_DAY
     with pytest.raises(ValueError):
         setting.set(42)
+
 
 def test_setting_write_new_value_called():
     mock = Mock()

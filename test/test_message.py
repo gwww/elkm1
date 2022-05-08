@@ -112,7 +112,10 @@ def test_cr_encode():
 
 
 def test_cw_encode():
-    assert m.cw_encode(5, (21, 40), SettingFormat.TIME_OF_DAY) == ("0Dcw060541600", None)
+    assert m.cw_encode(5, (21, 40), SettingFormat.TIME_OF_DAY) == (
+        "0Dcw060541600",
+        None,
+    )
 
 
 def test_cv_encode():

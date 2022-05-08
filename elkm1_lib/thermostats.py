@@ -3,7 +3,13 @@
 from __future__ import annotations
 
 from .connection import Connection
-from .const import Max, TextDescriptions, ThermostatFan, ThermostatMode, ThermostatSetting
+from .const import (
+    Max,
+    TextDescriptions,
+    ThermostatFan,
+    ThermostatMode,
+    ThermostatSetting,
+)
 from .elements import Element, Elements
 from .message import tr_encode, ts_encode
 from .notify import Notifier
@@ -31,15 +37,21 @@ class Thermostat(Element):
         self.cool_setpoint = 0
         self.humidity = 0
 
-    def set(self, element_to_set: ThermostatSetting, val: bool | int | ThermostatMode | ThermostatFan) -> None:
+    def set(
+        self,
+        element_to_set: ThermostatSetting,
+        val: bool | int | ThermostatMode | ThermostatFan,
+    ) -> None:
         """(Helper) Set thermostat"""
-        if type(val) != SETTING_TYPING[element_to_set]:
+        if (  # pylint: disable=unidiomatic-typecheck
+            type(val) != SETTING_TYPING[element_to_set]
+        ):
             raise ValueError("Wrong type for thermostat setting.")
         if isinstance(val, bool):
             setting = 1 if val else 0
-        elif isinstance(val, ThermostatMode) or isinstance(val, ThermostatFan):
+        elif isinstance(val, (ThermostatFan, ThermostatMode)):
             setting = val.value
-        elif isinstance(val, int):
+        else:
             setting = val
 
         self._connection.send(ts_encode(self.index, setting, element_to_set))

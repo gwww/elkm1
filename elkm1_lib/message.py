@@ -72,7 +72,10 @@ def _is_valid_length_and_checksum(msg: str) -> tuple[bool, str]:
     """Check packet length valid and that checksum is good."""
     try:
         if int(msg[:2], 16) != (len(msg) - 2):
-            return False, f"Incorrect message length, expected {msg[:2]}, got {len(msg)-2:02X}. Msg {msg}"
+            return (
+                False,
+                f"Incorrect message length, expected {msg[:2]}, got {len(msg)-2:02X}. Msg {msg}",
+            )
         checksum = int(msg[-2:], 16)
         for char in msg[:-2]:
             checksum += ord(char)

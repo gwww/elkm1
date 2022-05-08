@@ -21,7 +21,7 @@ class Setting(Element):
 
     def set(self, value: int | tuple[int, int]) -> None:
         """(Helper) Set custom value."""
-        if type(value) == tuple:
+        if isinstance(value, tuple):
             if self.value_format != SettingFormat.TIME_OF_DAY:
                 raise ValueError("Custom setting 'set' value is wrong format for Elk")
         elif self.value_format == SettingFormat.TIME_OF_DAY:

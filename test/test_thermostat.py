@@ -2,9 +2,9 @@ from unittest.mock import Mock
 
 import pytest
 
-from elkm1_lib.const import ThermostatSetting, ThermostatMode, ThermostatFan
+from elkm1_lib.const import ThermostatFan, ThermostatMode, ThermostatSetting
 from elkm1_lib.message import MessageEncode
-from elkm1_lib.thermostats import Thermostats, Thermostat
+from elkm1_lib.thermostats import Thermostat, Thermostats
 
 from .util import rx_msg
 
@@ -33,6 +33,7 @@ def test_thermostat_set_types_are_correct(notifier):
         thermostat.set(ThermostatSetting.MODE, 3)
     with pytest.raises(ValueError):
         thermostat.set(ThermostatSetting.COOL_SETPOINT, True)
+
 
 def test_thermostat_set_sends_correct_command_to_elk():
     mock = Mock()

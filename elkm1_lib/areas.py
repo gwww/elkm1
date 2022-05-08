@@ -33,7 +33,12 @@ class Area(Element):
 
     def in_alarm_state(self) -> bool:
         """Return if area is in alarm state."""
-        return not self.alarm_state in {None, AlarmState.NO_ALARM_ACTIVE, AlarmState.ENTRANCE_DELAY_ACTIVE, AlarmState.ALARM_ABORT_DELAY_ACTIVE}
+        return self.alarm_state not in {
+            None,
+            AlarmState.NO_ALARM_ACTIVE,
+            AlarmState.ENTRANCE_DELAY_ACTIVE,
+            AlarmState.ALARM_ABORT_DELAY_ACTIVE,
+        }
 
     def arm(self, level: ArmLevel, code: int) -> None:
         """(Helper) Arm system at specified level (away, vacation, etc)"""

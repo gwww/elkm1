@@ -7,7 +7,7 @@ from __future__ import annotations
 import re
 from abc import abstractmethod
 from collections.abc import Callable
-from typing import Any, Generator, Type
+from typing import Any, Generator, Generic, Type, TypeVar
 
 from .connection import Connection
 from .const import TextDescriptions
@@ -92,14 +92,17 @@ class Element:
         return {key: attrs[key] for key in attrs if not key.startswith("_")}
 
 
-class Elements:
+T = TypeVar("T", bound=Element)
+
+
+class Elements(Generic[T]):
     """Base for list of elements."""
 
     def __init__(
         self,
         connection: Connection,
         notifier: Notifier,
-        class_: Type[Element],
+        class_: Type[T],
         max_elements: int,
     ) -> None:
         self._connection = connection

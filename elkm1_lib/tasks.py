@@ -20,7 +20,7 @@ class Task(Element):
         self._connection.send(tn_encode(self._index))
 
 
-class Tasks(Elements):
+class Tasks(Elements[Task]):
     """Handling for multiple tasks"""
 
     def __init__(self, connection: Connection, notifier: Notifier) -> None:

@@ -1,6 +1,6 @@
 """Definition of an ElkM1 Keypad."""
 import datetime as dt
-from typing import Optional, cast
+from typing import Optional
 
 from .connection import Connection
 from .const import KeypadKeys, Max, TextDescriptions
@@ -22,7 +22,7 @@ class Keypad(Element):
         self.last_keypress: Optional[tuple[str, int]] = None
 
 
-class Keypads(Elements):
+class Keypads(Elements[Keypad]):
     """Handling for multiple areas"""
 
     def __init__(self, connection: Connection, notifier: Notifier) -> None:
@@ -54,8 +54,7 @@ class Keypads(Elements):
                 keypad.setattr("area", keypad_areas[keypad.index], True)
 
     def _kc_handler(self, keypad: int, key: int) -> None:
-        keypads: list[Keypad] = cast(list[Keypad], self.elements)
-        keypads[keypad].last_keypress = None  # Force a change notification
+        self.elements[keypad].last_keypress = None  # Force a change notification
         try:
             name = KeypadKeys(key).name
         except ValueError:

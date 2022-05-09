@@ -28,7 +28,7 @@ class Light(Element):
         self._connection.send(pt_encode(self._index))
 
 
-class Lights(Elements):
+class Lights(Elements[Light]):
     """Handling for multiple lights"""
 
     def __init__(self, connection: Connection, notifier: Notifier) -> None:

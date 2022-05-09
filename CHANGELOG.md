@@ -2,6 +2,26 @@
 All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## [2.0.0]
+- **Breaking change**: use Enums proper instead of Enum.values; signature of many
+  of the xx_encode/xx_decode functions change as the parameters that were str,
+  int, etc are now AlarmLevel, etc. Full list of of the enums used is in `const.py`
+  Inspiration for this change from from Home Assistant move to using more
+  enums to eliminate constants. Attribute changes:
+  - Zone.definition (switch to Enum)
+  - Zone.logical_status (switch to Enum)
+  - Zone.physical_status (switch to Enum)
+  - Area.armed_status (switch to Enum)
+  - Area.arm_up_state (switch to Enum)
+  - Area.alarm_status (switch to Enum)
+  - Area.arm method uses ArmLevel instead of a string
+  - Thermostat.mode (switch to Enum)
+  - Thermostat.fan (switch to Enum)
+  - Thermostat.set (use Enum)
+  - Setting.value_format (switch to Enum)
+  - Area.alarm_memory (changed from "0"/"1" string to bool)
+- Add use of Generics on Elements to give better typing of self.elements
+
 ## [1.3.6]
 - Refactor to separate concerns. Major part of this separation was pulling the
   observer code out of message.py and putting it in a separate class. This

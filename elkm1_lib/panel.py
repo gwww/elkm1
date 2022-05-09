@@ -96,8 +96,8 @@ class Panel(Element):
         _get_status(33, "Fire", True)
         self.setattr("system_trouble_status", ", ".join(statuses), True)
 
-    def _rp_handler(self, remote_programming_status: int) -> None:
-        if remote_programming_status == ElkRPStatus.DISCONNECTED.value:
+    def _rp_handler(self, remote_programming_status: ElkRPStatus) -> None:
+        if remote_programming_status == ElkRPStatus.DISCONNECTED:
             self._connection.resume()
         else:
             self._connection.pause()

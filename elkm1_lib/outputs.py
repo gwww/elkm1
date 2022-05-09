@@ -27,7 +27,7 @@ class Output(Element):
         self._connection.send(ct_encode(self._index))
 
 
-class Outputs(Elements):
+class Outputs(Elements[Output]):
     """Handling for multiple areas"""
 
     def __init__(self, connection: Connection, notifier: Notifier) -> None:

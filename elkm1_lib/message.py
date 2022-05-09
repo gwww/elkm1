@@ -25,7 +25,22 @@ from collections import namedtuple
 from collections.abc import Callable
 from typing import Any, cast
 
-from .const import Max
+from .const import (
+    AlarmState,
+    ArmedStatus,
+    ArmLevel,
+    ArmUpState,
+    ElkRPStatus,
+    Max,
+    SettingFormat,
+    ThermostatFan,
+    ThermostatMode,
+    ThermostatSetting,
+    ZoneAlarmState,
+    ZoneLogicalStatus,
+    ZonePhysicalStatus,
+    ZoneType,
+)
 
 MessageEncode = namedtuple("MessageEncode", ["message", "response_command"])
 MsgHandler = Callable[..., None]
@@ -54,29 +69,57 @@ def decode(msg: str) -> tuple[str, dict[str, Any]] | None:
     raise ValueError(error_msg)
 
 
-def am_decode(msg: str) -> dict[str, str]:
+def _is_valid_length_and_checksum(msg: str) -> tuple[bool, str]:
+    """Check packet length valid and that checksum is good."""
+    try:
+        if int(msg[:2], 16) != (len(msg) - 2):
+            return (
+                False,
+                f"Incorrect message length, expected {msg[:2]}, got {len(msg)-2:02X}. Msg {msg}",
+            )
+        checksum = int(msg[-2:], 16)
+        for char in msg[:-2]:
+            checksum += ord(char)
+        if (checksum % 256) != 0:
+            return False, f"Bad checksum. Msg: {msg}"
+    except ValueError:
+        return False, "Message invalid"
+
+    return True, ""
+
+
+def _chk_len(msg: str, msg_len: str) -> None:
+    if msg[:2] != msg_len:
+        raise ValueError(f"Expected msg len {msg_len}. Got msg {msg}")
+
+
+def am_decode(msg: str) -> dict[str, list[bool]]:
     """AM: Alarm memory by area report."""
-    return {"alarm_memory": msg[4 : 4 + Max.AREAS.value]}
+    _chk_len(msg, "0C")
+    return {"alarm_memory": [x == "1" for x in msg[4 : 4 + Max.AREAS.value]]}
 
 
-def as_decode(msg: str) -> dict[str, str]:
+def as_decode(
+    msg: str,
+) -> dict[str, list[ArmedStatus] | list[ArmUpState] | list[AlarmState]]:
     """AS: Arming status report."""
     return {
-        "armed_statuses": msg[4:12],
-        "arm_up_states": msg[12:20],
-        "alarm_states": msg[20:28],
+        "armed_statuses": [ArmedStatus(x) for x in msg[4:12]],
+        "arm_up_states": [ArmUpState(x) for x in msg[12:20]],
+        "alarm_states": [AlarmState(x) for x in msg[20:28]],
     }
 
 
-def az_decode(msg: str) -> dict[str, str]:
+def az_decode(msg: str) -> dict[str, list[ZoneAlarmState]]:
     """AZ: Alarm by zone report."""
-    return {"alarm_status": msg[4 : 4 + Max.ZONES.value]}
+    _chk_len(msg, "D6")
+    return {"alarm_status": [ZoneAlarmState(x) for x in msg[4 : 4 + Max.ZONES.value]]}
 
 
 def _cr_one_custom_value_decode(index: int, part: str) -> dict[str, Any]:
     value = int(part[0:5])
-    value_format = int(part[5])
-    if value_format == 2:
+    value_format = SettingFormat(int(part[5]))
+    if value_format == SettingFormat.TIME_OF_DAY:
         ret: int | tuple[int, int] = ((value >> 8) & 0xFF, value & 0xFF)
     else:
         ret = value
@@ -113,14 +156,14 @@ def cv_decode(msg: str) -> dict[str, Any]:
     return {"counter": int(msg[4:6]) - 1, "value": int(msg[6:11])}
 
 
-def ee_decode(msg: str) -> dict[str, Any]:
+def ee_decode(msg: str) -> dict[str, int | bool | ArmedStatus]:
     """EE: Entry/exit timer report."""
     return {
         "area": int(msg[4:5]) - 1,
         "is_exit": msg[5:6] == "0",
         "timer1": int(msg[6:9]),
         "timer2": int(msg[9:12]),
-        "armed_status": msg[12:13],
+        "armed_status": ArmedStatus(msg[12:13]),
     }
 
 
@@ -202,9 +245,9 @@ def ps_decode(msg: str) -> dict[str, Any]:
     }
 
 
-def rp_decode(msg: str) -> dict[str, int]:
+def rp_decode(msg: str) -> dict[str, ElkRPStatus]:
     """RP: Remote programming status."""
-    return {"remote_programming_status": int(msg[4:6])}
+    return {"remote_programming_status": ElkRPStatus(int(msg[4:6]))}
 
 
 def rr_decode(msg: str) -> dict[str, str]:
@@ -249,11 +292,12 @@ def tc_decode(msg: str) -> dict[str, int]:
 
 def tr_decode(msg: str) -> dict[str, Any]:
     """TR: Thermostat data response."""
+    _chk_len(msg, "13")
     return {
         "thermostat_index": int(msg[4:6]) - 1,
-        "mode": int(msg[6]),
+        "mode": ThermostatMode(int(msg[6])),
         "hold": msg[7] == "1",
-        "fan": int(msg[8]),
+        "fan": ThermostatFan(int(msg[8])),
         "current_temp": int(msg[9:11]),
         "heat_setpoint": int(msg[11:13]),
         "cool_setpoint": int(msg[13:15]),
@@ -290,15 +334,19 @@ def zb_decode(msg: str) -> dict[str, Any]:
     return {"zone_number": int(msg[4:7]) - 1, "zone_bypassed": msg[7] == "1"}
 
 
-def zc_decode(msg: str) -> dict[str, Any]:
+def zc_decode(
+    msg: str,
+) -> dict[str, int | tuple[ZoneLogicalStatus, ZonePhysicalStatus]]:
     """ZC: Zone Change."""
+    _chk_len(msg, "0A")
     status = _status_decode(int(msg[7:8], 16))
     return {"zone_number": int(msg[4:7]) - 1, "zone_status": status}
 
 
-def zd_decode(msg: str) -> dict[str, list[int]]:
+def zd_decode(msg: str) -> dict[str, list[ZoneType]]:
     """ZD: Zone definitions."""
-    zone_definitions = [ord(x) - 0x30 for x in msg[4 : 4 + Max.ZONES.value]]
+    _chk_len(msg, "D6")
+    zone_definitions = [ZoneType(ord(x) - 0x30) for x in msg[4 : 4 + Max.ZONES.value]]
     return {"zone_definitions": zone_definitions}
 
 
@@ -308,8 +356,11 @@ def zp_decode(msg: str) -> dict[str, list[int]]:
     return {"zone_partitions": zone_partitions}
 
 
-def zs_decode(msg: str) -> dict[str, list[tuple[int, int]]]:
+def zs_decode(
+    msg: str,
+) -> dict[str, list[tuple[ZoneLogicalStatus, ZonePhysicalStatus]]]:
     """ZS: Zone statuses."""
+    _chk_len(msg, "D6")
     status = [_status_decode(int(x, 16)) for x in msg[4 : 4 + Max.ZONES.value]]
     return {"zone_statuses": status}
 
@@ -344,33 +395,16 @@ def get_elk_command(line: str) -> str:
     return line[2:4]
 
 
-def _status_decode(status: int) -> tuple[int, int]:
+def _status_decode(status: int) -> tuple[ZoneLogicalStatus, ZonePhysicalStatus]:
     """Decode a 1 byte status into logical and physical statuses."""
-    logical_status = (status & 0b00001100) >> 2
-    physical_status = status & 0b00000011
+    logical_status = ZoneLogicalStatus((status & 0b00001100) >> 2)
+    physical_status = ZonePhysicalStatus(status & 0b00000011)
     return (logical_status, physical_status)
 
 
-def _is_valid_length_and_checksum(msg: str) -> tuple[bool, str]:
-    """Check packet length valid and that checksum is good."""
-    try:
-        if int(msg[:2], 16) != (len(msg) - 2):
-            return False, "Incorrect message length"
-
-        checksum = int(msg[-2:], 16)
-        for char in msg[:-2]:
-            checksum += ord(char)
-        if (checksum % 256) != 0:
-            return False, "Bad checksum"
-    except ValueError:
-        return False, "Message invalid"
-
-    return True, ""
-
-
-def al_encode(arm_mode: str, area: int, user_code: int) -> MessageEncode:
+def al_encode(arm_mode: ArmLevel, area: int, user_code: int) -> MessageEncode:
     """al: Arm system. Note in 'al' the 'l' can vary"""
-    return MessageEncode(f"0Da{arm_mode}{area + 1:1}{user_code:06}00", "AS")
+    return MessageEncode(f"0Da{arm_mode.value}{area + 1:1}{user_code:06}00", "AS")
 
 
 def as_encode() -> MessageEncode:
@@ -414,10 +448,10 @@ def cr_encode(index: int) -> MessageEncode:
 
 
 def cw_encode(
-    index: int, value: int | tuple[int, int], value_format: int
+    index: int, value: int | tuple[int, int], value_format: SettingFormat
 ) -> MessageEncode:
     """cw: Write a custom value."""
-    if value_format == 2:
+    if value_format == SettingFormat.TIME_OF_DAY:
         val = cast(tuple[int, int], value)
         enc = val[0] * 256 + val[1]
     else:
@@ -522,9 +556,9 @@ def tr_encode(thermostat: int) -> MessageEncode:
     return MessageEncode(f"08tr{thermostat + 1:02}00", None)
 
 
-def ts_encode(thermostat: int, value: int, element: int) -> MessageEncode:
+def ts_encode(thermostat: int, value: int, element: ThermostatSetting) -> MessageEncode:
     """ts: Set thermostat data."""
-    return MessageEncode(f"0Bts{thermostat + 1:02}{value:02}{element:1}00", None)
+    return MessageEncode(f"0Bts{thermostat + 1:02}{value:02}{element.value:1}00", None)
 
 
 def ua_encode(user_code: int) -> MessageEncode:

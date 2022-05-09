@@ -30,6 +30,7 @@ from .const import (
     ArmedStatus,
     ArmLevel,
     ArmUpState,
+    ElkRPStatus,
     Max,
     SettingFormat,
     ThermostatFan,
@@ -244,9 +245,9 @@ def ps_decode(msg: str) -> dict[str, Any]:
     }
 
 
-def rp_decode(msg: str) -> dict[str, int]:
+def rp_decode(msg: str) -> dict[str, ElkRPStatus]:
     """RP: Remote programming status."""
-    return {"remote_programming_status": int(msg[4:6])}
+    return {"remote_programming_status": ElkRPStatus(int(msg[4:6]))}
 
 
 def rr_decode(msg: str) -> dict[str, str]:

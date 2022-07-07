@@ -38,7 +38,7 @@ def parse_url(url: str) -> tuple[str, str, int, ssl.SSLContext | None]:
             ssl_context.minimum_version = tls
             ssl_context.maximum_version = tls
 
-        ssl_context.verify_mode = ssl.CERT_NONE
+        ssl_context.set_ciphers("AES+SHA")
         scheme = "elks"
     elif scheme == "serial":
         host, port = dest.split(":") if ":" in dest else (dest, "115200")

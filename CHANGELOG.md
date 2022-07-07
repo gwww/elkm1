@@ -2,6 +2,9 @@
 All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## [2.0.2]
+- Use a more liberal cipher set.
+
 ## [2.0.1]
 - Support for Python 3.10; SSL cipher must be explicitly set
 

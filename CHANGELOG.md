@@ -2,6 +2,9 @@
 All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## [2.0.1]
+- Support for Python 3.10; SSL cipher must be explicitly set
+
 ## [2.0.0]
 - **Breaking change**: use Enums proper instead of Enum.values; signature of many
   of the xx_encode/xx_decode functions change as the parameters that were str,

@@ -191,8 +191,13 @@ def ka_decode(msg: str) -> dict[str, Any]:
 
 def kc_decode(msg: str) -> dict[str, Any]:
     """KC: Keypad key change."""
-    return {"keypad": int(msg[4:6]) - 1, "key": int(msg[6:8])}
+    #chimes = [ord(x) for x in msg[15:22]]
 
+    return {
+        "keypad": int(msg[4:6]) - 1,
+        "key": int(msg[6:8]),
+        "chime": "xxxx"
+    }
 
 def ld_decode(msg: str) -> dict[str, Any]:
     """LD: System Log Data Update."""
@@ -608,3 +613,8 @@ def zt_encode(zone: int) -> MessageEncode:
 def zv_encode(zone: int) -> MessageEncode:
     """zv: Get zone voltage"""
     return MessageEncode(f"09zv{zone + 1:03}00", "ZV")
+
+
+def kc_encode(keypad: int) -> MessageEncode:
+    """zb: Zone bypass. Zone < 0 unbypass all; Zone > Max bypass all."""
+    return MessageEncode(f"08kc{keypad:02}00", "KC")

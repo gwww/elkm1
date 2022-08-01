@@ -19,6 +19,7 @@ class Max(Enum):
     LIGHTS = 256
     ZONES = 208
     ZONE_TEMPS = 16
+    KEYS = 28
 
 
 class ZoneType(Enum):

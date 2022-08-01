@@ -1,13 +1,16 @@
 """Definition of an ElkM1 Keypad."""
 import datetime as dt
 from typing import Optional
+import logging
 
 from .connection import Connection
 from .const import KeypadKeys, Max, TextDescriptions
 from .elements import Element, Elements
-from .message import ka_encode
+from .message import ka_encode,kc_encode
 from .notify import Notifier
 
+# Temporary to debug
+_LOGGER = logging.getLogger(__name__)
 
 class Keypad(Element):
     """Class representing an Keypad"""
@@ -21,6 +24,10 @@ class Keypad(Element):
         self.code = ""
         self.last_keypress: Optional[tuple[str, int]] = None
 
+    # Just temporary to test, shouldn't really need
+    def get_chime_mode(self) -> None:
+        """(Helper) Get keypad chime mode."""
+        self._connection.send(kc_encode(self.index))
 
 class Keypads(Elements[Keypad]):
     """Handling for multiple areas"""
@@ -53,7 +60,8 @@ class Keypads(Elements[Keypad]):
             if keypad_areas[keypad.index] >= 0:
                 keypad.setattr("area", keypad_areas[keypad.index], True)
 
-    def _kc_handler(self, keypad: int, key: int) -> None:
+    def _kc_handler(self, keypad: int, key: int, chime: str) -> None:
+        _LOGGER.warning(f"got keypad={keypad} key:{key} chime{chime}")
         self.elements[keypad].last_keypress = None  # Force a change notification
         try:
             name = KeypadKeys(key).name

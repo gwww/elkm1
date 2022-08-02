@@ -38,4 +38,4 @@ class Notifier:
             try:
                 observer(**notify_parameters)
             except Exception as exc:  # pylint: disable=broad-except
-                LOG.exception(exc)
+                LOG.exception(f"For observer {observer} params {notify_parameters}: {exc}",exc_info=True)

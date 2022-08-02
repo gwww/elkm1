@@ -4,9 +4,9 @@ from typing import Optional
 import logging
 
 from .connection import Connection
-from .const import KeypadKeys, Max, TextDescriptions
+from .const import KeypadKeys, Max, TextDescriptions, FunctionKeys
 from .elements import Element, Elements
-from .message import ka_encode,kc_encode
+from .message import ka_encode,kc_encode,kf_encode
 from .notify import Notifier
 
 # Temporary to debug
@@ -23,11 +23,20 @@ class Keypad(Element):
         self.last_user = -1
         self.code = ""
         self.last_keypress: Optional[tuple[str, int]] = None
+        # Not sure what these init values should be? should it be same as above?
+        self.chime_mode = None
+        self.last_function_key = None
 
     # Just temporary to test, shouldn't really need
     def get_chime_mode(self) -> None:
         """(Helper) Get keypad chime mode."""
-        self._connection.send(kc_encode(self.index))
+        self._connection.send(kf_encode(self.index))
+
+    def press_function_key(self,key: str) -> None:
+        self._connection.send(kf_encode(self.index,key))
+
+    def press_chime_key(self) -> None:
+        self.press_function_key('C')
 
 class Keypads(Elements[Keypad]):
     """Handling for multiple areas"""
@@ -37,6 +46,7 @@ class Keypads(Elements[Keypad]):
         notifier.attach("IC", self._ic_handler)
         notifier.attach("KA", self._ka_handler)
         notifier.attach("KC", self._kc_handler)
+        notifier.attach("KF", self._kf_handler)
         notifier.attach("LW", self._lw_handler)
         notifier.attach("ST", self._st_handler)
 
@@ -44,6 +54,9 @@ class Keypads(Elements[Keypad]):
         """Retrieve areas from ElkM1"""
         self._connection.send(ka_encode())
         self.get_descriptions(TextDescriptions.KEYPAD.value)
+        # Not sure about this, sending kf needs a keypad index, so should we send all?
+        # Just send one for now
+        self._connection.send(kf_encode(0))
 
     def _ic_handler(self, code: int, user: int, keypad: int) -> None:
         keypad_ = self.elements[keypad]
@@ -60,14 +73,20 @@ class Keypads(Elements[Keypad]):
             if keypad_areas[keypad.index] >= 0:
                 keypad.setattr("area", keypad_areas[keypad.index], True)
 
-    def _kc_handler(self, keypad: int, key: int, chime: str) -> None:
-        _LOGGER.warning(f"got keypad={keypad} key:{key} chime{chime}")
+    def _kc_handler(self, keypad: int, key: int, function_key_leds: list[int], code_required_to_bypass: int, chime: list[int]) -> None:
         self.elements[keypad].last_keypress = None  # Force a change notification
         try:
             name = KeypadKeys(key).name
         except ValueError:
             name = ""
         self.elements[keypad].setattr("last_keypress", (name, key), True)
+
+    def _kf_handler(self, keypad: int, key: str, chime_mode: list[int]):
+        try:
+            name = FunctionKeys(key).name
+        except ValueError:
+            name = ""
+        self.elements[keypad].setattr("last_function_key", (name, key), True)
 
     def _lw_handler(self, keypad_temps: list[int], zone_temps: list[int]) -> None:
         for keypad in self.elements:

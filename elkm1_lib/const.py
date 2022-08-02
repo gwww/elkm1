@@ -200,6 +200,43 @@ class KeypadKeys(Enum):
     F5 = 27
     DATA_KEY_MODE = 28
 
+class FunctionKeys(Enum):
+    """From KF:
+    Which function key pressed, 1 to 6 ASCII, ‘*’ = 0x2A,
+    ‘C’ = Chime.
+    """
+    Null = "0"
+    F1 = "1"
+    F2 = "2"
+    F3 = "3"
+    F4 = "4"
+    F5 = "5"
+    F6 = "6"
+    SilenceTrouble = "*" # What is this?
+    Chime = "C"
+
+class ChimeMode(Enum):
+    """From KF:
+    Chime mode for each area 1 to 8, ‘0’= Off, ‘1’=Chime only,
+    ‘2’ = Voice only, ‘3’= Chime and voice.
+    """
+    OFF = 0
+    Chime = 1
+    Voice = 2
+    ChimeAndVoice = 3
+
+class ChimeAndBeep(Enum):
+    """Chime & beep OFF = 0x30. No bits in the least significant nibble are set.
+        Single beep = 0x31. Bit 0 is set.
+        Constant beep = 0x32. Bit 1 is set once the beeping starts and will be
+                        unset when the constant beep ends.
+        Chime = 0x34. Bit 2 is set and then unset after transmission of the “KC”
+                    command.
+    """
+    OFF = 0
+    SingleBeep = 1
+    ConstantBeep = 2
+    Chime = 3
 
 class TextDescriptions(Enum):
     """Types of description strings that can be retrieved from the panel"""

@@ -24,7 +24,6 @@ import time
 from collections import namedtuple
 from collections.abc import Callable
 from typing import Any, cast
-import logging
 
 from .const import (
     AlarmState,
@@ -41,15 +40,12 @@ from .const import (
     ZoneLogicalStatus,
     ZonePhysicalStatus,
     ZoneType,
-    ChimeAndBeep,
     FunctionKeys,
     ChimeMode,
 )
 
 MessageEncode = namedtuple("MessageEncode", ["message", "response_command"])
 MsgHandler = Callable[..., None]
-# Temporary to debug
-_LOGGER = logging.getLogger(__name__)
 
 def decode(msg: str) -> tuple[str, dict[str, Any]] | None:
     """Decode an Elk message by passing to appropriate decoder"""
@@ -195,25 +191,11 @@ def ka_decode(msg: str) -> dict[str, Any]:
 
 
 def kc_decode(msg: str) -> dict[str, Any]:
-    """KC: Keypad key change.
-       19KC01000000000000000000017
-       012345678901234567890123456
-           PPKKFFFFFFCBBBBBBBBxxSS
-    """
-    return {
-        "keypad": int(msg[4:6]) - 1,
-        "key": int(msg[6:8]),
-        "function_key_leds": [int(x) for x in msg[8:14]],
-        "code_required_to_bypass": int(msg[14]),
-        "chime": [ChimeAndBeep(int(x) & 0x03) for x in msg[15:23]]
-    }
+    """KC: Keypad key change."""
+    return {"keypad": int(msg[4:6]) - 1, "key": int(msg[6:8])}
 
 def kf_decode(msg: str) -> dict[str, Any]:
-    """KF: Keypad function key press.
-       11KF02C2000000000
-       0123456789012
-           NNDMMMMMMMMxxCS
-    """
+    """KF: Keypad function key press."""
     return {
         "keypad": int(msg[4:6]) - 1,
         "key": FunctionKeys(msg[6]),
@@ -635,14 +617,6 @@ def zv_encode(zone: int) -> MessageEncode:
     """zv: Get zone voltage"""
     return MessageEncode(f"09zv{zone + 1:03}00", "ZV")
 
-
-def kc_encode(keypad: int) -> MessageEncode:
-    """zb: Zone bypass. Zone < 0 unbypass all; Zone > Max bypass all."""
-    return MessageEncode(f"08kc{keypad:02}00", "KC")
-
-#- Which function key pressed, 1 to 6 ASCII, ‘*’ = 0x2A to silence
-#  trouble beep on keypads. ‘C’ = 0x43 to control Chime, ‘0’
-#  function key value will only return the “KF” command
 def kf_encode(keypad: int, key: str=FunctionKeys.Null.value) -> MessageEncode:
-    """zb: Zone bypass. Zone < 0 unbypass all; Zone > Max bypass all."""
+    """kf: Function Key Press."""
     return MessageEncode(f"09kf{keypad:02}{key}00", "KF")

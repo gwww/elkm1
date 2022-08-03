@@ -6,7 +6,7 @@ import logging
 from .connection import Connection
 from .const import KeypadKeys, Max, TextDescriptions, FunctionKeys
 from .elements import Element, Elements
-from .message import ka_encode,kc_encode,kf_encode
+from .message import ka_encode,kf_encode
 from .notify import Notifier
 
 # Temporary to debug
@@ -27,16 +27,12 @@ class Keypad(Element):
         self.chime_mode = None
         self.last_function_key = None
 
-    # Just temporary to test, shouldn't really need
-    def get_chime_mode(self) -> None:
-        """(Helper) Get keypad chime mode."""
-        self._connection.send(kf_encode(self.index))
-
     def press_function_key(self,key: str) -> None:
         self._connection.send(kf_encode(self.index,key))
 
+    # Should we create these for all function keys?
     def press_chime_key(self) -> None:
-        self.press_function_key('C')
+        self.press_function_key(FunctionKeys.CHIME.value)
 
 class Keypads(Elements[Keypad]):
     """Handling for multiple areas"""
@@ -73,7 +69,7 @@ class Keypads(Elements[Keypad]):
             if keypad_areas[keypad.index] >= 0:
                 keypad.setattr("area", keypad_areas[keypad.index], True)
 
-    def _kc_handler(self, keypad: int, key: int, function_key_leds: list[int], code_required_to_bypass: int, chime: list[int]) -> None:
+    def _kc_handler(self, keypad: int, key: int) -> None:
         self.elements[keypad].last_keypress = None  # Force a change notification
         try:
             name = KeypadKeys(key).name

@@ -20,6 +20,7 @@ class Max(Enum):
     ZONES = 208
     ZONE_TEMPS = 16
 
+
 class ZoneType(Enum):
     """Types of Elk zones"""
 

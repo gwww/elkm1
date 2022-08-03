@@ -281,7 +281,7 @@ class _ElkProtocol(asyncio.Protocol):
             cksum = (256 - reduce(lambda x, y: x + y, map(ord, data))) % 256
             data = f"{data}{cksum:02X}"
             if int(data[0:2], 16) != len(data) - 2:
-                LOG.error("message length wrong: %s", data)
+                LOG.debug("message length wrong: %s", data)
 
         LOG.debug("write_data '%s'", data)
         self._transport.write((data + "\r\n").encode())

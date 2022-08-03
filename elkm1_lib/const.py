@@ -216,9 +216,9 @@ class FunctionKeys(Enum):
 class ChimeMode(Enum):
     """Chime Mode Settings on an Area"""
     OFF = 0
-    Chime = 1
-    Voice = 2
-    ChimeAndVoice = 3
+    CHIME = 1
+    VOICE = 2
+    CHIMEANDVOICE = 3
 
 class TextDescriptions(Enum):
     """Types of description strings that can be retrieved from the panel"""

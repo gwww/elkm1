@@ -33,7 +33,7 @@ class Keypad(Element):
 
     # Should we create these for all function keys?
     def press_chime_key(self) -> None:
-        """(Helper) Press the chip function"""
+        """(Helper) Press the chime function"""
         self.press_function_key(FunctionKeys.CHIME.value)
 
 class Keypads(Elements[Keypad]):

@@ -52,9 +52,9 @@ class Keypads(Elements[Keypad]):
         """Retrieve areas from ElkM1"""
         self._connection.send(ka_encode())
         self.get_descriptions(TextDescriptions.KEYPAD.value)
-        # Not sure about this, sending kf needs a keypad index, so should we send all?
-        # Just send one for now
-        self._connection.send(kf_encode(0))
+        # Send KF for each of our keypads
+        for keypad in self.elements:
+            self._connection.send(kf_encode(keypad.index))
 
     def _ic_handler(self, code: int, user: int, keypad: int) -> None:
         keypad_ = self.elements[keypad]

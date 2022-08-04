@@ -619,4 +619,4 @@ def zv_encode(zone: int) -> MessageEncode:
 
 def kf_encode(keypad: int, key: str=FunctionKeys.NULL.value) -> MessageEncode:
     """kf: Function Key Press."""
-    return MessageEncode(f"09kf{keypad:02}{key}00", "KF")
+    return MessageEncode(f"09kf{keypad + 1:02}{key}00", "KF")

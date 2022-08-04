@@ -492,6 +492,11 @@ def ka_encode() -> MessageEncode:
     return MessageEncode("06ka00", "KA")
 
 
+def kf_encode(keypad: int, key: str=FunctionKeys.NULL.value) -> MessageEncode:
+    """kf: Function Key Press."""
+    return MessageEncode(f"09kf{keypad + 1:02}{key}00", "KF")
+    
+
 def lw_encode() -> MessageEncode:
     """lw: Get temperature data."""
     return MessageEncode("06lw00", "LW")
@@ -617,6 +622,3 @@ def zv_encode(zone: int) -> MessageEncode:
     """zv: Get zone voltage"""
     return MessageEncode(f"09zv{zone + 1:03}00", "ZV")
 
-def kf_encode(keypad: int, key: str=FunctionKeys.NULL.value) -> MessageEncode:
-    """kf: Function Key Press."""
-    return MessageEncode(f"09kf{keypad + 1:02}{key}00", "KF")

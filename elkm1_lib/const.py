@@ -215,7 +215,7 @@ class FunctionKeys(Enum):
     CHIME = "C"
 
 class ChimeMode(Enum):
-    """Chime Mode Settings on an Area"""
+    """Chime mode settings on an Area"""
     OFF = 0
     CHIME = 1
     VOICE = 2

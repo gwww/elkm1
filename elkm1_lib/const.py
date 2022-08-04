@@ -200,10 +200,7 @@ class KeypadKeys(Enum):
     DATA_KEY_MODE = 28
 
 class FunctionKeys(Enum):
-    """From KF:
-    Which function key pressed, 1 to 6 ASCII, ‘*’ = 0x2A,
-    ‘C’ = Chime.
-    """
+    """From KF: Which function key pressed"""
     NULL = "0"
     F1 = "1"
     F2 = "2"

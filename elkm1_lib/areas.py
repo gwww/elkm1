@@ -10,7 +10,6 @@ from .elements import Element, Elements
 from .message import al_encode, as_encode, az_encode, dm_encode, zb_encode
 from .notify import Notifier
 
-
 class Area(Element):
     """Class representing an Area"""
 
@@ -135,4 +134,4 @@ class Areas(Elements[Area]):
                 name = ChimeMode(mode).name
             except ValueError:
                 name = ""
-            self.elements[area].setattr("chime_mode", mode)
+            self.elements[area].setattr("chime_mode", (name, mode), True)

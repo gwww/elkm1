@@ -74,6 +74,7 @@ class Keypads(Elements[Keypad]):
         self.elements[keypad].setattr("last_keypress", (name, key), True)
 
     def _kf_handler(self, keypad: int, key: str, chime_mode: list[int]):
+        self.elements[keypad].last_function_key = None # Force a change notification
         try:
             name = FunctionKeys(key).name
         except ValueError:

@@ -492,7 +492,7 @@ def ka_encode() -> MessageEncode:
     return MessageEncode("06ka00", "KA")
 
 
-def kf_encode(keypad: int, key: str=FunctionKeys.NULL.value) -> MessageEncode:
+def kf_encode(keypad: int, key: FunctionKeys=FunctionKeys.NULL) -> MessageEncode:
     """kf: Function Key Press."""
     return MessageEncode(f"09kf{keypad + 1:02}{key}00", "KF")
     

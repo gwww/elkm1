@@ -27,14 +27,9 @@ class Keypad(Element):
         self.chime_mode = None
         self.last_function_key = None
 
-    def press_function_key(self,key: str) -> None:
+    def press_function_key(self,functionkey: FunctionKeys) -> None:
         """(Helper) Send a function key (1, ... 6, *, C)"""
-        self._connection.send(kf_encode(self.index,key))
-
-    # Should we create these for all function keys?
-    def press_chime_key(self) -> None:
-        """(Helper) Press the chime function"""
-        self.press_function_key(FunctionKeys.CHIME.value)
+        self._connection.send(kf_encode(self.index,functionkey.value))
 
 class Keypads(Elements[Keypad]):
     """Handling for multiple areas"""

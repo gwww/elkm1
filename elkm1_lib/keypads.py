@@ -23,7 +23,6 @@ class Keypad(Element):
         self.last_user = -1
         self.code = ""
         self.last_keypress: Optional[tuple[str, int]] = None
-        # Not sure what these init values should be? should it be same as above?
         self.chime_mode = None
         self.last_function_key = None
 

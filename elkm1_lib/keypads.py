@@ -26,9 +26,9 @@ class Keypad(Element):
         self.chime_mode = None
         self.last_function_key = None
 
-    def press_function_key(self,functionkey: FunctionKeys) -> None:
+    def press_function_key(self, functionkey: FunctionKeys) -> None:
         """(Helper) Send a function key (1, ... 6, *, C)"""
-        self._connection.send(kf_encode(self.index,functionkey))
+        self._connection.send(kf_encode(self.index, functionkey))
 
 class Keypads(Elements[Keypad]):
     """Handling for multiple areas"""

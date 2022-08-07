@@ -47,6 +47,7 @@ from .const import (
 MessageEncode = namedtuple("MessageEncode", ["message", "response_command"])
 MsgHandler = Callable[..., None]
 
+
 def decode(msg: str) -> tuple[str, dict[str, Any]] | None:
     """Decode an Elk message by passing to appropriate decoder"""
     valid, error_msg = _is_valid_length_and_checksum(msg)
@@ -194,6 +195,7 @@ def kc_decode(msg: str) -> dict[str, Any]:
     """KC: Keypad key change."""
     return {"keypad": int(msg[4:6]) - 1, "key": int(msg[6:8])}
 
+
 def kf_decode(msg: str) -> dict[str, Any]:
     """KF: Keypad function key press."""
     return {
@@ -201,6 +203,7 @@ def kf_decode(msg: str) -> dict[str, Any]:
         "key": FunctionKeys(msg[6]),
         "chime_mode": [ChimeMode(int(x)) for x in msg[7:15]],
     }
+
 
 def ld_decode(msg: str) -> dict[str, Any]:
     """LD: System Log Data Update."""
@@ -492,10 +495,12 @@ def ka_encode() -> MessageEncode:
     return MessageEncode("06ka00", "KA")
 
 
-def kf_encode(keypad: int, functionkey: FunctionKeys=FunctionKeys.NULL) -> MessageEncode:
+def kf_encode(
+    keypad: int, functionkey: FunctionKeys = FunctionKeys.NULL
+) -> MessageEncode:
     """kf: Function Key Press."""
     return MessageEncode(f"09kf{keypad + 1:02}{functionkey.value}00", "KF")
-    
+
 
 def lw_encode() -> MessageEncode:
     """lw: Get temperature data."""

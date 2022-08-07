@@ -5,10 +5,18 @@ from __future__ import annotations
 from typing import Any
 
 from .connection import Connection
-from .const import AlarmState, ArmedStatus, ArmLevel, ArmUpState, Max, TextDescriptions, ChimeMode
 from .elements import Element, Elements
 from .message import al_encode, as_encode, az_encode, dm_encode, zb_encode
 from .notify import Notifier
+from .const import (
+    AlarmState,
+    ArmedStatus,
+    ArmLevel,
+    ArmUpState,
+    Max,
+    TextDescriptions,
+    ChimeMode,
+)
 
 class Area(Element):
     """Class representing an Area"""
@@ -129,7 +137,7 @@ class Areas(Elements[Area]):
         self.elements[area].setattr("last_log", log, True)
 
     def _kf_handler(self, keypad: int, key: str, chime_mode: list[int]):
-        for area,mode in enumerate(chime_mode):
+        for area, mode in enumerate(chime_mode):
             try:
                 name = ChimeMode(mode).name
             except ValueError:

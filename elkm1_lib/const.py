@@ -203,7 +203,7 @@ class KeypadKeys(Enum):
 class FunctionKeys(Enum):
     """From KF: Which function key pressed"""
 
-    NULL = "0"
+    FORCE_KF_SYNC = "0"
     F1 = "1"
     F2 = "2"
     F3 = "3"

@@ -496,7 +496,7 @@ def ka_encode() -> MessageEncode:
 
 
 def kf_encode(
-    keypad: int, functionkey: FunctionKeys = FunctionKeys.NULL
+    keypad: int, functionkey: FunctionKeys = FunctionKeys.FORCE_KF_SYNC
 ) -> MessageEncode:
     """kf: Function Key Press."""
     return MessageEncode(f"09kf{keypad + 1:02}{functionkey.value}00", "KF")

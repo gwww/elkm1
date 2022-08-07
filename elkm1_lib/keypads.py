@@ -29,7 +29,7 @@ class Keypad(Element):
 
     def press_function_key(self,functionkey: FunctionKeys) -> None:
         """(Helper) Send a function key (1, ... 6, *, C)"""
-        self._connection.send(kf_encode(self.index,functionkey.value))
+        self._connection.send(kf_encode(self.index,functionkey))
 
 class Keypads(Elements[Keypad]):
     """Handling for multiple areas"""

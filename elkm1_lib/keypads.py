@@ -20,7 +20,6 @@ class Keypad(Element):
         self.last_user = -1
         self.code = ""
         self.last_keypress: Optional[tuple[str, int]] = None
-        self.chime_mode = None
         self.last_function_key = None
 
     def press_function_key(self, functionkey: FunctionKeys) -> None:

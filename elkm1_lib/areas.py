@@ -5,18 +5,19 @@ from __future__ import annotations
 from typing import Any
 
 from .connection import Connection
+from .elements import Element, Elements
+from .message import al_encode, as_encode, az_encode, dm_encode, zb_encode
+from .notify import Notifier
 from .const import (
     AlarmState,
     ArmedStatus,
     ArmLevel,
     ArmUpState,
+    ChimeMode,
     Max,
     TextDescriptions,
-    ChimeMode,
 )
-from .elements import Element, Elements
-from .message import al_encode, as_encode, az_encode, dm_encode, zb_encode
-from .notify import Notifier
+
 
 class Area(Element):
     """Class representing an Area"""

@@ -30,7 +30,9 @@ from .const import (
     ArmedStatus,
     ArmLevel,
     ArmUpState,
+    ChimeMode,
     ElkRPStatus,
+    FunctionKeys,
     Max,
     SettingFormat,
     ThermostatFan,
@@ -40,8 +42,6 @@ from .const import (
     ZoneLogicalStatus,
     ZonePhysicalStatus,
     ZoneType,
-    FunctionKeys,
-    ChimeMode,
 )
 
 MessageEncode = namedtuple("MessageEncode", ["message", "response_command"])

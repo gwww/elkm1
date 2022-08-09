@@ -3,7 +3,7 @@ import datetime as dt
 from typing import Optional
 
 from .connection import Connection
-from .const import KeypadKeys, Max, TextDescriptions, FunctionKeys
+from .const import FunctionKeys, KeypadKeys, Max, TextDescriptions
 from .elements import Element, Elements
 from .message import ka_encode, kf_encode
 from .notify import Notifier
@@ -71,7 +71,7 @@ class Keypads(Elements[Keypad]):
             name = ""
         self.elements[keypad].setattr("last_keypress", (name, key), True)
 
-    def _kf_handler(self, keypad: int, key: str, chime_mode: list[int]):
+    def _kf_handler(self, keypad: int, key: str, chime_mode: list[int]) -> None:
         self.elements[keypad].last_function_key = None  # Force a change notification
         try:
             name = FunctionKeys(key).name

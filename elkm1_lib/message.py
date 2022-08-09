@@ -626,4 +626,3 @@ def zt_encode(zone: int) -> MessageEncode:
 def zv_encode(zone: int) -> MessageEncode:
     """zv: Get zone voltage"""
     return MessageEncode(f"09zv{zone + 1:03}00", "ZV")
-

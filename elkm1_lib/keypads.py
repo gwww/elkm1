@@ -1,7 +1,6 @@
 """Definition of an ElkM1 Keypad."""
 import datetime as dt
 from typing import Optional
-import logging
 
 from .connection import Connection
 from .const import KeypadKeys, Max, TextDescriptions, FunctionKeys
@@ -9,8 +8,6 @@ from .elements import Element, Elements
 from .message import ka_encode,kf_encode
 from .notify import Notifier
 
-# Temporary to debug
-_LOGGER = logging.getLogger(__name__)
 
 class Keypad(Element):
     """Class representing an Keypad"""
@@ -29,6 +26,7 @@ class Keypad(Element):
     def press_function_key(self, functionkey: FunctionKeys) -> None:
         """(Helper) Send a function key (1, ... 6, *, C)"""
         self._connection.send(kf_encode(self.index, functionkey))
+
 
 class Keypads(Elements[Keypad]):
     """Handling for multiple areas"""
@@ -74,7 +72,7 @@ class Keypads(Elements[Keypad]):
         self.elements[keypad].setattr("last_keypress", (name, key), True)
 
     def _kf_handler(self, keypad: int, key: str, chime_mode: list[int]):
-        self.elements[keypad].last_function_key = None # Force a change notification
+        self.elements[keypad].last_function_key = None  # Force a change notification
         try:
             name = FunctionKeys(key).name
         except ValueError:

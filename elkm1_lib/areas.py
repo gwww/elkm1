@@ -18,6 +18,7 @@ from .const import (
     ChimeMode,
 )
 
+
 class Area(Element):
     """Class representing an Area"""
 

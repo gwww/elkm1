@@ -20,7 +20,7 @@ class Keypad(Element):
         self.last_user = -1
         self.code = ""
         self.last_keypress: Optional[tuple[str, int]] = None
-        self.last_function_key = None
+        self.last_function_key = FunctionKeys.FORCE_KF_SYNC
 
     def press_function_key(self, functionkey: FunctionKeys) -> None:
         """(Helper) Send a function key (1, ... 6, *, C)"""
@@ -43,9 +43,6 @@ class Keypads(Elements[Keypad]):
         """Retrieve areas from ElkM1"""
         self._connection.send(ka_encode())
         self.get_descriptions(TextDescriptions.KEYPAD.value)
-        # Send KF for each of our keypads
-        for keypad in self.elements:
-            self._connection.send(kf_encode(keypad.index))
 
     def _ic_handler(self, code: int, user: int, keypad: int) -> None:
         keypad_ = self.elements[keypad]

@@ -91,6 +91,9 @@ class Areas(Elements[Area]):
         """Retrieve areas from ElkM1"""
         self._connection.send(as_encode())
         self.get_descriptions(TextDescriptions.AREA.value)
+        # Send KF for one of our keypads
+        # TODO: Zero is not right, need to get the index of a keypad in this area.
+        self._connection.send(kf_encode(0))
 
     def _am_handler(self, alarm_memory: list[bool]) -> None:
         for area in self.elements:

@@ -5,7 +5,7 @@ from typing import Optional
 from .connection import Connection
 from .const import KeypadKeys, Max, TextDescriptions, FunctionKeys
 from .elements import Element, Elements
-from .message import ka_encode,kf_encode
+from .message import ka_encode, kf_encode
 from .notify import Notifier
 
 

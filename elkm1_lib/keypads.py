@@ -63,7 +63,7 @@ class Keypads(Elements[Keypad]):
 
     def _kc_handler(self, keypad: int, key: int) -> None:
         # Force a change notification
-        self.elements[keypad].last_keypress = None 
+        self.elements[keypad].last_keypress = None
         try:
             name = KeypadKeys(key).name
         except ValueError:

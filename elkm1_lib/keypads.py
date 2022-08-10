@@ -3,9 +3,9 @@ import datetime as dt
 from typing import Optional
 
 from .connection import Connection
-from .const import KeypadKeys, Max, TextDescriptions
+from .const import FunctionKeys, KeypadKeys, Max, TextDescriptions
 from .elements import Element, Elements
-from .message import ka_encode
+from .message import ka_encode, kf_encode
 from .notify import Notifier
 
 
@@ -20,6 +20,11 @@ class Keypad(Element):
         self.last_user = -1
         self.code = ""
         self.last_keypress: Optional[tuple[str, int]] = None
+        self.last_function_key = FunctionKeys.FORCE_KF_SYNC
+
+    def press_function_key(self, functionkey: FunctionKeys) -> None:
+        """(Helper) Send a function key (1, ... 6, *, C)"""
+        self._connection.send(kf_encode(self.index, functionkey))
 
 
 class Keypads(Elements[Keypad]):
@@ -30,6 +35,7 @@ class Keypads(Elements[Keypad]):
         notifier.attach("IC", self._ic_handler)
         notifier.attach("KA", self._ka_handler)
         notifier.attach("KC", self._kc_handler)
+        notifier.attach("KF", self._kf_handler)
         notifier.attach("LW", self._lw_handler)
         notifier.attach("ST", self._st_handler)
 
@@ -37,6 +43,8 @@ class Keypads(Elements[Keypad]):
         """Retrieve areas from ElkM1"""
         self._connection.send(ka_encode())
         self.get_descriptions(TextDescriptions.KEYPAD.value)
+        # Send KF for one of our keypads which reports them all
+        self._connection.send(kf_encode(0))
 
     def _ic_handler(self, code: int, user: int, keypad: int) -> None:
         keypad_ = self.elements[keypad]
@@ -54,12 +62,22 @@ class Keypads(Elements[Keypad]):
                 keypad.setattr("area", keypad_areas[keypad.index], True)
 
     def _kc_handler(self, keypad: int, key: int) -> None:
-        self.elements[keypad].last_keypress = None  # Force a change notification
+        # Force a change notification
+        self.elements[keypad].last_keypress = None
         try:
             name = KeypadKeys(key).name
         except ValueError:
             name = ""
         self.elements[keypad].setattr("last_keypress", (name, key), True)
+
+    def _kf_handler(self, keypad: int, key: str, chime_mode: list[int]) -> None:
+        # Force a change notification
+        self.elements[keypad].last_function_key = FunctionKeys.FORCE_KF_SYNC
+        try:
+            name = FunctionKeys(key).name
+        except ValueError:
+            name = ""
+        self.elements[keypad].setattr("last_function_key", (name, key), True)
 
     def _lw_handler(self, keypad_temps: list[int], zone_temps: list[int]) -> None:
         for keypad in self.elements:

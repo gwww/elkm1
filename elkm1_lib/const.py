@@ -200,6 +200,29 @@ class KeypadKeys(Enum):
     DATA_KEY_MODE = 28
 
 
+class FunctionKeys(Enum):
+    """From KF: Which function key pressed"""
+
+    FORCE_KF_SYNC = "0"
+    F1 = "1"
+    F2 = "2"
+    F3 = "3"
+    F4 = "4"
+    F5 = "5"
+    F6 = "6"
+    STAR = "*"
+    CHIME = "C"
+
+
+class ChimeMode(Enum):
+    """Chime mode settings on an Area"""
+
+    OFF = 0
+    CHIME = 1
+    VOICE = 2
+    CHIMEANDVOICE = 3
+
+
 class TextDescriptions(Enum):
     """Types of description strings that can be retrieved from the panel"""
 

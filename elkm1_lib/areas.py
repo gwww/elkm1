@@ -5,7 +5,15 @@ from __future__ import annotations
 from typing import Any
 
 from .connection import Connection
-from .const import AlarmState, ArmedStatus, ArmLevel, ArmUpState, Max, TextDescriptions
+from .const import (
+    AlarmState,
+    ArmedStatus,
+    ArmLevel,
+    ArmUpState,
+    ChimeMode,
+    Max,
+    TextDescriptions,
+)
 from .elements import Element, Elements
 from .message import al_encode, as_encode, az_encode, dm_encode, zb_encode
 from .notify import Notifier
@@ -24,6 +32,7 @@ class Area(Element):
         self.timer1 = 0
         self.timer2 = 0
         self.last_log: str | None = None
+        self.chime_mode = None
 
     def is_armed(self) -> bool:
         """Return if the area is armed."""
@@ -75,6 +84,7 @@ class Areas(Elements[Area]):
         notifier.attach("AM", self._am_handler)
         notifier.attach("AS", self._as_handler)
         notifier.attach("EE", self._ee_handler)
+        notifier.attach("KF", self._kf_handler)
         notifier.attach("LD", self._ld_handler)
 
     def sync(self) -> None:
@@ -126,3 +136,11 @@ class Areas(Elements[Area]):
             # arm/disarm log (YAGNI - decode number for more log types when needed)
             log["user_number"] = log["number"]
         self.elements[area].setattr("last_log", log, True)
+
+    def _kf_handler(self, keypad: int, key: str, chime_mode: list[int]) -> None:
+        for area, mode in enumerate(chime_mode):
+            try:
+                name = ChimeMode(mode).name
+            except ValueError:
+                name = ""
+            self.elements[area].setattr("chime_mode", (name, mode), True)

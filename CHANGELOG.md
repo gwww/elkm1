@@ -2,6 +2,9 @@
 All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## [2.1.0]
+- Add keypad function key and chime sync (Thx @jimboca)
+
 ## [2.0.2]
 - Use a more liberal cipher set.
 

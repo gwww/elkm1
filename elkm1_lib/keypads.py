@@ -43,6 +43,8 @@ class Keypads(Elements[Keypad]):
         """Retrieve areas from ElkM1"""
         self._connection.send(ka_encode())
         self.get_descriptions(TextDescriptions.KEYPAD.value)
+        # Send KF for one of our keypads which reports them all
+        self._connection.send(kf_encode(0))
 
     def _ic_handler(self, code: int, user: int, keypad: int) -> None:
         keypad_ = self.elements[keypad]

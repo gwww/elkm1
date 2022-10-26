@@ -98,6 +98,11 @@ class Connection:
         if self._elk_protocol:
             self._elk_protocol.resume()
 
+    def login_completed(self) -> None:
+        """Mark the login as completed."""
+        if self._elk_protocol:
+            self._elk_protocol.login_completed()
+
     def disconnect(self) -> None:
         """Disconnect the connection from sending/receiving."""
         self._connection_retry_time = -1  # Stop future timeout reconnects
@@ -169,6 +174,7 @@ class _ElkProtocol(asyncio.Protocol):
         self._queued_writes: list[tuple[str, Optional[str], float]] = []
         self._buffer = ""
         self._paused = False
+        self._login_complete = False
 
     def connection_made(self, transport: asyncio.BaseTransport) -> None:
         LOG.debug("connected callback")
@@ -207,6 +213,10 @@ class _ElkProtocol(asyncio.Protocol):
     def resume(self) -> None:
         """Restart the connection from sending/receiving."""
         self._paused = False
+
+    def login_completed(self) -> None:
+        """Login completed."""
+        self._login_complete = True
 
     def _response_required_timeout(self) -> None:
         self._timeout_callback(self._waiting_for_response)
@@ -265,7 +275,7 @@ class _ElkProtocol(asyncio.Protocol):
         if self._paused:
             return
 
-        if self._waiting_for_response:
+        if self._waiting_for_response and not self._login_complete:
             LOG.debug("queueing write %s", data)
             self._queued_writes.append((data, response_required, timeout))
             return

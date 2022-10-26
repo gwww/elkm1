@@ -82,6 +82,7 @@ class Elk:
             LOG.error("Invalid username or password.")
 
     def _got_first_message(self, **kwargs: dict[str, Any]) -> None:
+        self._connection.login_completed()
         if not self._logged_in:
             self._notifier.notify("login", {"succeeded": True})
 

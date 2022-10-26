@@ -10,7 +10,7 @@ from typing import Optional, cast
 
 import serial_asyncio
 
-from .message import MessageEncode, decode, get_elk_command
+from .message import MessageEncode, decode
 from .notify import Notifier
 from .util import parse_url
 

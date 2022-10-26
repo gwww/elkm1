@@ -81,7 +81,7 @@ class Connection:
     def send(self, msg: MessageEncode) -> None:
         """Send a message on the connection."""
         if self._elk_protocol:
-            self._elk_protocol.write_data(msg.message, msg.response_command)
+            self._elk_protocol.write_data(msg.message)
 
     def send_raw(self, msg: str) -> None:
         """Send a message on the connection."""
@@ -163,10 +163,8 @@ class _ElkProtocol(asyncio.Protocol):
         self._timeout_callback = timeout
 
         self._transport: Optional[asyncio.Transport] = None
-        self._waiting_for_response: Optional[str] = None
         self._write_timeout_task: Optional[asyncio.TimerHandle] = None
         self._heartbeat_timeout_task: Optional[asyncio.TimerHandle] = None
-        self._queued_writes: list[tuple[str, Optional[str], float]] = []
         self._buffer = ""
         self._paused = False
 
@@ -186,10 +184,7 @@ class _ElkProtocol(asyncio.Protocol):
             self._disconnected_callback()
 
     def _cleanup(self) -> None:
-        self._cancel_write_timer()
         self._cancel_heartbeat_timer()
-        self._waiting_for_response = None
-        self._queued_writes = []
         self._buffer = ""
 
     def close(self) -> None:
@@ -207,17 +202,6 @@ class _ElkProtocol(asyncio.Protocol):
     def resume(self) -> None:
         """Restart the connection from sending/receiving."""
         self._paused = False
-
-    def _response_required_timeout(self) -> None:
-        self._timeout_callback(self._waiting_for_response)
-        self._write_timeout_task = None
-        self._waiting_for_response = None
-        self._process_write_queue()
-
-    def _cancel_write_timer(self) -> None:
-        if self._write_timeout_task:
-            self._write_timeout_task.cancel()
-            self._write_timeout_task = None
 
     def _cancel_heartbeat_timer(self) -> None:
         if self._heartbeat_timeout_task is not None:
@@ -240,22 +224,11 @@ class _ElkProtocol(asyncio.Protocol):
         self._buffer += data.decode("ISO-8859-1")
         while "\r\n" in self._buffer:
             line, self._buffer = self._buffer.split("\r\n", 1)
-            if get_elk_command(line) == self._waiting_for_response:
-                self._waiting_for_response = None
-                self._cancel_write_timer()
             self._got_data_callback(line)
-        self._process_write_queue()
-
-    def _process_write_queue(self) -> None:
-        while self._queued_writes and not self._waiting_for_response:
-            to_write = self._queued_writes.pop(0)
-            self.write_data(to_write[0], to_write[1], timeout=to_write[2])
 
     def write_data(
         self,
         data: str,
-        response_required: str | None = None,
-        timeout: float = 5.0,
         raw: bool = False,
     ) -> None:
         """Write data on the asyncio Protocol"""
@@ -264,18 +237,6 @@ class _ElkProtocol(asyncio.Protocol):
 
         if self._paused:
             return
-
-        if self._waiting_for_response:
-            LOG.debug("queueing write %s", data)
-            self._queued_writes.append((data, response_required, timeout))
-            return
-
-        if response_required:
-            self._waiting_for_response = response_required
-            if timeout > 0:
-                self._write_timeout_task = self._loop.call_later(
-                    timeout, self._response_required_timeout
-                )
 
         if not raw:
             cksum = (256 - reduce(lambda x, y: x + y, map(ord, data))) % 256

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import async_timeout
 import logging
 from collections.abc import Callable
 from functools import partial, reduce
@@ -18,6 +19,137 @@ LOG = logging.getLogger(__name__)
 
 
 class Connection:
+    """Manage connection to ElkM1 panel."""
+
+    def __init__(self, url: str, notifier: Notifier):
+        self._url = url
+        self._notifier = notifier
+
+        self._writer: asyncio.StreamWriter | None = None
+        self._awaiting_response_command_event = asyncio.Event()
+        self._awaiting_response_command = ""
+        self._heartbeat_event = asyncio.Event()
+        self._paused = False
+
+    async def connect(self) -> None:
+        """Asyncio connection to Elk."""
+
+        connection_retry_time = 1
+        while 1:
+            LOG.info("Connecting to ElkM1 at %s", self._url)
+            scheme, dest, param, ssl_context = parse_url(self._url)
+
+            try:
+                if scheme == "serial":
+                    coro = serial_asyncio.open_serial_connection(port=dest, baudrate=param)
+                else:
+                    coro = asyncio.open_connection(host=dest, port=param, ssl=ssl_context)
+                    asyncio.create_task(self._heartbeat_timer())
+
+                reader, self._writer = await asyncio.wait_for(coro, timeout=30)
+                asyncio.create_task(self._read(reader))
+                self._notifier.notify("connected", {})
+                break
+
+            except (ValueError, OSError, asyncio.TimeoutError) as err:
+                # if self._connection_retry_time <= 0:
+                #     return
+                LOG.warning(
+                    "Could not connect to ElkM1 (%s). Retrying in %d seconds",
+                    err,
+                    connection_retry_time,
+                )
+                await asyncio.sleep(connection_retry_time)
+                connection_retry_time = min(60, connection_retry_time * 2)
+
+    async def _read(self, reader: asyncio.StreamReader) -> None:
+        """Read data from the connection."""
+
+        read_buffer = ""
+        while 1:
+            data = await reader.read(1000)
+            if not data:
+                break
+
+            self._heartbeat()
+
+            read_buffer += data.decode("ISO-8859-1")
+            while "\r\n" in read_buffer:
+                line, read_buffer = read_buffer.split("\r\n", 1)
+                if get_elk_command(line) == self._awaiting_response_command:
+                    self._awaiting_response_command_event.set()
+                    self._awaiting_response_command = ""
+
+                LOG.debug("got_data '%s'", line)
+                try:
+                    decoded = decode(line)
+                    if decoded:
+                        self._notifier.notify(decoded[0], decoded[1])
+                except (ValueError, AttributeError) as exc:
+                    LOG.error("Invalid message '%s'", data, exc_info=exc)
+
+    async def send(self, msg: MessageEncode, raw: bool = False) -> None:
+        """Send a message on the connection."""
+
+        if self._paused or not self._writer: # TODO: Is _paused check needed?
+            return
+
+        data = msg.message
+        if not raw:
+            cksum = (256 - reduce(lambda x, y: x + y, map(ord, data))) % 256
+            data = f"{data}{cksum:02X}"
+            if int(data[0:2], 16) != len(data) - 2:
+                LOG.debug("message length wrong: %s", data)
+
+        LOG.debug("write_data '%s'", data)
+        self._writer.write((data + "\r\n").encode())
+
+        if not msg.response_command:
+            return
+
+        self._awaiting_response_command_event.clear()
+        self._awaiting_response_command = msg.response_command
+
+        try:
+            async with async_timeout.timeout(5.0):
+                await self._awaiting_response_command_event.wait()
+        except asyncio.TimeoutError:
+            self._notifier.notify("timeout", {"msg_code": msg.response_command})
+
+    async def send_raw(self, msg: str) -> None:
+        await self.send(MessageEncode(msg, ""), True)
+
+    def is_connected(self) -> bool:
+        """Is the connection active?"""
+        return self._writer is not None
+
+    def pause(self) -> None:
+        """Pause the connection from sending/receiving."""
+        # self._cleanup() TODO
+        self._paused = True
+
+    def resume(self) -> None:
+        """Restart the connection from sending/receiving."""
+        self._paused = False
+
+    def _heartbeat(self) -> None:
+        """Heartbeat!"""
+        self._heartbeat_event.set()
+
+    async def _heartbeat_timer(self) -> None:
+        """Ensure messages received within heartbeat time."""
+        self._heartbeat_event.clear()
+        while 1:
+            try:
+                async with async_timeout.timeout(120):
+                    await self._heartbeat_event.wait()
+                self._heartbeat_event.clear()
+            except asyncio.TimeoutError:
+                LOG.warning("ElkM1 connection heartbeat timed out, disconnecting")
+                break; # TODO close connection here; restart connect
+
+
+class ConnectionOld:
     """Method to manage a connection to the ElkM1."""
 
     def __init__(

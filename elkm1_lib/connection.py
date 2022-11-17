@@ -7,7 +7,7 @@ import async_timeout
 import logging
 from collections.abc import Callable
 from functools import partial, reduce
-from typing import Optional, cast
+from typing import List, NamedTuple, Optional, cast
 
 import serial_asyncio
 
@@ -16,6 +16,13 @@ from .notify import Notifier
 from .util import parse_url
 
 LOG = logging.getLogger(__name__)
+
+class QueuedWrite(NamedTuple):
+    data: str
+    response_required: str | None
+    timeout: float
+    raw: bool = False
+
 
 
 class Connection:
@@ -30,6 +37,7 @@ class Connection:
         self._awaiting_response_command = ""
         self._heartbeat_event = asyncio.Event()
         self._paused = False
+        self._queued_writes: List[QueuedWrite] = []
 
     async def connect(self) -> None:
         """Asyncio connection to Elk."""
@@ -88,7 +96,7 @@ class Connection:
                 except (ValueError, AttributeError) as exc:
                     LOG.error("Invalid message '%s'", data, exc_info=exc)
 
-    async def send(self, msg: MessageEncode, raw: bool = False) -> None:
+    async def _send(self, msg: MessageEncode, raw: bool = False) -> None:
         """Send a message on the connection."""
 
         if self._paused or not self._writer: # TODO: Is _paused check needed?
@@ -115,6 +123,9 @@ class Connection:
                 await self._awaiting_response_command_event.wait()
         except asyncio.TimeoutError:
             self._notifier.notify("timeout", {"msg_code": msg.response_command})
+
+    def send(self, msg: MessageEncode, raw: bool = False) -> None:
+        """Add to send queue"""
 
     async def send_raw(self, msg: str) -> None:
         await self.send(MessageEncode(msg, ""), True)

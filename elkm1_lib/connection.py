@@ -7,7 +7,7 @@ import async_timeout
 import logging
 from collections.abc import Callable
 from functools import partial, reduce
-from typing import List, NamedTuple, Optional, cast
+from typing import NamedTuple, Optional, cast
 
 import serial_asyncio
 
@@ -18,11 +18,10 @@ from .util import parse_url
 LOG = logging.getLogger(__name__)
 
 class QueuedWrite(NamedTuple):
-    data: str
-    response_required: str | None
-    timeout: float
+    msg: str
+    response_cmd: str | None
+    timeout: float = 5.0
     raw: bool = False
-
 
 
 class Connection:
@@ -34,19 +33,19 @@ class Connection:
 
         self._writer: asyncio.StreamWriter | None = None
         self._awaiting_response_command_event = asyncio.Event()
-        self._awaiting_response_command = ""
-        self._heartbeat_event = asyncio.Event()
+        self._awaiting_response_command: str | None = None
         self._paused = False
-        self._queued_writes: List[QueuedWrite] = []
+        self._heartbeat_event = asyncio.Event()
+        self._write_queue: list[QueuedWrite] = []
+        self._check_write_queue = asyncio.Event()
 
     async def connect(self) -> None:
         """Asyncio connection to Elk."""
 
+        LOG.info("Connecting to ElkM1 at %s", self._url)
         connection_retry_time = 1
         while 1:
-            LOG.info("Connecting to ElkM1 at %s", self._url)
             scheme, dest, param, ssl_context = parse_url(self._url)
-
             try:
                 if scheme == "serial":
                     coro = serial_asyncio.open_serial_connection(port=dest, baudrate=param)
@@ -84,9 +83,10 @@ class Connection:
             read_buffer += data.decode("ISO-8859-1")
             while "\r\n" in read_buffer:
                 line, read_buffer = read_buffer.split("\r\n", 1)
+
                 if get_elk_command(line) == self._awaiting_response_command:
-                    self._awaiting_response_command_event.set()
-                    self._awaiting_response_command = ""
+                    self._awaiting_response_command = None
+                    self._check_write_queue.set()
 
                 LOG.debug("got_data '%s'", line)
                 try:
@@ -96,39 +96,47 @@ class Connection:
                 except (ValueError, AttributeError) as exc:
                     LOG.error("Invalid message '%s'", data, exc_info=exc)
 
-    async def _send(self, msg: MessageEncode, raw: bool = False) -> None:
+    async def _send(self) -> None:
         """Send a message on the connection."""
 
-        if self._paused or not self._writer: # TODO: Is _paused check needed?
-            return
+        while 1:
+            await self._check_write_queue.wait()
+            self._check_write_queue.clear()
 
-        data = msg.message
-        if not raw:
-            cksum = (256 - reduce(lambda x, y: x + y, map(ord, data))) % 256
-            data = f"{data}{cksum:02X}"
-            if int(data[0:2], 16) != len(data) - 2:
-                LOG.debug("message length wrong: %s", data)
+            if self._awaiting_response_command or not self._write_queue or self._paused or not self._writer: # TODO: Is _paused check needed?
+                continue
 
-        LOG.debug("write_data '%s'", data)
-        self._writer.write((data + "\r\n").encode())
+            q_entry = self._write_queue.pop(0)
 
-        if not msg.response_command:
-            return
+            if not q_entry.raw:
+                cksum = (256 - reduce(lambda x, y: x + y, map(ord, q_entry.msg))) % 256
+                msg = f"{q_entry.msg}{cksum:02X}\r\n"
+                if int(msg[0:2], 16) != len(msg) - 2:
+                    LOG.warning("message length wrong: %s", msg)
+            else:
+                msg = q_entry.msg + "\r\n"
 
-        self._awaiting_response_command_event.clear()
-        self._awaiting_response_command = msg.response_command
+            LOG.debug("write_data '%s'", msg[:-2])
+            self._writer.write((msg).encode())
 
-        try:
-            async with async_timeout.timeout(5.0):
-                await self._awaiting_response_command_event.wait()
-        except asyncio.TimeoutError:
-            self._notifier.notify("timeout", {"msg_code": msg.response_command})
+            if not q_entry.response_cmd:
+                continue
 
-    def send(self, msg: MessageEncode, raw: bool = False) -> None:
-        """Add to send queue"""
+            self._awaiting_response_command = q_entry.response_cmd
+            try:
+                async with async_timeout.timeout(5.0):
+                    await self._check_write_queue.wait()
+            except asyncio.TimeoutError:
+                self._notifier.notify("timeout", {"msg_code": q_entry.response_cmd})
+                self._check_write_queue.clear()
 
-    async def send_raw(self, msg: str) -> None:
-        await self.send(MessageEncode(msg, ""), True)
+    def send(self, msg: MessageEncode) -> None:
+        self._write_queue.append(QueuedWrite(msg.message, msg.response_command))
+        self._check_write_queue.set()
+
+    def send_raw(self, msg: str) -> None:
+        self._write_queue.append(QueuedWrite(msg, None, raw=True))
+        self._check_write_queue.set()
 
     def is_connected(self) -> bool:
         """Is the connection active?"""
@@ -143,6 +151,13 @@ class Connection:
         """Restart the connection from sending/receiving."""
         self._paused = False
 
+    def disconnect(self) -> None:
+        """Disconnect."""
+        if self._writer:
+            self._writer.close()
+            self._writer = None
+        self._write_queue = []
+
     def _heartbeat(self) -> None:
         """Heartbeat!"""
         self._heartbeat_event.set()
@@ -156,8 +171,12 @@ class Connection:
                     await self._heartbeat_event.wait()
                 self._heartbeat_event.clear()
             except asyncio.TimeoutError:
+                if self._paused:
+                    continue
                 LOG.warning("ElkM1 connection heartbeat timed out, disconnecting")
-                break; # TODO close connection here; restart connect
+                self.disconnect()
+                await self.connect()
+                break
 
 
 class ConnectionOld:

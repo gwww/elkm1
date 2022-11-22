@@ -54,7 +54,10 @@ class Connection:
                     asyncio.create_task(self._heartbeat_timer())
 
                 reader, self._writer = await asyncio.wait_for(coro, timeout=30)
+
                 asyncio.create_task(self._read(reader))
+                asyncio.create_task(self._write())
+
                 self._notifier.notify("connected", {})
                 break
 
@@ -73,7 +76,7 @@ class Connection:
         """Read data from the connection."""
 
         read_buffer = ""
-        while 1:
+        while True:
             data = await reader.read(1000)
             if not data:
                 break
@@ -95,15 +98,18 @@ class Connection:
                         self._notifier.notify(decoded[0], decoded[1])
                 except (ValueError, AttributeError) as exc:
                     LOG.error("Invalid message '%s'", data, exc_info=exc)
+        LOG.debug("Reader ending")
 
-    async def _send(self) -> None:
+    async def _write(self) -> None:
         """Send a message on the connection."""
 
-        while 1:
+        while True:
             await self._check_write_queue.wait()
             self._check_write_queue.clear()
 
-            if self._awaiting_response_command or not self._write_queue or self._paused or not self._writer: # TODO: Is _paused check needed?
+            if not self._writer:
+                break
+            if self._awaiting_response_command or not self._write_queue or self._paused:
                 continue
 
             q_entry = self._write_queue.pop(0)
@@ -111,24 +117,16 @@ class Connection:
             if not q_entry.raw:
                 cksum = (256 - reduce(lambda x, y: x + y, map(ord, q_entry.msg))) % 256
                 msg = f"{q_entry.msg}{cksum:02X}\r\n"
-                if int(msg[0:2], 16) != len(msg) - 2:
+                if int(msg[0:2], 16) != len(msg) - 4:
                     LOG.warning("message length wrong: %s", msg)
             else:
                 msg = q_entry.msg + "\r\n"
 
             LOG.debug("write_data '%s'", msg[:-2])
             self._writer.write((msg).encode())
-
-            if not q_entry.response_cmd:
-                continue
-
             self._awaiting_response_command = q_entry.response_cmd
-            try:
-                async with async_timeout.timeout(5.0):
-                    await self._check_write_queue.wait()
-            except asyncio.TimeoutError:
-                self._notifier.notify("timeout", {"msg_code": q_entry.response_cmd})
-                self._check_write_queue.clear()
+
+        LOG.debug("Writer ending")
 
     def send(self, msg: MessageEncode) -> None:
         self._write_queue.append(QueuedWrite(msg.message, msg.response_command))
@@ -165,7 +163,7 @@ class Connection:
     async def _heartbeat_timer(self) -> None:
         """Ensure messages received within heartbeat time."""
         self._heartbeat_event.clear()
-        while 1:
+        while True:
             try:
                 async with async_timeout.timeout(120):
                     await self._heartbeat_event.wait()
@@ -177,6 +175,7 @@ class Connection:
                 self.disconnect()
                 await self.connect()
                 break
+        LOG.debug("Heartbeat ending")
 
 
 class ConnectionOld:

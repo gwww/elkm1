@@ -16,8 +16,8 @@ from .notify import Notifier
 from .util import parse_url
 
 LOG = logging.getLogger(__name__)
-HEARTBEAT_TIME = 10
-MESSAGE_RESPONSE_TIMER = 5.0
+HEARTBEAT_TIME = 120
+MESSAGE_RESPONSE_TIME = 5.0
 
 class QueuedWrite(NamedTuple):
     """Entries in the write queue use this structure."""
@@ -41,6 +41,7 @@ class Connection:
         self._message_timer_event = asyncio.Event()
         self._write_queue: deque[QueuedWrite] = deque()
         self._check_write_queue = asyncio.Event()
+        self._response_received = asyncio.Event()
         self._tasks: set[Optional[asyncio.Task]] = set()
         self._response_timeout_task: Optional[asyncio.TimerHandle] = None
 
@@ -91,7 +92,7 @@ class Connection:
                 line, read_buffer = read_buffer.split("\r\n", 1)
 
                 if get_elk_command(line) == self._awaiting_response_command:
-                    self._cancel_response_timer()
+                    self._response_received.set()
                     self._check_write_queue.set()
 
                 LOG.debug("got_data '%s'", line)
@@ -123,8 +124,19 @@ class Connection:
 
             LOG.debug("write_data '%s'", msg[:-2])
             self._writer.write((msg).encode())
+
+            if not q_entry.response_cmd:
+                continue
+
             self._awaiting_response_command = q_entry.response_cmd
-            self._start_response_timer(q_entry.timeout)
+            try:
+                async with async_timeout.timeout(MESSAGE_RESPONSE_TIME):
+                    await self._response_received.wait()
+            except asyncio.TimeoutError:
+                self._notifier.notify("timeout", {"msg_code": q_entry.response_cmd})
+                pass
+            self._response_received.clear()
+            self._awaiting_response_command = None
 
         self._tasks.remove(asyncio.current_task())
 
@@ -182,19 +194,3 @@ class Connection:
                 await self.connect()
                 break
         self._tasks.remove(asyncio.current_task())
-
-    def _start_response_timer(self, timeout) -> None:
-        if timeout > 0:
-            loop = asyncio.get_running_loop()
-            self._write_timeout_task = loop.call_later(timeout, self._response_timeout)
-
-    def _cancel_response_timer(self) -> None:
-        if self._write_timeout_task:
-            self._write_timeout_task.cancel()
-            self._response_timeout_task = None
-
-    def _response_timeout(self) -> None:
-        self._notifier.notify("timeout", {"msg_code": self._awaiting_response_command})
-        self._response_timeout_task = None
-        self._awaiting_response_command = None
-        self._check_write_queue.set()

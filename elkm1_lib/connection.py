@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import asyncio
-import logging
+from collections import deque
 from functools import reduce
+import logging
 from typing import NamedTuple, Optional
 
 import async_timeout
@@ -16,6 +17,7 @@ from .util import parse_url
 
 LOG = logging.getLogger(__name__)
 HEARTBEAT_TIME = 10
+MESSAGE_RESPONSE_TIMER = 5.0
 
 class QueuedWrite(NamedTuple):
     """Entries in the write queue use this structure."""
@@ -36,9 +38,11 @@ class Connection:
         self._awaiting_response_command: str | None = None
         self._paused = False
         self._heartbeat_event = asyncio.Event()
-        self._write_queue: list[QueuedWrite] = []
+        self._message_timer_event = asyncio.Event()
+        self._write_queue: deque[QueuedWrite] = deque()
         self._check_write_queue = asyncio.Event()
         self._tasks: set[Optional[asyncio.Task]] = set()
+        self._response_timeout_task: Optional[asyncio.TimerHandle] = None
 
     async def connect(self) -> None:
         """Create connection to Elk."""
@@ -87,7 +91,7 @@ class Connection:
                 line, read_buffer = read_buffer.split("\r\n", 1)
 
                 if get_elk_command(line) == self._awaiting_response_command:
-                    self._awaiting_response_command = None
+                    self._cancel_response_timer()
                     self._check_write_queue.set()
 
                 LOG.debug("got_data '%s'", line)
@@ -109,7 +113,7 @@ class Connection:
             if self._awaiting_response_command or not self._write_queue or self._paused:
                 continue
 
-            q_entry = self._write_queue.pop(0)
+            q_entry = self._write_queue.popleft()
 
             if not q_entry.raw:
                 cksum = (256 - reduce(lambda x, y: x + y, map(ord, q_entry.msg))) % 256
@@ -120,6 +124,7 @@ class Connection:
             LOG.debug("write_data '%s'", msg[:-2])
             self._writer.write((msg).encode())
             self._awaiting_response_command = q_entry.response_cmd
+            self._start_response_timer(q_entry.timeout)
 
         self._tasks.remove(asyncio.current_task())
 
@@ -127,7 +132,7 @@ class Connection:
         """Send a message to Elk."""
         q_entry = QueuedWrite(msg.message, msg.response_command)
         if priority_send:
-            self._write_queue.insert(0, q_entry)
+            self._write_queue.appendleft(q_entry)
         else:
             self._write_queue.append(q_entry)
         self._check_write_queue.set()
@@ -144,7 +149,7 @@ class Connection:
     def pause(self) -> None:
         """Pause the connection from sending/receiving."""
         # self._cleanup() TODO
-        self._write_queue = []
+        self._write_queue.clear()
         self._paused = True
 
     def resume(self) -> None:
@@ -156,14 +161,14 @@ class Connection:
         if self._writer:
             self._writer.close()
             self._writer = None
-        self._write_queue = []
+        self._write_queue.clear()
         self._check_write_queue.set()
+        self._notifier.notify("disconnected", {})
 
     def _heartbeat(self) -> None:
         self._heartbeat_event.set()
 
     async def _heartbeat_timer(self) -> None:
-        """Ensure messages received within heartbeat time."""
         while True:
             self._heartbeat_event.clear()
             try:
@@ -177,3 +182,19 @@ class Connection:
                 await self.connect()
                 break
         self._tasks.remove(asyncio.current_task())
+
+    def _start_response_timer(self, timeout) -> None:
+        if timeout > 0:
+            loop = asyncio.get_running_loop()
+            self._write_timeout_task = loop.call_later(timeout, self._response_timeout)
+
+    def _cancel_response_timer(self) -> None:
+        if self._write_timeout_task:
+            self._write_timeout_task.cancel()
+            self._response_timeout_task = None
+
+    def _response_timeout(self) -> None:
+        self._notifier.notify("timeout", {"msg_code": self._awaiting_response_command})
+        self._response_timeout_task = None
+        self._awaiting_response_command = None
+        self._check_write_queue.set()

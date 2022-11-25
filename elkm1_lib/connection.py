@@ -98,35 +98,38 @@ class Connection:
                     LOG.error("Invalid message '%s'", data, exc_info=exc)
 
     async def _write_stream(self) -> None:
+        async def write_msg():
+            if not q_entry.raw:
+                cksum = (256 - reduce(lambda x, y: x + y, map(ord, q_entry.msg))) % 256
+                msg = f"{q_entry.msg}{cksum:02X}\r\n"
+            else:
+                msg = q_entry.msg + "\r\n"
+            LOG.debug("write_data '%s'", msg[:-2])
+            self._writer.write((msg).encode()) # type: ignore
+
+        async def await_msg_response():
+            self._awaiting_response_command = q_entry.response_cmd
+            try:
+                async with async_timeout.timeout(MESSAGE_RESPONSE_TIME):
+                    await self._response_received.wait()
+            except asyncio.TimeoutError:
+                self._notifier.notify("timeout", {"msg_code": q_entry.response_cmd})
+            self._response_received.clear()
+            self._awaiting_response_command = None
+
         while True:
             if not self._write_queue:
                 await self._check_write_queue.wait()
             if not self._writer:
                 break
             self._check_write_queue.clear()
-
             if not self._write_queue:
                 continue
             q_entry = self._write_queue.popleft()
 
-            if not q_entry.raw:
-                cksum = (256 - reduce(lambda x, y: x + y, map(ord, q_entry.msg))) % 256
-                msg = f"{q_entry.msg}{cksum:02X}\r\n"
-            else:
-                msg = q_entry.msg + "\r\n"
-
-            LOG.debug("write_data '%s'", msg[:-2])
-            self._writer.write((msg).encode())
-
+            await write_msg()
             if q_entry.response_cmd:
-                self._awaiting_response_command = q_entry.response_cmd
-                try:
-                    async with async_timeout.timeout(MESSAGE_RESPONSE_TIME):
-                        await self._response_received.wait()
-                except asyncio.TimeoutError:
-                    self._notifier.notify("timeout", {"msg_code": q_entry.response_cmd})
-                self._response_received.clear()
-                self._awaiting_response_command = None
+                await await_msg_response()
 
     def _send(self, q_entry: QueuedWrite, priority_send: bool) -> None:
         if self._paused:

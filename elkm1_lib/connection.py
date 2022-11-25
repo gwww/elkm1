@@ -6,7 +6,7 @@ import asyncio
 from collections import deque
 from functools import reduce
 import logging
-from typing import NamedTuple, Optional
+from typing import Any, NamedTuple, Optional
 
 import async_timeout
 import serial_asyncio
@@ -43,7 +43,7 @@ class Connection:
         self._check_write_queue = asyncio.Event()
         self._response_received = asyncio.Event()
         self._heartbeat_event = asyncio.Event()
-        self._tasks: set[Optional[asyncio.Task]] = set()
+        self._tasks: set[Optional[asyncio.Task[Any]]] = set()
 
     async def connect(self) -> None:
         """Create connection to Elk."""
@@ -130,7 +130,7 @@ class Connection:
 
         self._tasks.remove(asyncio.current_task())
 
-    def _send(self, q_entry: QueuedWrite, priority_send: bool):
+    def _send(self, q_entry: QueuedWrite, priority_send: bool) -> None:
         if self._paused:
             return
         if priority_send:

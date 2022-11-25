@@ -3,7 +3,7 @@ from unittest.mock import Mock
 import pytest
 
 from elkm1_lib.areas import Area, Areas
-from elkm1_lib.const import AlarmState, ArmedStatus, ArmLevel, ArmUpState
+from elkm1_lib.const import AlarmState, ArmedStatus, ArmUpState
 from elkm1_lib.message import MessageEncode
 
 from .util import rx_msg

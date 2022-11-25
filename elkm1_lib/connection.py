@@ -158,7 +158,7 @@ class Connection:
         """Restart the connection sending/receiving."""
         self._paused = False
 
-    def disconnect(self, reason: str ="") -> None:
+    def disconnect(self, reason: str = "") -> None:
         """Disconnect and cleanup."""
         LOG.warning("ElkM1 disconnecting %s", reason)
         if self._writer:

@@ -6,7 +6,7 @@ import asyncio
 import logging
 from collections import deque
 from functools import reduce
-from typing import Any, NamedTuple, Optional
+from typing import Any, NamedTuple
 
 import async_timeout
 import serial_asyncio
@@ -43,7 +43,7 @@ class Connection:
         self._check_write_queue = asyncio.Event()
         self._response_received = asyncio.Event()
         self._heartbeat_event = asyncio.Event()
-        self._tasks: set[Optional[asyncio.Task[Any]]] = set()
+        self._tasks: set[asyncio.Task[Any]] = set()
 
     async def connect(self) -> None:
         """Create connection to Elk."""
@@ -97,18 +97,18 @@ class Connection:
                 except (ValueError, AttributeError) as exc:
                     LOG.error("Invalid message '%s'", data, exc_info=exc)
 
-        self._tasks.remove(asyncio.current_task())
-
     async def _write_stream(self) -> None:
         while True:
             if not self._write_queue:
                 await self._check_write_queue.wait()
-                self._check_write_queue.clear()
-
             if not self._writer:
                 break
+            self._check_write_queue.clear()
 
+            if not self._write_queue:
+                continue
             q_entry = self._write_queue.popleft()
+
             if not q_entry.raw:
                 cksum = (256 - reduce(lambda x, y: x + y, map(ord, q_entry.msg))) % 256
                 msg = f"{q_entry.msg}{cksum:02X}\r\n"
@@ -127,8 +127,6 @@ class Connection:
                     self._notifier.notify("timeout", {"msg_code": q_entry.response_cmd})
                 self._response_received.clear()
                 self._awaiting_response_command = None
-
-        self._tasks.remove(asyncio.current_task())
 
     def _send(self, q_entry: QueuedWrite, priority_send: bool) -> None:
         if self._paused:
@@ -160,13 +158,17 @@ class Connection:
         """Restart the connection sending/receiving."""
         self._paused = False
 
-    def disconnect(self) -> None:
+    def disconnect(self, reason="") -> None:
         """Disconnect and cleanup."""
+        LOG.warning("ElkM1 disconnecting %s", reason)
         if self._writer:
             self._writer.close()
             self._writer = None
         self._write_queue.clear()
-        self._check_write_queue.set()
+        for task in self._tasks:
+            if asyncio.current_task() != task:
+                task.cancel()
+        self._tasks = set()
         self._notifier.notify("disconnected", {})
 
     def _heartbeat(self) -> None:
@@ -181,8 +183,6 @@ class Connection:
             except asyncio.TimeoutError:
                 if self._paused:
                     continue
-                LOG.warning("ElkM1 connection heartbeat timed out, disconnecting")
-                self.disconnect()
+                self.disconnect("(heartbeat timeout)")
                 await self.connect()
                 break
-        self._tasks.remove(asyncio.current_task())

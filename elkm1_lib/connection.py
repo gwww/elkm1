@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 from collections import deque
 from functools import reduce
-import logging
 from typing import Any, NamedTuple, Optional
 
 import async_timeout

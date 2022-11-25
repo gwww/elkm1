@@ -122,10 +122,8 @@ class Connection:
             if not self._writer:
                 break
             self._check_write_queue.clear()
-            if not self._write_queue:
-                continue
-            q_entry = self._write_queue.popleft()
 
+            q_entry = self._write_queue.popleft()
             await write_msg()
             if q_entry.response_cmd:
                 await await_msg_response()

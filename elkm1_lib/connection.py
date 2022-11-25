@@ -87,7 +87,6 @@ class Connection:
                 line, read_buffer = read_buffer.split("\r\n", 1)
                 if get_elk_command(line) == self._awaiting_response_command:
                     self._response_received.set()
-                    self._check_write_queue.set()
 
                 LOG.debug("got_data '%s'", line)
                 try:
@@ -163,11 +162,10 @@ class Connection:
 
     def disconnect(self, reason: str = "") -> None:
         """Disconnect and cleanup."""
-        LOG.warning("ElkM1 disconnecting %s", reason)
+        LOG.warning("ElkM1 at %s disconnecting %s", self._url, reason)
         if self._writer:
             self._writer.close()
             self._writer = None
-        self._write_queue.clear()
         for task in self._tasks:
             if asyncio.current_task() != task:
                 task.cancel()

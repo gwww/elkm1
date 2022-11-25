@@ -98,16 +98,16 @@ class Connection:
                     LOG.error("Invalid message '%s'", data, exc_info=exc)
 
     async def _write_stream(self) -> None:
-        async def write_msg():
+        async def write_msg() -> None:
             if not q_entry.raw:
                 cksum = (256 - reduce(lambda x, y: x + y, map(ord, q_entry.msg))) % 256
                 msg = f"{q_entry.msg}{cksum:02X}\r\n"
             else:
                 msg = q_entry.msg + "\r\n"
             LOG.debug("write_data '%s'", msg[:-2])
-            self._writer.write((msg).encode()) # type: ignore
+            self._writer.write((msg).encode())  # type: ignore
 
-        async def await_msg_response():
+        async def await_msg_response() -> None:
             self._awaiting_response_command = q_entry.response_cmd
             try:
                 async with async_timeout.timeout(MESSAGE_RESPONSE_TIME):

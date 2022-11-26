@@ -41,7 +41,7 @@ class Counters(Elements[Counter]):
         # Only poll counters that have a name defined
         for counter in self.elements:
             if not counter.is_default_name():
-                self._connection.send(cv_encode(counter.index), True)
+                self._connection.send(cv_encode(counter.index), priority_send=True)
 
     def _cv_handler(self, counter: int, value: int) -> None:
         self.elements[counter].setattr("value", value, True)

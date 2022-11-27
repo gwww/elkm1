@@ -60,7 +60,6 @@ pythonVersion = "3.9"
 # consider-using-assignment-expr (Pylint CodeStyle extension)
 disable = [
     "format",
-    "abstract-class-little-used",
     "abstract-method",
     "cyclic-import",
     "duplicate-code",
@@ -79,8 +78,6 @@ disable = [
     "too-many-statements",
     "too-many-boolean-expressions",
     "unused-argument",
-    "consider-using-namedtuple-or-dataclass",
-    "consider-using-assignment-expr",
 ]
 enable = [
     #"useless-suppression",  # temporarily every now and then to clean them up

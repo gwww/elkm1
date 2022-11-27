@@ -4,16 +4,22 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import sys
 from collections import deque
 from functools import reduce
 from typing import Any, NamedTuple
 
-import async_timeout
-import serial_asyncio
+from serial_asyncio import open_serial_connection
 
 from .message import MessageEncode, decode, get_elk_command
 from .notify import Notifier
 from .util import parse_url
+
+if sys.version_info[:2] < (3, 11):
+    from async_timeout import timeout as asyncio_timeout  # pyright: ignore
+else:
+    from asyncio import timeout as asyncio_timeout  # pyright: ignore
+
 
 LOG = logging.getLogger(__name__)
 HEARTBEAT_TIME = 120
@@ -48,16 +54,22 @@ class Connection:
     async def connect(self) -> None:
         """Create connection to Elk."""
 
+        loop = asyncio.get_running_loop()
+        loop.set_debug(True)
         LOG.info("Connecting to ElkM1 at %s", self._url)
         retry_time = 1
         scheme, dest, param, ssl_context = parse_url(self._url)
         while not self._writer:
-            if scheme == "serial":
-                coro = serial_asyncio.open_serial_connection(url=dest, baudrate=param)
-            else:
-                coro = asyncio.open_connection(host=dest, port=param, ssl=ssl_context)
             try:
-                reader, self._writer = await asyncio.wait_for(coro, timeout=30)
+                async with asyncio_timeout(30):
+                    if scheme == "serial":
+                        reader, self._writer = await open_serial_connection(
+                            url=dest, baudrate=param
+                        )
+                    else:
+                        reader, self._writer = await asyncio.open_connection(
+                            host=dest, port=param, ssl=ssl_context
+                        )
             except (ValueError, OSError, asyncio.TimeoutError) as err:
                 LOG.warning(
                     "Error connecting to ElkM1 (%s). Retrying in %d seconds",
@@ -73,6 +85,10 @@ class Connection:
             self._tasks.add(asyncio.create_task(self._read_stream(reader)))
             self._tasks.add(asyncio.create_task(self._write_stream()))
             self._notifier.notify("connected", {})
+            def task_done(task):
+                LOG.debug(f"Task '{task.get_name()}' done ({task.get_coro()})")
+            for task in asyncio.all_tasks():
+                task.add_done_callback(task_done)
 
     async def _read_stream(self, reader: asyncio.StreamReader) -> None:
         read_buffer = ""
@@ -109,7 +125,7 @@ class Connection:
         async def await_msg_response() -> None:
             self._awaiting_response_command = q_entry.response_cmd
             try:
-                async with async_timeout.timeout(MESSAGE_RESPONSE_TIME):
+                async with asyncio_timeout(MESSAGE_RESPONSE_TIME):
                     await self._response_received.wait()
             except asyncio.TimeoutError:
                 self._notifier.notify("timeout", {"msg_code": q_entry.response_cmd})
@@ -177,7 +193,7 @@ class Connection:
         while True:
             self._heartbeat_event.clear()
             try:
-                async with async_timeout.timeout(HEARTBEAT_TIME):
+                async with asyncio_timeout(HEARTBEAT_TIME):
                     await self._heartbeat_event.wait()
             except asyncio.TimeoutError:
                 if self._paused:

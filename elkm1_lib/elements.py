@@ -110,9 +110,7 @@ class Elements(Generic[T]):
         self.max_elements = max_elements
         self.elements = [class_(i, connection, notifier) for i in range(max_elements)]
 
-        self._get_description_state: tuple[
-            int, int, list[str | None], Callable[[list[str | None], int], None]
-        ] | None = None
+        self._get_description_state: tuple[int, int] | None = None
         notifier.attach("SD", self._sd_handler)
 
     def __iter__(self) -> Generator[Element, None, None]:
@@ -122,46 +120,30 @@ class Elements(Generic[T]):
     def __getitem__(self, key: int) -> Element:
         return self.elements[key]
 
+    def get_descriptions(self, description_type: tuple[int, int]) -> None:
+        """Gets the descriptions for specified type."""
+        (desc_type, count) = description_type
+        self._get_description_state = (desc_type, count)
+        self._connection.send(sd_encode(desc_type, 0))
+
     def _sd_handler(
         self, desc_type: int, unit: int, desc: str, show_on_keypad: bool
     ) -> None:
         if not self._get_description_state:
             return
-        (_desc_type, count, results, callback) = self._get_description_state
+        (_desc_type, count) = self._get_description_state
         if desc_type != _desc_type:
             return
 
         if unit < 0 or unit >= count:
-            callback(results, desc_type)
             self._get_description_state = None
-        else:
-            results[unit] = desc
-            self._connection.send(sd_encode(desc_type, unit + 1))
+            return
 
-    def _got_desc(self, descriptions: list[str | None], desc_type: int) -> None:
-        # Elk reports descriptions for all 199 users, irregardless of how many
-        # are configured. Only set configured for those that are really there.
-        if desc_type == TextDescriptions.USER.value[0]:
-            user_re = re.compile(r"USER \d\d\d")
-        else:
-            user_re = None
-
-        for element in self.elements:
-            if element.index >= len(descriptions):
-                break
-            name = descriptions[element.index]
-            if name is not None:
-                if user_re and user_re.match(name):
-                    continue
-                element.setattr("name", name, True)
-                element._configured = True  # pylint: disable=protected-access
-
-    def get_descriptions(self, description_type: tuple[int, int]) -> None:
-        """Gets the descriptions for specified type."""
-        (desc_type, count) = description_type
-        results: list[str | None] = [None] * count
-        self._get_description_state = (desc_type, count, results, self._got_desc)
-        self._connection.send(sd_encode(desc_type, 0))
+        if desc_type != TextDescriptions.USER.value[0] or not re.match(r"USER \d\d\d", desc):
+            element = self.elements[unit]
+            element.setattr("name", desc, True)
+            element._configured = True  # pylint: disable=protected-access
+        self._connection.send(sd_encode(desc_type, unit + 1))
 
     @abstractmethod
     def sync(self) -> None:

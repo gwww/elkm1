@@ -3,6 +3,7 @@ Constants used across package
 """
 
 from enum import Enum
+from typing import NamedTuple
 
 
 class Max(Enum):
@@ -223,29 +224,35 @@ class ChimeMode(Enum):
     CHIMEANDVOICE = 3
 
 
+class TextDescription(NamedTuple):
+    """A text description."""
+
+    desc_type: int
+    number_descriptions: int
+
 class TextDescriptions(Enum):
     """Types of description strings that can be retrieved from the panel"""
 
-    ZONE = (0, Max.ZONES.value)
-    AREA = (1, Max.AREAS.value)
-    USER = (2, Max.USERS.value)
-    KEYPAD = (3, Max.KEYPADS.value)
-    OUTPUT = (4, 64)
-    TASK = (5, Max.TASKS.value)
-    TELEPHONE = 6
-    LIGHT = (7, Max.LIGHTS.value)
-    ALARM_DURATION = 8
-    SETTING = (9, Max.SETTINGS.value)
-    COUNTER = (10, Max.COUNTERS.value)
-    THERMOSTAT = (11, Max.THERMOSTATS.value)
-    FUNCTION_KEY_1 = 12
-    FUNCTION_KEY_2 = 13
-    FUNCTION_KEY_3 = 14
-    FUNCTION_KEY_4 = 15
-    FUNCTION_KEY_5 = 16
-    FUNCTION_KEY_6 = 17
-    AUDIO_ZONE = 18
-    AUDIO_SOURCE = 19
+    ZONE = TextDescription(0, Max.ZONES.value)
+    AREA = TextDescription(1, Max.AREAS.value)
+    USER = TextDescription(2, Max.USERS.value)
+    KEYPAD = TextDescription(3, Max.KEYPADS.value)
+    OUTPUT = TextDescription(4, 64)
+    TASK = TextDescription(5, Max.TASKS.value)
+    TELEPHONE = TextDescription(6, 0)
+    LIGHT = TextDescription(7, Max.LIGHTS.value)
+    ALARM_DURATION = TextDescription(8, 0)
+    SETTING = TextDescription(9, Max.SETTINGS.value)
+    COUNTER = TextDescription(10, Max.COUNTERS.value)
+    THERMOSTAT = TextDescription(11, Max.THERMOSTATS.value)
+    FUNCTION_KEY_1 = TextDescription(12, 0)
+    FUNCTION_KEY_2 = TextDescription(13, 0)
+    FUNCTION_KEY_3 = TextDescription(14, 0)
+    FUNCTION_KEY_4 = TextDescription(15, 0)
+    FUNCTION_KEY_5 = TextDescription(16, 0)
+    FUNCTION_KEY_6 = TextDescription(17, 0)
+    AUDIO_ZONE = TextDescription(18, 0)
+    AUDIO_SOURCE = TextDescription(19, 0)
 
 
 # Map to convert message code to descriptive string

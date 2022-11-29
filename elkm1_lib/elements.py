@@ -10,7 +10,7 @@ from collections.abc import Callable
 from typing import Any, Generator, Generic, Type, TypeVar
 
 from .connection import Connection
-from .const import TextDescriptions
+from .const import TextDescription, TextDescriptions
 from .message import sd_encode
 from .notify import Notifier
 
@@ -110,7 +110,7 @@ class Elements(Generic[T]):
         self.max_elements = max_elements
         self.elements = [class_(i, connection, notifier) for i in range(max_elements)]
 
-        self._get_description_state: tuple[int, int] | None = None
+        self._text_desc: TextDescription | None = None
         notifier.attach("SD", self._sd_handler)
 
     def __iter__(self) -> Generator[Element, None, None]:
@@ -120,26 +120,22 @@ class Elements(Generic[T]):
     def __getitem__(self, key: int) -> Element:
         return self.elements[key]
 
-    def get_descriptions(self, description_type: tuple[int, int]) -> None:
+    def get_descriptions(self, text_desc: TextDescription) -> None:
         """Gets the descriptions for specified type."""
-        (desc_type, count) = description_type
-        self._get_description_state = (desc_type, count)
-        self._connection.send(sd_encode(desc_type, 0))
+        self._text_desc = text_desc
+        self._connection.send(sd_encode(text_desc.desc_type, 0))
 
     def _sd_handler(
         self, desc_type: int, unit: int, desc: str, show_on_keypad: bool
     ) -> None:
-        if not self._get_description_state:
-            return
-        (_desc_type, count) = self._get_description_state
-        if desc_type != _desc_type:
+        if not self._text_desc or desc_type != self._text_desc.desc_type:
             return
 
-        if unit < 0 or unit >= count:
-            self._get_description_state = None
+        if unit < 0 or unit >= self._text_desc.number_descriptions:
+            self._text_desc = None
             return
 
-        if desc_type != TextDescriptions.USER.value[0] or not re.match(r"USER \d\d\d", desc):
+        if desc_type != TextDescriptions.USER.value.desc_type or not re.match(r"USER \d\d\d$", desc):
             element = self.elements[unit]
             element.setattr("name", desc, True)
             element._configured = True  # pylint: disable=protected-access

@@ -54,8 +54,6 @@ class Connection:
     async def connect(self) -> None:
         """Create connection to Elk."""
 
-        loop = asyncio.get_running_loop()
-        loop.set_debug(True)
         LOG.info("Connecting to ElkM1 at %s", self._url)
         retry_time = 1
         scheme, dest, param, ssl_context = parse_url(self._url)
@@ -85,10 +83,6 @@ class Connection:
             self._tasks.add(asyncio.create_task(self._read_stream(reader)))
             self._tasks.add(asyncio.create_task(self._write_stream()))
             self._notifier.notify("connected", {})
-            def task_done(task):
-                LOG.debug(f"Task '{task.get_name()}' done ({task.get_coro()})")
-            for task in asyncio.all_tasks():
-                task.add_done_callback(task_done)
 
     async def _read_stream(self, reader: asyncio.StreamReader) -> None:
         read_buffer = ""
@@ -138,11 +132,11 @@ class Connection:
             if not self._writer:
                 break
             self._check_write_queue.clear()
-
-            q_entry = self._write_queue.popleft()
-            await write_msg()
-            if q_entry.response_cmd:
-                await await_msg_response()
+            if self._write_queue:
+                q_entry = self._write_queue.popleft()
+                await write_msg()
+                if q_entry.response_cmd:
+                    await await_msg_response()
 
     def _send(self, q_entry: QueuedWrite, priority_send: bool) -> None:
         if self._paused:

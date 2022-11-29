@@ -33,7 +33,13 @@ class Elk:
     ) -> None:
         """Initialize a new Elk instance."""
         self._config = config
-        self.loop = loop if loop else asyncio.get_event_loop()
+        if not loop:
+            try:
+                loop = asyncio.get_running_loop()
+            except RuntimeError:
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+        self._loop = loop
 
         self._notifier = Notifier()
         self._connection = Connection(config["url"], self._notifier)
@@ -116,7 +122,7 @@ class Elk:
 
     def run(self) -> None:
         """Enter the asyncio loop."""
-        self.loop.run_forever()
+        self._loop.run_forever()
 
     def add_handler(self, msg_type: str, handler: MsgHandler) -> None:
         """Helper to connection add_handler."""

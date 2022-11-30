@@ -11,7 +11,7 @@ https://github.com/gwww/elkm1
 
 ## Requirements
 
-- Python 3.6 (or higher)
+- Python 3.10 (or higher)
 
 ## Description
 

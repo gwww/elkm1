@@ -136,7 +136,7 @@ class Elements(Generic[T]):
             self._get_description_state = None
         else:
             results[unit] = desc
-            self._connection.send(sd_encode(desc_type, unit + 1))
+            self._connection.send(sd_encode(desc_type, unit + 1), priority_send=True)
 
     def _got_desc(self, descriptions: list[str | None], desc_type: int) -> None:
         # Elk reports descriptions for all 199 users, irregardless of how many

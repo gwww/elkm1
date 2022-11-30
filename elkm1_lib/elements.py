@@ -130,7 +130,6 @@ class Elements(Generic[T]):
     ) -> None:
         if not self._text_desc or desc_type != self._text_desc.desc_type:
             return
-
         if unit < 0 or unit >= self._text_desc.number_descriptions:
             self._text_desc = None
             return
@@ -141,7 +140,7 @@ class Elements(Generic[T]):
             element = self.elements[unit]
             element.setattr("name", desc, True)
             element._configured = True  # pylint: disable=protected-access
-        self._connection.send(sd_encode(desc_type, unit + 1))
+        self._connection.send(sd_encode(desc_type, unit + 1), priority_send=True)
 
     @abstractmethod
     def sync(self) -> None:

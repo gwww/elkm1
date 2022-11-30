@@ -91,7 +91,6 @@ class Element:
         attrs = vars(self)
         return {key: attrs[key] for key in attrs if not key.startswith("_")}
 
-    @abstractmethod
     def _configured_was_set(self) -> None:
         """Called when configured flag is set for an element."""
 

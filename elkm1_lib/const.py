@@ -230,6 +230,7 @@ class TextDescription(NamedTuple):
     desc_type: int
     number_descriptions: int
 
+
 class TextDescriptions(Enum):
     """Types of description strings that can be retrieved from the panel"""
 

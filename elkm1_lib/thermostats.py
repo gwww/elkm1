@@ -56,6 +56,9 @@ class Thermostat(Element):
 
         self._connection.send(ts_encode(self.index, setting, element_to_set))
 
+    def _configured_was_set(self) -> None:
+        self._connection.send(tr_encode(self.index), priority_send=True)
+
 
 class Thermostats(Elements[Thermostat]):
     """Handling for multiple areas"""
@@ -68,13 +71,6 @@ class Thermostats(Elements[Thermostat]):
     def sync(self) -> None:
         """Retrieve areas from ElkM1"""
         self.get_descriptions(TextDescriptions.THERMOSTAT.value)
-
-    def _got_desc(self, descriptions: list[str | None], desc_type: int) -> None:
-        super()._got_desc(descriptions, desc_type)
-        # Only poll thermostats that have a name defined
-        for thermostat in self.elements:
-            if not thermostat.is_default_name():
-                self._connection.send(tr_encode(thermostat.index))
 
     def _st_handler(self, group: int, device: int, temperature: int) -> None:
         if group == 2:

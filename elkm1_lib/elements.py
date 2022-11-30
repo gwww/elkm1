@@ -135,7 +135,9 @@ class Elements(Generic[T]):
             self._text_desc = None
             return
 
-        if desc_type != TextDescriptions.USER.value.desc_type or not re.match(r"USER \d\d\d$", desc):
+        if desc_type != TextDescriptions.USER.value.desc_type or not re.match(
+            r"USER \d\d\d$", desc
+        ):
             element = self.elements[unit]
             element.setattr("name", desc, True)
             element._configured = True  # pylint: disable=protected-access

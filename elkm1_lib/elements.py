@@ -144,7 +144,7 @@ class Elements(Generic[T]):
             element = self.elements[unit]
             element.setattr("name", desc, True)
             element._configured = True  # pylint: disable=protected-access
-            element._configured_was_set()
+            element._configured_was_set()  # pylint: disable=protected-access
         self._connection.send(sd_encode(desc_type, unit + 1), priority_send=True)
 
     @abstractmethod

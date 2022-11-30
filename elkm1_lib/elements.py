@@ -91,6 +91,10 @@ class Element:
         attrs = vars(self)
         return {key: attrs[key] for key in attrs if not key.startswith("_")}
 
+    @abstractmethod
+    def _configured_was_set(self) -> None:
+        """Called when configured flag is set for an element."""
+
 
 T = TypeVar("T", bound=Element)
 
@@ -140,6 +144,7 @@ class Elements(Generic[T]):
             element = self.elements[unit]
             element.setattr("name", desc, True)
             element._configured = True  # pylint: disable=protected-access
+            element._configured_was_set()
         self._connection.send(sd_encode(desc_type, unit + 1), priority_send=True)
 
     @abstractmethod

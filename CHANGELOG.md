@@ -2,6 +2,14 @@
 All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## [2.2.1]
+- Change minimum Python version back to 3.9
+
+## [2.2.0]
+- Refactor connection.py; no functional changes
+- Refactor get_description; no functional changes
+- Bump minimum Python version to 3.10
+
 ## [2.1.0]
 - Add keypad function key and chime sync (Thx @jimboca)
 

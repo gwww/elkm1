@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import ssl
+from functools import cache
 
 TLS_VERSIONS = {
     # Unfortunately M1XEP does not support auto-negotiation for TLS
@@ -24,6 +25,26 @@ def url_scheme_is_secure(url: str) -> bool:
     return scheme.startswith("elks")
 
 
+@cache
+def ssl_context_for_scheme(scheme: str) -> ssl.SSLContext:
+    """Create an SSL context for the given scheme.
+
+    Since ssl context is expensive to create, cache it
+    for future use since we only have a few schemes.
+    """
+    ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS)
+    if tls := TLS_VERSIONS.get(scheme):
+        ssl_context.minimum_version = tls
+        ssl_context.maximum_version = tls
+
+    ssl_context.set_ciphers(
+        "DEFAULT:!aNULL:!eNULL:!MD5:!3DES:!DES:!RC4:!IDEA:!SEED:!aDSS:!SRP:!PSK"
+    )
+    # ssl.OP_LEGACY_SERVER_CONNECT is only available in Python 3.12a4+
+    ssl_context.options |= getattr(ssl, "OP_LEGACY_SERVER_CONNECT", 0x4)
+    return ssl_context
+
+
 def parse_url(url: str) -> tuple[str, str, int, ssl.SSLContext | None]:
     """Parse a Elk connection string"""
     scheme, dest = url.split("://")
@@ -33,14 +54,7 @@ def parse_url(url: str) -> tuple[str, str, int, ssl.SSLContext | None]:
         host, port = dest.split(":") if ":" in dest else (dest, "2101")
     elif TLS_VERSIONS.get(scheme):
         host, port = dest.split(":") if ":" in dest else (dest, "2601")
-        ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS)
-        if tls := TLS_VERSIONS.get(scheme):
-            ssl_context.minimum_version = tls
-            ssl_context.maximum_version = tls
-
-        ssl_context.set_ciphers(
-            "DEFAULT:!aNULL:!eNULL:!MD5:!3DES:!DES:!RC4:!IDEA:!SEED:!aDSS:!SRP:!PSK"
-        )
+        ssl_context = ssl_context_for_scheme(scheme)
         scheme = "elks"
     elif scheme == "serial":
         host, port = dest.split(":") if ":" in dest else (dest, "115200")

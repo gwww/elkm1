@@ -37,9 +37,8 @@ def ssl_context_for_scheme(scheme: str) -> ssl.SSLContext:
         ssl_context.minimum_version = tls
         ssl_context.maximum_version = tls
 
-    ssl_context.set_ciphers(
-        "DEFAULT:!aNULL:!eNULL:!MD5:!3DES:!DES:!RC4:!IDEA:!SEED:!aDSS:!SRP:!PSK"
-    )
+    ssl_context.set_ciphers("DEFAULT")
+
     # ssl.OP_LEGACY_SERVER_CONNECT is only available in Python 3.12a4+
     ssl_context.options |= getattr(ssl, "OP_LEGACY_SERVER_CONNECT", 0x4)
     return ssl_context

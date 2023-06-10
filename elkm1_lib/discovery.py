@@ -178,7 +178,8 @@ class AIOELKDiscovery:
         )
         try:
             await self._async_run_scan(
-                cast(asyncio.DatagramTransport, transport),
+                # cast(asyncio.DatagramTransport, transport),
+                transport,
                 destination,
                 timeout,
                 found_all_future,

@@ -9,7 +9,7 @@ import time
 from collections.abc import Callable
 from dataclasses import dataclass
 from struct import unpack
-from typing import Optional, cast
+from typing import Optional
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -178,7 +178,6 @@ class AIOELKDiscovery:
         )
         try:
             await self._async_run_scan(
-                # cast(asyncio.DatagramTransport, transport),
                 transport,
                 destination,
                 timeout,

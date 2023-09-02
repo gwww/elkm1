@@ -32,7 +32,7 @@ def ssl_context_for_scheme(scheme: str) -> ssl.SSLContext:
     Since ssl context is expensive to create, cache it
     for future use since we only have a few schemes.
     """
-    ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS)
+    ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
     if tls := TLS_VERSIONS.get(scheme):
         ssl_context.minimum_version = tls
         ssl_context.maximum_version = tls

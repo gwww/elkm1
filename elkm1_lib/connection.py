@@ -9,7 +9,7 @@ from collections import deque
 from functools import reduce
 from typing import Any, NamedTuple
 
-from serial_asyncio import open_serial_connection
+from serial_asyncio_fast import open_serial_connection
 
 from .message import MessageEncode, decode, get_elk_command
 from .notify import Notifier

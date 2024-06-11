@@ -107,13 +107,19 @@ def main():
     if args.interactive:
         c = cmdr.Commander("Elk console", cmd_cb=cmdr.Commands(elk))
         mystdout = StdOutWrapper(c)
-        logging.basicConfig(stream=mystdout, level=logging.DEBUG, format="%(message)s")
+        logging.basicConfig(stream=mystdout, format="%(message)s")
+        LOG.setLevel(logging.DEBUG)
+        logging.getLogger("elkm1_lib").setLevel(logging.DEBUG)
         try:
             c.loop()
         except KeyboardInterrupt:
             exit(0)
     else:
-        logging.basicConfig(level=logging.DEBUG, format="%(asctime)s.%(msecs)03d %(message)s", datefmt='%H:%M:%S')
+        logging.basicConfig(
+            format="%(asctime)s.%(msecs)03d %(message)s", datefmt="%H:%M:%S"
+        )
+        LOG.setLevel(logging.DEBUG)
+        logging.getLogger("elkm1_lib").setLevel(logging.DEBUG)
         try:
             elk.run()
         except KeyboardInterrupt:

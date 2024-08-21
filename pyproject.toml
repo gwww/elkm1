@@ -1,39 +1,43 @@
-[tool.poetry]
+[project]
 name = "elkm1-lib"
 version = "2.2.7"
 description = "Library for interacting with ElkM1 alarm/automation panel."
-homepage = "https://github.com/gwww/elkm1"
-authors = ["Glenn Waters <gwwaters+elkm1@gmail.com>"]
 readme = "README.md"
-license = "MIT"
+requires-python = ">= 3.11"
+authors = [{name = "Glenn Waters", email = "gwwaters+elkm1@gmail.com"}]
 classifiers = [
   'Development Status :: 5 - Production/Stable',
-  'Intended Audience :: Developers',
+  "Intended Audience :: Developers",
+  "Topic :: Home Automation",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
 ]
-include = ["CHANGELOG.md", "bin/**/*"]
-exclude = ["test"]
+dependencies = [
+    "pyserial-asyncio-fast >= 0.14",
+    "async-timeout >= 4.0",
+]
 
-[tool.poetry.dependencies]
-python = "^3.11"
-pyserial-asyncio-fast = ">= 0.11"
-async-timeout = "^4.0"
+[tool.uv]
+dev-dependencies = [
+    "attrs >=24",
+    "black >=24.8",
+    "colorlog >=6.8",
+    "mypy >=1.11",
+    "pylint >=3.2",
+    "urwid ==2.1.2",
+    "pytest >= 8.3",
+    "pytest-asyncio >= 0.23",
+]
 
-[tool.poetry.group.dev.dependencies]
-attrs = ">=21.2"
-black = ">= 24.3"
-colorlog = ">= 4.0"
-isort = ">= 5.10"
-mypy = ">= 0.9"
-pylint = ">= 2"
-urwid = "~ 2.1"
-
-[tool.poetry.group.test.dependencies]
-pytest = ">= 7.2"
-pytest-asyncio = ">= 0.18"
+[project.urls]
+Homepage = "https://github.com/gwww/elkm1"
+Repository = "https://github.com/gwww/elkm1.git"
+Issues = "https://github.com/gwww/elkm1/issues"
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
@@ -69,5 +73,5 @@ enable = [
 ]
 
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.11"
 ignore_missing_imports = true

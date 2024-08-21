@@ -1,5 +1,5 @@
 """
-  Base of all the elements found on the Elk panel... Zone, Keypad, etc.
+Base of all the elements found on the Elk panel... Zone, Keypad, etc.
 """
 
 from __future__ import annotations

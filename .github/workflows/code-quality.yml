@@ -34,7 +34,7 @@ jobs:
         run: uv sync --all-extras --dev
 
       - name: Run pylint
-        run: uv run pylint $${{ env.SOURCE }}
+        run: uv run pylint ${{ env.SOURCE }}
 
       - name: Check code formatting
         run: uv run black --check

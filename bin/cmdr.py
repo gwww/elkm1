@@ -165,7 +165,10 @@ class Commands:
                 res = f"#green#{command.help}\n{command.docs}"
 
             elif help_for in self.element_cmds:
-                res = f"#green#{self.element_cmds[help_for][1]}\n{self.element_cmds[help_for][2]}"
+                res = (
+                    f"#green#{self.element_cmds[help_for][1]}\n"
+                    f"{self.element_cmds[help_for][2]}"
+                )
                 for k, v in self.element_cmds[help_for][3].items():
                     res += f"\nSubcommand: {v[1]}\n{v[2]}"
             else:

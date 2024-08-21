@@ -1,21 +1,18 @@
 name: CI
 on:
   push:
-    branches: [main]
-  pull_request: ~
+  pull_request:
+    branches:
+      - main
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 env:
   DEFAULT_UV: "0.3.0"
-  SOURCE: "elkm1_lib"
 
 jobs:
   check-quality:
-    # strategy:
-    #   fail-fast: false
-
     runs-on: ubuntu-latest
 
     steps:
@@ -30,30 +27,20 @@ jobs:
         with:
           python-version-file: "pyproject.toml"
 
-      - name: Install the project
+      - name: Create venv and install
         run: uv sync --all-extras --dev
 
-      - name: Run pylint
-        run: uv run pylint ${{ env.SOURCE }}
-
-      - name: Check code formatting
+      - name: Check formatting
         run: uv run ruff format --check
+
+      - name: Ruff lint/sort/etc checking
+        run: uv run ruff check --no-fix elkm1_lib
+
+      - name: Run pylint
+        run: uv run pylint elkm1_lib
 
       - name: Check typing
         run: uv run mypy --show-error-codes --strict elkm1_lib
-        # run: |
-        #   source .venv/bin/activate
-        #   mypy --show-error-codes --strict elkm1_lib
-
-      - name: Run isort check
-        run: uv run isort --check-only --profile black .
-        # run: |
-        #   source .venv/bin/activate
-        #   isort --check-only --profile black .
 
       - name: Run pytest
         run: uv run pytest test
-        # run: |
-        #   source .venv/bin/activate
-        #   poetry install --no-interaction
-        #   pytest test

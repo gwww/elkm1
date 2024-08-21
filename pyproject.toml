@@ -75,3 +75,19 @@ enable = [
 [tool.mypy]
 python_version = "3.11"
 ignore_missing_imports = true
+
+[tool.ruff.lint]
+select = [
+    # pycodestyle
+    "E",
+    # Pyflakes
+    "F",
+    # pyupgrade
+    # "UP",
+    # flake8-bugbear
+    # "B",
+    # flake8-simplify
+    "SIM",
+    # isort
+    "I",
+]

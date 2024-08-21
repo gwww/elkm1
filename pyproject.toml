@@ -21,13 +21,13 @@ dependencies = [
 [tool.uv]
 dev-dependencies = [
     "attrs >=24",
-    "black >=24.8",
     "colorlog >=6.8",
     "mypy >=1.11",
     "pylint >=3.2",
     "urwid ==2.1.2",
-    "pytest >= 8.3",
-    "pytest-asyncio >= 0.23",
+    "pytest >=8.3",
+    "pytest-asyncio >=0.23",
+    "ruff >=0.6.1",
 ]
 
 [project.urls]

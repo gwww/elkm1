@@ -485,7 +485,10 @@ def dm_encode(
 ) -> MessageEncode:
     """dm: Display message on keypad."""
     return MessageEncode(
-        f"2Edm{keypad_area + 1:1}{clear:1}{beep:1}{timeout:05}{line1:^<16.16}{line2:^<16.16}00",
+        (
+            f"2Edm{keypad_area + 1:1}{clear:1}{beep:1}"
+            f"{timeout:05}{line1:^<16.16}{line2:^<16.16}00"
+        ),
         None,
     )
 

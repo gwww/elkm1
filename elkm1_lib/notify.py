@@ -32,7 +32,7 @@ class Notifier:
 
     def notify(self, notify_type: str, notify_parameters: dict[str, Any]) -> None:
         """Call the observers."""
-        # Copy the obervers list as add/remove could be called when invoking the observers
+        # Dup obervers list; add/remove could be called when invoking the observers
         observers = list(self._observers.get(notify_type, []))
         for observer in observers:
             try:

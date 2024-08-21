@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import sys
+from asyncio import timeout as asyncio_timeout
 from collections import deque
 from functools import reduce
 from typing import Any, NamedTuple
@@ -14,12 +14,6 @@ from serial_asyncio_fast import open_serial_connection
 from .message import MessageEncode, decode, get_elk_command
 from .notify import Notifier
 from .util import parse_url
-
-if sys.version_info[:2] < (3, 11):
-    from async_timeout import timeout as asyncio_timeout  # pyright: ignore
-else:
-    from asyncio import timeout as asyncio_timeout  # pyright: ignore
-
 
 LOG = logging.getLogger(__name__)
 HEARTBEAT_TIME = 120

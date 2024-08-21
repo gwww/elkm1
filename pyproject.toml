@@ -15,7 +15,6 @@ classifiers = [
 ]
 dependencies = [
     "pyserial-asyncio-fast >= 0.14",
-    "async-timeout >= 4.0",
 ]
 
 [tool.uv]

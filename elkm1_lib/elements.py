@@ -6,8 +6,8 @@ from __future__ import annotations
 
 import re
 from abc import abstractmethod
-from collections.abc import Callable
-from typing import Any, Generator, Generic, Type, TypeVar
+from collections.abc import Callable, Generator
+from typing import Any, Generic, TypeVar
 
 from .connection import Connection
 from .const import TextDescription, TextDescriptions
@@ -105,7 +105,7 @@ class Elements(Generic[T]):
         self,
         connection: Connection,
         notifier: Notifier,
-        class_: Type[T],
+        class_: type[T],
         max_elements: int,
     ) -> None:
         self._connection = connection

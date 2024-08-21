@@ -9,7 +9,6 @@ import time
 from collections.abc import Callable
 from dataclasses import dataclass
 from struct import unpack
-from typing import Optional
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -48,11 +47,11 @@ class ELKDiscovery(asyncio.DatagramProtocol):
         """Trigger on_response."""
         self.on_response(data, addr)
 
-    def error_received(self, exc: Optional[Exception]) -> None:
+    def error_received(self, exc: Exception | None) -> None:
         """Handle error."""
         _LOGGER.error("ELKDiscovery error: %s", exc)
 
-    def connection_lost(self, exc: Optional[Exception]) -> None:
+    def connection_lost(self, exc: Exception | None) -> None:
         """Do nothing on connection lost."""
 
 
@@ -96,16 +95,16 @@ class AIOELKDiscovery:
     def __init__(self) -> None:
         self.found_devices: list[ElkSystem] = []
 
-    def _destination_from_address(self, address: Optional[str]) -> tuple[str, int]:
+    def _destination_from_address(self, address: str | None) -> tuple[str, int]:
         if address is None:
             address = self.BROADCAST_ADDRESS
         return (address, self.DISCOVERY_PORT)
 
     def _process_response(
         self,
-        data: Optional[bytes],
+        data: bytes | None,
         from_address: tuple[str, int],
-        address: Optional[str],
+        address: str | None,
         response_list: dict[tuple[str, int], ElkSystem],
     ) -> bool:
         """Process a response.
@@ -130,7 +129,7 @@ class AIOELKDiscovery:
         transport: asyncio.DatagramTransport,
         destination: tuple[str, int],
         timeout: int,
-        found_all_future: "asyncio.Future[bool]",
+        found_all_future: asyncio.Future[bool],
     ) -> None:
         """Send the scans."""
         _LOGGER.debug("discover: %s => %s", destination, self.DISCOVER_MESSAGE)
@@ -145,7 +144,7 @@ class AIOELKDiscovery:
                 await asyncio.wait_for(
                     asyncio.shield(found_all_future), timeout=time_out
                 )
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 if time.monotonic() >= quit_time:
                     return
                 # No response, send broadcast again in cast it got lost
@@ -156,7 +155,7 @@ class AIOELKDiscovery:
             remain_time = quit_time - time.monotonic()
 
     async def async_scan(
-        self, timeout: int = 10, address: Optional[str] = None
+        self, timeout: int = 10, address: str | None = None
     ) -> list[ElkSystem]:
         """Discover ELK devices."""
         sock = create_udp_socket(self.DISCOVERY_PORT)

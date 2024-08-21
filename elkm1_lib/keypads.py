@@ -1,7 +1,6 @@
 """Definition of an ElkM1 Keypad."""
 
 import datetime as dt
-from typing import Optional
 
 from .connection import Connection
 from .const import FunctionKeys, KeypadKeys, Max, TextDescriptions
@@ -17,10 +16,10 @@ class Keypad(Element):
         super().__init__(index, connection, notifier)
         self.area = -1
         self.temperature = -40
-        self.last_user_time = dt.datetime.now(dt.timezone.utc)
+        self.last_user_time = dt.datetime.now(dt.UTC)
         self.last_user = -1
         self.code = ""
-        self.last_keypress: Optional[tuple[str, int]] = None
+        self.last_keypress: tuple[str, int] | None = None
         self.last_function_key = FunctionKeys.FORCE_KF_SYNC
 
     def press_function_key(self, functionkey: FunctionKeys) -> None:
@@ -51,7 +50,7 @@ class Keypads(Elements[Keypad]):
         keypad_ = self.elements[keypad]
 
         # By setting a time this will force the IC change to always be reported
-        keypad_.setattr("last_user_time", dt.datetime.now(dt.timezone.utc), False)
+        keypad_.setattr("last_user_time", dt.datetime.now(dt.UTC), False)
 
         # If user is negative then invalid code entered
         keypad_.setattr("code", code if user < 0 else "****", False)

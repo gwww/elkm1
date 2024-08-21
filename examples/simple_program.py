@@ -67,7 +67,7 @@ def main():
     if not url:
         print("Specify url to connect to in ELKM1_URL environment variable")
         exit(0)
-    myapp = MyApp(url, 8813)
+    _ = MyApp(url, 8813)
 
 
 if __name__ == "__main__":

@@ -77,7 +77,7 @@ def _is_valid_length_and_checksum(msg: str) -> tuple[bool, str]:
         if int(msg[:2], 16) != (len(msg) - 2):
             return (
                 False,
-                f"Incorrect message length, expected {msg[:2]}, got {len(msg)-2:02X}. Msg {msg}",
+                f"Incorrect message length, expected {msg[:2]}, got {len(msg)-2:02X}. Msg {msg}",  # noqa: E501
             )
         checksum = int(msg[-2:], 16)
         for char in msg[:-2]:

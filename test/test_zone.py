@@ -35,10 +35,10 @@ def test_zone_definition(zones, notifier):
 
 def test_zone_alarm_state(zones, notifier):
     rx_msg("AZ", f"05:A0000{'0' * 200}", notifier)
-    assert zones[0].triggered_alarm == False
-    assert zones[1].triggered_alarm == True
-    assert zones[2].triggered_alarm == True
-    assert zones[3].triggered_alarm == True
+    assert zones[0].triggered_alarm is False
+    assert zones[1].triggered_alarm is True
+    assert zones[2].triggered_alarm is True
+    assert zones[3].triggered_alarm is True
 
 
 def test_zone_voltage(zones, notifier):

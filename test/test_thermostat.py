@@ -18,7 +18,7 @@ def test_entry_exit_general(thermostats, notifier):
     rx_msg("TR", "0120072687500", notifier)
     thermostat = thermostats[0]
     assert thermostat.mode == ThermostatMode.COOL
-    assert thermostat.hold == False
+    assert thermostat.hold is False
     assert thermostat.fan == ThermostatFan.AUTO
     assert thermostat.current_temp == 72
     assert thermostat.heat_setpoint == 68

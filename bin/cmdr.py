@@ -87,7 +87,7 @@ def get_helpers(element, clas):
                 params = " ".join(["<" + p + ">" for p in params])
                 helpers[function_name] = (
                     fn,
-                    "{} {}".format(function_name, params),
+                    f"{function_name} {params}",
                     fn.__doc__[8:],
                 )
     return helpers
@@ -120,8 +120,8 @@ class Commands:
                 cmd = element[:-1]
             self.element_cmds[cmd] = (
                 fn,
-                "{} <range list> [subcommand]".format(cmd),
-                "Displays internal state of {}".format(element),
+                f"{cmd} <range list> [subcommand]",
+                f"Displays internal state of {element}",
                 get_helpers(element, cmd.capitalize()),
             )
 
@@ -133,7 +133,7 @@ class Commands:
         if cmd in self._quit_cmd:
             return Commander.Exit
 
-        print("#blue#{}".format(line))
+        print(f"#blue#{line}")
 
         if cmd in self._help_cmd:
             return self.help(cmd, args)
@@ -147,7 +147,7 @@ class Commands:
         if cmd in self.element_cmds:
             return self.element_cmds[cmd][0](cmd, args)
 
-        return "#error#Unknown command: {}".format(cmd)
+        return f"#error#Unknown command: {cmd}"
 
     def help(self, cmd, args):
         if len(args) == 0:
@@ -162,16 +162,14 @@ class Commands:
             help_for = args[0]
             if help_for in self.encode_cmds:
                 command = self.encode_cmds[help_for]
-                res = "#green#{}\n{}".format(command.help, command.docs)
+                res = f"#green#{command.help}\n{command.docs}"
 
             elif help_for in self.element_cmds:
-                res = "#green#{}\n{}".format(
-                    self.element_cmds[help_for][1], self.element_cmds[help_for][2]
-                )
+                res = f"#green#{self.element_cmds[help_for][1]}\n{self.element_cmds[help_for][2]}"
                 for k, v in self.element_cmds[help_for][3].items():
-                    res += "\nSubcommand: {}\n{}".format(v[1], v[2])
+                    res += f"\nSubcommand: {v[1]}\n{v[2]}"
             else:
-                res = "#error#Unknown command: {}".format(help_for)
+                res = f"#error#Unknown command: {help_for}"
         return res
 
     def print_elements(self, cmd, args):
@@ -211,7 +209,7 @@ class Commands:
         self.elk.send(self.encode_cmds[cmd].function(*converted))
 
 
-class FocusMixin(object):
+class FocusMixin:
     def mouse_event(self, size, event, button, x, y, focus):
         if focus and hasattr(self, "_got_focus") and self._got_focus:
             self._got_focus()
@@ -281,7 +279,7 @@ class Commander(urwid.Frame):
     Commander.loop(). You can also asynchronously output messages
     with Commander.output('message')"""
 
-    class Exit(object):
+    class Exit:
         pass
 
     PALLETE = [

@@ -37,7 +37,7 @@ jobs:
         run: uv run pylint ${{ env.SOURCE }}
 
       - name: Check code formatting
-        run: uv run black --check
+        run: uv run ruff format --check
 
       - name: Check typing
         run: uv run mypy --show-error-codes --strict elkm1_lib

@@ -43,7 +43,9 @@ class Thermostat(Element):
         val: bool | int | ThermostatMode | ThermostatFan,
     ) -> None:
         """(Helper) Set thermostat"""
-        if type(val) is not SETTING_TYPING[element_to_set]:
+        if (  # pylint: disable=unidiomatic-typecheck
+            type(val) is not SETTING_TYPING[element_to_set]
+        ):
             raise ValueError("Wrong type for thermostat setting.")
         if isinstance(val, bool):
             setting = 1 if val else 0

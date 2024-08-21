@@ -117,8 +117,7 @@ class Elements(Generic[T]):
         notifier.attach("SD", self._sd_handler)
 
     def __iter__(self) -> Generator[Element, None, None]:
-        for element in self.elements:
-            yield element
+        yield from self.elements
 
     def __getitem__(self, key: int) -> Element:
         return self.elements[key]

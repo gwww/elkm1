@@ -1,4 +1,5 @@
 """Definition of an ElkM1 Keypad."""
+
 import datetime as dt
 from typing import Optional
 

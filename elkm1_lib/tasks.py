@@ -1,4 +1,5 @@
 """Definition of an ElkM1 Task"""
+
 from time import time
 
 from .connection import Connection

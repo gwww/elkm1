@@ -77,7 +77,7 @@ def _is_valid_length_and_checksum(msg: str) -> tuple[bool, str]:
         if int(msg[:2], 16) != (len(msg) - 2):
             return (
                 False,
-                f"Incorrect message length, expected {msg[:2]}, got {len(msg)-2:02X}. Msg {msg}",
+                f"Incorrect message length, expected {msg[:2]}, got {len(msg)-2:02X}. Msg {msg}",  # noqa: E501
             )
         checksum = int(msg[-2:], 16)
         for char in msg[:-2]:
@@ -485,7 +485,10 @@ def dm_encode(
 ) -> MessageEncode:
     """dm: Display message on keypad."""
     return MessageEncode(
-        f"2Edm{keypad_area + 1:1}{clear:1}{beep:1}{timeout:05}{line1:^<16.16}{line2:^<16.16}00",
+        (
+            f"2Edm{keypad_area + 1:1}{clear:1}{beep:1}"
+            f"{timeout:05}{line1:^<16.16}{line2:^<16.16}00"
+        ),
         None,
     )
 

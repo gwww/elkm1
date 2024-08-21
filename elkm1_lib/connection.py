@@ -108,7 +108,7 @@ class Connection:
 
     async def _write_stream(self) -> None:
         async def write_msg() -> None:
-            if not q_entry.raw:
+            if not q_entry.raw:  # pylint: disable=possibly-used-before-assignment
                 cksum = (256 - reduce(lambda x, y: x + y, map(ord, q_entry.msg))) % 256
                 msg = f"{q_entry.msg}{cksum:02X}\r\n"
             else:

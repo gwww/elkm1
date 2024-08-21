@@ -9,19 +9,13 @@ clean:
 	rm -rf build dist *.egg-info
 
 install:
-	poetry install
+	uv sync
 
-build:
-	poetry build
+format:
+	ruff format
 
-upload.test: build
-	poetry publish --repository test
-
-upload: build
-	poetry publish
-
-isort:
-	sh -c "isort --skip-glob=.tox ."
+check:
+	ruff check --no-fix
 
 lint:
 	pylint --msg-template='{msg_id}({symbol}):{line:3d},{column}: {obj}: {msg}' elkm1_lib

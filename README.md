@@ -57,6 +57,7 @@ and the call to `Elk` changes to:
 ```
 
 The following ElkM1 connection protocols are supported:
+
 - serial:// - Serial port;
 - elk:// - Elk M1XEP Ethernet, non-secure
 - elks:// - Elk M1XEP Ethernet, secure, TLS 1.0
@@ -185,25 +186,27 @@ command for light number 3 (light 4 on the panel -- remember 0
 versus 1 base).
 
 All of the commands that send messages to the panel are automatically
-discovered and are all the XX_encode functions in the ``elkm1_lib.message``
+discovered and are all the XX_encode functions in the `elkm1_lib.message`
 module. The docstring and the XX_encode's parameters are shown as part
 of the help.
 
 ## Development
 
-This project uses [poetry](https://poetry.eustace.io/) for development dependencies. Installation instructions are on their website.
+This project uses [uv](https://astral.sh/blog/uv-unified-python-packaging) for development dependencies.
+Installation instructions are on their website. Other tools used by development are installed as part of
+the development dependencies.
 
 To get started developing:
 
 ```
 git clone https://github.com/gwww/elkm1.git
 cd elkm1
-poetry install
-poetry shell # Or activate the created virtual environment
+uv sync
+# Activate the created virtual environment according to the shell you are using.
 make test # to ensure everything installed properly
 ```
 
-There is a `Makefile` in the root directory as well. The `make` command
+There is a `Makefile` in the root directory. The `make` command
 followed by one of the targets in the `Makefile` can be used. If you don't
 have or wish to use `make` the `Makefile` serves as examples of common
 commands that can be run.
@@ -213,6 +216,7 @@ commands that can be run.
 No problem ;) — report the bugs! But, logs are most often required. If you
 are using Home Assistant, which is about the only use I'm aware of for
 this library, then add the following to your `configuration.yaml`:
+
 ```
 logger:
   default: info

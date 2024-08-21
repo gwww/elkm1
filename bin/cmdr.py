@@ -189,7 +189,7 @@ class Commands:
             if args[1] in self.element_cmds[cmd][3]:
                 fn = self.element_cmds[cmd][3][args[1]][0]
             else:
-                raise NotImplemented
+                raise NotImplementedError
             for i in args[0]:
                 print(fn)
                 fn(element_list[i], *args[2])
@@ -296,7 +296,7 @@ class Commander(urwid.Frame):
     def __init__(
         self,
         title,
-        command_caption="Command:  (Tab to switch focus to upper frame, where you can scroll text)",
+        command_caption="Command:  (Tab to switch focus to upper frame)",
         cmd_cb=None,
         max_size=1000,
     ):

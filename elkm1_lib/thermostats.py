@@ -49,7 +49,7 @@ class Thermostat(Element):
             raise ValueError("Wrong type for thermostat setting.")
         if isinstance(val, bool):
             setting = 1 if val else 0
-        elif isinstance(val, (ThermostatFan, ThermostatMode)):
+        elif isinstance(val, ThermostatFan | ThermostatMode):
             setting = val.value
         else:
             setting = val

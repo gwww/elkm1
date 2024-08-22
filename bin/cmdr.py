@@ -55,7 +55,7 @@ def parse_range(rng, max):
             xr = [s.strip() for s in x.split("-")]
             ids.extend(range(int(xr[0]), int(xr[1]) + 1))
         else:
-            raise ValueError('Unknown range type: "%s"' % x)
+            raise ValueError(f'Unknown range type: "{x}"')
     return ids
 
 
@@ -87,7 +87,7 @@ def get_helpers(element, clas):
                 params = " ".join(["<" + p + ">" for p in params])
                 helpers[function_name] = (
                     fn,
-                    "{} {}".format(function_name, params),
+                    f"{function_name} {params}",
                     fn.__doc__[8:],
                 )
     return helpers
@@ -120,8 +120,8 @@ class Commands:
                 cmd = element[:-1]
             self.element_cmds[cmd] = (
                 fn,
-                "{} <range list> [subcommand]".format(cmd),
-                "Displays internal state of {}".format(element),
+                f"{cmd} <range list> [subcommand]",
+                f"Displays internal state of {element}",
                 get_helpers(element, cmd.capitalize()),
             )
 
@@ -133,7 +133,7 @@ class Commands:
         if cmd in self._quit_cmd:
             return Commander.Exit
 
-        print("#blue#{}".format(line))
+        print(f"#blue#{line}")
 
         if cmd in self._help_cmd:
             return self.help(cmd, args)
@@ -147,7 +147,7 @@ class Commands:
         if cmd in self.element_cmds:
             return self.element_cmds[cmd][0](cmd, args)
 
-        return "#error#Unknown command: {}".format(cmd)
+        return f"#error#Unknown command: {cmd}"
 
     def help(self, cmd, args):
         if len(args) == 0:
@@ -162,16 +162,17 @@ class Commands:
             help_for = args[0]
             if help_for in self.encode_cmds:
                 command = self.encode_cmds[help_for]
-                res = "#green#{}\n{}".format(command.help, command.docs)
+                res = f"#green#{command.help}\n{command.docs}"
 
             elif help_for in self.element_cmds:
-                res = "#green#{}\n{}".format(
-                    self.element_cmds[help_for][1], self.element_cmds[help_for][2]
+                res = (
+                    f"#green#{self.element_cmds[help_for][1]}\n"
+                    f"{self.element_cmds[help_for][2]}"
                 )
-                for k, v in self.element_cmds[help_for][3].items():
-                    res += "\nSubcommand: {}\n{}".format(v[1], v[2])
+                for _k, v in self.element_cmds[help_for][3].items():
+                    res += f"\nSubcommand: {v[1]}\n{v[2]}"
             else:
-                res = "#error#Unknown command: {}".format(help_for)
+                res = f"#error#Unknown command: {help_for}"
         return res
 
     def print_elements(self, cmd, args):
@@ -211,11 +212,11 @@ class Commands:
         self.elk.send(self.encode_cmds[cmd].function(*converted))
 
 
-class FocusMixin(object):
+class FocusMixin:
     def mouse_event(self, size, event, button, x, y, focus):
         if focus and hasattr(self, "_got_focus") and self._got_focus:
             self._got_focus()
-        return super(FocusMixin, self).mouse_event(size, event, button, x, y, focus)
+        return super().mouse_event(size, event, button, x, y, focus)
 
 
 class ListView(FocusMixin, urwid.ListBox):
@@ -227,7 +228,7 @@ class ListView(FocusMixin, urwid.ListBox):
 
     def mouse_event(self, size, event, button, x, y, focus):
         direction = "up" if button == 4 else "down"
-        return super(ListView, self).keypress(size, direction)
+        return super().keypress(size, direction)
 
     def add(self, line):
         with self._lock:
@@ -281,7 +282,7 @@ class Commander(urwid.Frame):
     Commander.loop(). You can also asynchronously output messages
     with Commander.output('message')"""
 
-    class Exit(object):
+    class Exit:
         pass
 
     PALLETE = [
@@ -344,7 +345,7 @@ class Commander(urwid.Frame):
                 res = self._cmd(line)
             except Exception as e:
                 traceback.print_exc()
-                self.output("Error: %s" % e, "error")
+                self.output(f"Error: {e}", "error")
                 return
             if res == Commander.Exit:
                 raise urwid.ExitMainLoop()

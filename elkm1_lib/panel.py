@@ -2,7 +2,7 @@
 
 import datetime as dt
 import time
-from typing import Any, Optional
+from typing import Any
 
 from .connection import Connection
 from .const import ElkRPStatus
@@ -48,7 +48,7 @@ class Panel(Element):
         """(Helper) Speak phrase."""
         self._connection.send(sp_encode(phrase))
 
-    def set_time(self, datetime: Optional[dt.datetime] = None) -> None:
+    def set_time(self, datetime: dt.datetime | None = None) -> None:
         """(Helper) Set the time given a datetime."""
         if datetime is None:
             struct_time = time.localtime()

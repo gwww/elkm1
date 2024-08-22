@@ -62,7 +62,7 @@ class Connection:
                         reader, self._writer = await asyncio.open_connection(
                             host=dest, port=param, ssl=ssl_context
                         )
-            except (ValueError, OSError, asyncio.TimeoutError) as err:
+            except (TimeoutError, ValueError, OSError) as err:
                 LOG.warning(
                     "Error connecting to ElkM1 (%s). Retrying in %d seconds",
                     err,
@@ -115,7 +115,7 @@ class Connection:
             try:
                 async with asyncio_timeout(MESSAGE_RESPONSE_TIME):
                     await self._response_received.wait()
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 self._notifier.notify("timeout", {"msg_code": q_entry.response_cmd})
             self._response_received.clear()
             self._awaiting_response_command = None
@@ -183,7 +183,7 @@ class Connection:
             try:
                 async with asyncio_timeout(HEARTBEAT_TIME):
                     await self._heartbeat_event.wait()
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 if self._paused:
                     continue
                 self.disconnect("(heartbeat timeout)")

@@ -221,9 +221,7 @@ def ld_decode(msg: str) -> dict[str, Any]:
     log["event"] = int(msg[4:8])
     log["number"] = int(msg[8:11])
     log["index"] = int(msg[20:23])
-    log["timestamp"] = dt.datetime(
-        *log_gm_timestruct[:6], tzinfo=dt.timezone.utc
-    ).isoformat()
+    log["timestamp"] = dt.datetime(*log_gm_timestruct[:6], tzinfo=dt.UTC).isoformat()
 
     return {"area": area, "log": log}
 

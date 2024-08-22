@@ -6,8 +6,8 @@ from __future__ import annotations
 
 import re
 from abc import abstractmethod
-from collections.abc import Callable
-from typing import Any, Generator, Generic, Type, TypeVar
+from collections.abc import Callable, Generator
+from typing import Any, Generic, TypeVar
 
 from .connection import Connection
 from .const import TextDescription, TextDescriptions
@@ -81,7 +81,8 @@ class Element:
             if not k.startswith("_") and k != "name"
         }.items()
         varstr = " ".join(
-            "%s:%s" % item  # pylint: disable=consider-using-f-string
+            # pylint: disable=consider-using-f-string
+            "%s:%s" % item  # noqa
             for item in varlist
         )
         return f"{self._index} '{self.name}' {varstr}"
@@ -105,7 +106,7 @@ class Elements(Generic[T]):
         self,
         connection: Connection,
         notifier: Notifier,
-        class_: Type[T],
+        class_: type[T],
         max_elements: int,
     ) -> None:
         self._connection = connection

@@ -81,7 +81,8 @@ class Element:
             if not k.startswith("_") and k != "name"
         }.items()
         varstr = " ".join(
-            "%s:%s" % item  # pylint: disable=consider-using-f-string
+            # pylint: disable=consider-using-f-string
+            "%s:%s" % item  # noqa
             for item in varlist
         )
         return f"{self._index} '{self.name}' {varstr}"

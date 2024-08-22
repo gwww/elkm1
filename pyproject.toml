@@ -79,7 +79,7 @@ pythonVersion = "3.11"
 select = [
     "E",    # pycodestyle
     "F",    # Pyflakes
-    # "UP", # pyupgrade
+    "UP", # pyupgrade
     # "B",  # flake8-bugbear
     "SIM",  # flake8-simplify
     "I",    # isort

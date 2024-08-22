@@ -169,7 +169,7 @@ class Commands:
                     f"#green#{self.element_cmds[help_for][1]}\n"
                     f"{self.element_cmds[help_for][2]}"
                 )
-                for k, v in self.element_cmds[help_for][3].items():
+                for _k, v in self.element_cmds[help_for][3].items():
                     res += f"\nSubcommand: {v[1]}\n{v[2]}"
             else:
                 res = f"#error#Unknown command: {help_for}"

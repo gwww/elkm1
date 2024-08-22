@@ -1,4 +1,4 @@
-.PHONY: install clean isort lint debug test status
+.PHONY: clean setup format check lint run status status
 
 clean:
 	find . -name '*.pyc' -exec rm -f {} +
@@ -8,7 +8,7 @@ clean:
 	find . -name '.pytest_cache' -exec rm -rf {} +
 	rm -rf build dist *.egg-info
 
-install:
+setup:
 	uv sync
 
 format:

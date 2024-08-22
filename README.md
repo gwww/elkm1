@@ -208,8 +208,9 @@ make test # to ensure everything installed properly
 
 There is a `Makefile` in the root directory. The `make` command
 followed by one of the targets in the `Makefile` can be used. If you don't
-have or wish to use `make` the `Makefile` serves as examples of common
-commands that can be run.
+have or wish to use `make` the `Makefile` serves as examples of
+commands that are used for code quality in this project. Those commands are
+also run on pushes and pull requests.
 
 ## Reporting a Bug
 

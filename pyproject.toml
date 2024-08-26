@@ -75,6 +75,9 @@ ignore_missing_imports = true
 [tool.pyright]
 pythonVersion = "3.11"
 
+# Handled by ruff...
+reportUndefinedVariable = false
+
 [tool.ruff.lint]
 select = [
     "E",    # pycodestyle

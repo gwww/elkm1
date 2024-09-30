@@ -180,6 +180,7 @@ class ZoneAlarmState(Enum):
 class KeypadKeys(Enum):
     """Keys on the keypad."""
 
+    NO_KEY = 0
     USER_CODE_ENTERED = 0
     STAR = 11
     POUND = 12

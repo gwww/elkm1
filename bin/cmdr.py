@@ -60,7 +60,7 @@ def parse_range(rng, max):
 
 
 def parse_element_command(cmd, line, max):
-    match = re.match("([\d,\- <*]+)(\w*.*)", line)
+    match = re.match("([\\d,\\- <*]+)(\\w*.*)", line)
     if match:
         ids = parse_range(match.groups()[0], max)
         subcommand = parse_subcommand(match.groups()[1])

@@ -14,7 +14,7 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
-    "pyserial-asyncio-fast >= 0.14",
+    "pyserial-asyncio-fast >= 0.11",
 ]
 
 [tool.uv]

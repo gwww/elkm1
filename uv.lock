@@ -55,7 +55,7 @@ wheels = [
 
 [[package]]
 name = "elkm1-lib"
-version = "2.2.8"
+version = "2.2.9"
 source = { editable = "." }
 dependencies = [
     { name = "pyserial-asyncio-fast" },

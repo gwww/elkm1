@@ -62,6 +62,15 @@ class Keypads(Elements[Keypad]):
                 keypad.setattr("area", keypad_areas[keypad.index], True)
 
     def _kc_handler(self, keypad: int, key: int) -> None:
+        """
+        Handle a keypad change message. At present this function is only handling
+        keypresses and does not process function key light changes and beep changes.
+        """
+
+        # Ignore NO_KEY as it is not a key press
+        if key == KeypadKeys.NO_KEY.value:
+            return
+
         # Force a change notification
         self.elements[keypad].last_keypress = None
         try:

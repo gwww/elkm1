@@ -128,6 +128,7 @@ class AlarmState(Enum):
     WATER_ALARM = "@"
     FIRE_SUPERVISORY = "A"
     VERIFY_FIRE = "B"
+    UNSUPERVISED_ZONE_TROUBLE = "U"
 
 
 class ArmLevel(Enum):

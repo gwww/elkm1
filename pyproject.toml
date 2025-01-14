@@ -1,6 +1,6 @@
 [project]
 name = "elkm1-lib"
-version = "2.2.10"
+version = "2.2.11"
 description = "Library for interacting with ElkM1 alarm/automation panel."
 readme = "README.md"
 requires-python = ">= 3.11"

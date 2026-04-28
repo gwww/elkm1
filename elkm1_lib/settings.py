@@ -45,5 +45,5 @@ class Settings(Elements[Setting]):
         settings = self.elements
         for value in values:
             setting = settings[value["index"]]
-            setting.value_format = value["value_format"]
-            setting.value = value["value"]
+            setting.setattr("value_format", value["value_format"], False)
+            setting.setattr("value", value["value"], True)

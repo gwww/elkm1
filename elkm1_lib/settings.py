@@ -17,7 +17,7 @@ class Setting(Element):
     def __init__(self, index: int, connection: Connection, notifier: Notifier) -> None:
         super().__init__(index, connection, notifier)
         self.value_format = SettingFormat.NUMBER
-        self.value = None
+        self.value: int | tuple[int, int] | None = None
 
     def set(self, value: int | tuple[int, int]) -> None:
         """(Helper) Set custom value."""

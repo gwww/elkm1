@@ -33,6 +33,15 @@ class Area(Element):
         self.timer2 = 0
         self.last_log: str | None = None
         self.chime_mode = None
+        self.contains_zones = False
+        self.contains_keypads = False
+
+    @property
+    def configured(self) -> bool:
+        """Return whether Area is in use within the system"""
+        if not self.contains_zones and not self.contains_keypads:
+            return False
+        return super().configured
 
     def is_armed(self) -> bool:
         """Return if the area is armed."""
@@ -84,8 +93,10 @@ class Areas(Elements[Area]):
         notifier.attach("AM", self._am_handler)
         notifier.attach("AS", self._as_handler)
         notifier.attach("EE", self._ee_handler)
+        notifier.attach("KA", self._ka_handler)
         notifier.attach("KF", self._kf_handler)
         notifier.attach("LD", self._ld_handler)
+        notifier.attach("ZP", self._zp_handler)
 
     def sync(self) -> None:
         """Retrieve areas from ElkM1"""
@@ -137,6 +148,12 @@ class Areas(Elements[Area]):
             log["user_number"] = log["number"]
         self.elements[area].setattr("last_log", log, True)
 
+    def _ka_handler(self, keypad_areas: list[int]) -> None:
+        keypad_areas_set = set(keypad_areas)
+        for area in self.elements:
+            contains_keypads = area.index in keypad_areas_set
+            area.setattr("contains_keypads", contains_keypads, True)
+
     def _kf_handler(self, keypad: int, key: str, chime_mode: list[int]) -> None:
         for area, mode in enumerate(chime_mode):
             try:
@@ -144,3 +161,9 @@ class Areas(Elements[Area]):
             except ValueError:
                 name = ""
             self.elements[area].setattr("chime_mode", (name, mode), True)
+
+    def _zp_handler(self, zone_partitions: list[int]) -> None:
+        zone_areas_set = set(zone_partitions)
+        for area in self.elements:
+            contains_zones = area.index in zone_areas_set
+            area.setattr("contains_zones", contains_zones, True)

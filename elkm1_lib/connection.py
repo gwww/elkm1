@@ -49,6 +49,8 @@ class Connection:
         """Create connection to Elk."""
 
         LOG.info("Connecting to ElkM1 at %s", self._url)
+        if (task := asyncio.current_task()) is not None:
+            self._tasks.add(task)
         retry_time = 1
         scheme, dest, param, ssl_context = parse_url(self._url)
         while not self._writer:
@@ -176,8 +178,7 @@ class Connection:
             self._writer.close()
             self._writer = None
         for task in self._tasks:
-            if asyncio.current_task() != task:
-                task.cancel()
+            task.cancel()
         self._tasks = set()
         self._notifier.notify("disconnected", {})
 

@@ -32,17 +32,17 @@ serial port.
 Basic connection to the Elk panel:
 
 ```python
-    from elkm1_lib import Elk
-    import logging
+from elkm1_lib import Elk
+import logging
 
-    # Print to STDOUT
-    LOG = logging.getLogger(__name__)
-    logging.basicConfig(level=logging.DEBUG, format='%(message)s')
+# Print to STDOUT
+LOG = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG, format="%(message)s")
 
-    # Connect to elk
-    elk = Elk({'url': 'elk://192.168.1.100'})
-    elk.connect()
-    elk.run()
+# Connect to elk
+elk = Elk({"url": "elk://192.168.1.100"})
+elk.connect()
+elk.run()
 ```
 
 The above will connect to the Elk panel at IP address 192.168.1.100. the `elk://`
@@ -51,9 +51,7 @@ connect over TLS. In this case a userid and password must be specified
 and the call to `Elk` changes to:
 
 ```python
-    elk = Elk(
-        {'url': 'elks://192.168.1.100', 'userid': 'test', 'password': 'pass'}
-    )
+elk = Elk({"url": "elks://192.168.1.100", "userid": "test", "password": "pass"})
 ```
 
 The following ElkM1 connection protocols are supported:
@@ -89,11 +87,12 @@ callbacks are called so that user use of the library can be notified
 of changing elements. The following user code shows registering a callback:
 
 ```python
-    def call_me(element, changeset):
-       print(changeset)
+def call_me(element, changeset):
+    print(changeset)
 
-    for zone_number in range(Max.ZONES.value):
-      elk.zones[zone_number].add_callback(call_me)
+
+for zone_number in range(Max.ZONES.value):
+    elk.zones[zone_number].add_callback(call_me)
 ```
 
 The library encodes, decodes, and processes messages to/from the
@@ -114,10 +113,11 @@ are named parameters.
 Here is an example of a message handler being registered and how it is called:
 
 ```python
-    def zone_status_change_handler(zone_number, zone_status):
-      print(zone_number, zone_status)
+def zone_status_change_handler(zone_number, zone_status):
+    print(zone_number, zone_status)
 
-    elk.add_handler('ZC', zone_status_change_handler)
+
+elk.add_handler("ZC", zone_status_change_handler)
 ```
 
 The above code registers a callback for 'ZC' (Elk zone status change)

@@ -195,5 +195,5 @@ class Connection:
                 if self._paused:
                     continue
                 self.disconnect("(heartbeat timeout)")
-                await self.connect()
+                asyncio.ensure_future(self.connect())
                 break
